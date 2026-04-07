@@ -120,6 +120,7 @@ export default function ThemeAdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [token, setToken] = useState("");
+  const [nextToken, setNextToken] = useState("");
   const [config, setConfig] = useState<ThemeConfig | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [saving, setSaving] = useState(false);
@@ -139,11 +140,13 @@ export default function ThemeAdminPage() {
   useEffect(() => {
     const saved = localStorage.getItem("admin_token");
     const expiry = localStorage.getItem("admin_token_expiry");
+    const savedNext = localStorage.getItem("admin_next_token");
     if (saved && expiry && Date.now() < Number(expiry)) {
       fetch(`${backendUrl}/admin/stats`, { headers: { Authorization: `Bearer ${saved}` } })
         .then((r) => {
           if (r.ok) {
             setToken(saved);
+            if (savedNext) setNextToken(savedNext);
             setAuthenticated(true);
           } else {
             localStorage.removeItem("admin_token");
@@ -153,6 +156,7 @@ export default function ThemeAdminPage() {
         .catch(() => {
           // Backend not reachable, still allow login with saved token
           setToken(saved);
+          if (savedNext) setNextToken(savedNext);
           setAuthenticated(true);
         });
     }
@@ -179,6 +183,7 @@ export default function ThemeAdminPage() {
       }
 
       // Also authenticate with backend (for admin stats/CRUD)
+      const nextJwt = data.token;
       let backendToken = data.token;
       try {
         const backendRes = await fetch(`${backendUrl}/admin/auth`, {
@@ -195,8 +200,10 @@ export default function ThemeAdminPage() {
       }
 
       setToken(backendToken);
+      setNextToken(nextJwt);
       setAuthenticated(true);
       localStorage.setItem("admin_token", backendToken);
+      localStorage.setItem("admin_next_token", nextJwt);
       localStorage.setItem("admin_token_expiry", String(Date.now() + data.expiresIn * 1000));
     } catch {
       setLoginError("Erro de conexão");
@@ -208,8 +215,10 @@ export default function ThemeAdminPage() {
   const handleLogout = () => {
     setAuthenticated(false);
     setToken("");
+    setNextToken("");
     setPassword("");
     localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_next_token");
     localStorage.removeItem("admin_token_expiry");
   };
 
@@ -221,7 +230,7 @@ export default function ThemeAdminPage() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${nextToken || token}`,
         },
         body: JSON.stringify(updates),
       });
