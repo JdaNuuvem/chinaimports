@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { ThemeConfig, HomeSection, HomeSectionType } from "@/lib/theme-config";
 import SectionList from "./SectionList";
 import SectionEditor from "./SectionEditor";
@@ -23,10 +23,29 @@ export default function VisualEditor({ config, onSave, saving, token }: VisualEd
   // For product/collection pages — selected fixed section ID
   const [selectedFixedSection, setSelectedFixedSection] = useState<string | null>(null);
 
-  const sections = config.homeSections || [];
+  // Optimistic local copy of sections — keeps UI snappy while save is in flight
+  const [localSections, setLocalSections] = useState<HomeSection[]>(config.homeSections || []);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastConfigRef = useRef(config);
+
+  // Sync from props when config changes from outside (initial load, after save success)
+  useEffect(() => {
+    if (config !== lastConfigRef.current) {
+      lastConfigRef.current = config;
+      setLocalSections(config.homeSections || []);
+    }
+  }, [config]);
+
+  const sections = localSections;
 
   const updateSections = (newSections: HomeSection[]) => {
-    onSave({ homeSections: newSections });
+    // Optimistic: update local immediately so UI reflects the change
+    setLocalSections(newSections);
+    // Debounced save to backend (avoid hammering the API on every keystroke/click)
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      onSave({ homeSections: newSections });
+    }, 400);
   };
 
   const handleMove = (index: number, direction: "up" | "down") => {
