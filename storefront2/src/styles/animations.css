@@ -1,0 +1,216 @@
+/* ============================================================
+   Animations — inspired by atacadaodopovao.shop
+   Adds polish: pulses, hover lifts, scroll-reveals, image zooms
+   ============================================================ */
+
+/* --- Core keyframes --- */
+@keyframes cta-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
+  50%      { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
+}
+
+@keyframes cta-pulse-primary {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(30, 45, 125, 0.5); }
+  50%      { box-shadow: 0 0 0 12px rgba(30, 45, 125, 0); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes live-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.35); opacity: 0.65; }
+}
+
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+@keyframes badge-bounce {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+
+/* --- Utility classes --- */
+.cta-pulse { animation: cta-pulse 2s ease-in-out infinite; }
+.cta-pulse-primary { animation: cta-pulse-primary 2s ease-in-out infinite; }
+.cta-pulse:hover, .cta-pulse-primary:hover { animation-play-state: paused; }
+
+.fade-in-up { animation: fade-in-up 0.55s ease-out both; }
+.fade-in { animation: fade-in 0.5s ease-out both; }
+.scale-in { animation: scale-in 0.4s ease-out both; }
+
+.live-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: live-pulse 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.float-soft { animation: float-soft 3s ease-in-out infinite; }
+.badge-bounce { animation: badge-bounce 2s ease-in-out infinite; }
+
+/* Stagger delays for sequential reveals */
+.delay-0 { animation-delay: 0s; }
+.delay-1 { animation-delay: 0.05s; }
+.delay-2 { animation-delay: 0.1s; }
+.delay-3 { animation-delay: 0.15s; }
+.delay-4 { animation-delay: 0.2s; }
+.delay-5 { animation-delay: 0.25s; }
+.delay-6 { animation-delay: 0.3s; }
+.delay-7 { animation-delay: 0.35s; }
+.delay-8 { animation-delay: 0.4s; }
+
+/* --- Skeleton shimmer (loading) --- */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* --- Card hover lift (product cards, collection cards, mosaic blocks) --- */
+.product-item,
+.product-card,
+.mosaic__item,
+.collection-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.product-item:hover,
+.product-card:hover,
+.mosaic__item:hover,
+.collection-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+}
+.product-item:active,
+.product-card:active {
+  transform: translateY(-2px) scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Image zoom inside product cards on hover */
+.product-item__image-wrapper {
+  overflow: hidden;
+}
+.product-item__image-wrapper img,
+.product-item__primary-image,
+.product-card img {
+  transition: transform 0.5s ease;
+}
+.product-item:hover .product-item__primary-image,
+.product-item:hover .product-item__image-wrapper img,
+.product-card:hover img {
+  transform: scale(1.06);
+}
+
+/* --- Buttons: smooth transitions + active press --- */
+.button,
+button.button,
+.btn,
+[class*="button-"]:not([disabled]) {
+  transition: background-color 0.2s ease, color 0.2s ease,
+              transform 0.15s ease, box-shadow 0.2s ease;
+}
+.button:hover:not(:disabled),
+button.button:hover:not(:disabled),
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.button:active:not(:disabled),
+button.button:active:not(:disabled),
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+/* --- Links: subtle underline glide --- */
+a.link,
+.header__linklist-link {
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+/* --- Header sticky shadow on scroll (no JS needed) --- */
+.header {
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+/* --- Slideshow / Banner: smooth crossfade --- */
+.slideshow__slide,
+.banner-slide {
+  transition: opacity 0.6s ease;
+}
+
+/* --- Mosaic block image zoom --- */
+.mosaic__item {
+  overflow: hidden;
+}
+.mosaic__item img {
+  transition: transform 0.6s ease;
+}
+.mosaic__item:hover img {
+  transform: scale(1.08);
+}
+
+/* --- Logo list / Brand carousel: subtle grayscale to color --- */
+.logo-list__item,
+.brand-showcase__item {
+  filter: grayscale(60%);
+  opacity: 0.75;
+  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+.logo-list__item:hover,
+.brand-showcase__item:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* --- Trust/info bar icons: gentle bounce on hover --- */
+.text-with-icons__item,
+.info-bar__item {
+  transition: transform 0.25s ease;
+}
+.text-with-icons__item:hover,
+.info-bar__item:hover {
+  transform: translateY(-3px);
+}
+
+/* --- Newsletter input: focus glow --- */
+input[type="email"]:focus,
+input[type="text"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+  border-color: #22c55e !important;
+}
+
+/* --- Reduced motion: respect user preferences --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

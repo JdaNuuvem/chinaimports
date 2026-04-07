@@ -1,0 +1,392 @@
+{
+  "identity": {
+    "storeName": "Imports China Brasil",
+    "logoUrl": "/uploads/1774676092645-r2satt.jpg",
+    "logoText": "IMPORTS CHINA BRASIL",
+    "faviconUrl": "/uploads/1774676096314-4si4f3.jpg"
+  },
+  "colors": {
+    "headingColor": "#1c1b1b",
+    "textColor": "#000000",
+    "textStrongColor": "#1c1b1b",
+    "accentColor": "#f08000",
+    "linkColor": "#838383",
+    "borderColor": "#e1e3e4",
+    "backgroundColor": "#f3f5f6",
+    "secondaryBackground": "#ffffff",
+    "errorColor": "#ff0000",
+    "successColor": "#00aa00",
+    "primaryButtonBg": "#29bc62",
+    "primaryButtonText": "#ffffff",
+    "secondaryButtonBg": "#8c8c8c",
+    "secondaryButtonText": "#ffffff",
+    "headerBg": "#f08000",
+    "headerText": "#ffffff",
+    "headerLightText": "#ffffff",
+    "headerAccent": "#f08000",
+    "footerBg": "#f3f5f6",
+    "footerHeadingText": "#f08000",
+    "footerBodyText": "#677279",
+    "footerAccent": "#f08000",
+    "onSaleAccent": "#ee0000",
+    "inStockColor": "#00a500",
+    "lowStockColor": "#ee0000",
+    "soldOutColor": "#8a9297",
+    "customLabel1Bg": "#0774d7",
+    "customLabel2Bg": "#00a500",
+    "starColor": "#ffbd00",
+    "menuBarBg": "#000000",
+    "menuBarText": "#ffffff",
+    "announcementBarBg": "#ff8800",
+    "announcementBarText": "#ffffff"
+  },
+  "typography": {
+    "headingFontFamily": "'Roboto', sans-serif",
+    "headingFontWeight": 700,
+    "bodyFontFamily": "'Roboto', sans-serif",
+    "bodyFontWeight": 400,
+    "baseFontSize": 15,
+    "underlineLinks": false
+  },
+  "animation": {
+    "imageZoomOnHover": true
+  },
+  "search": {
+    "mode": "product,article"
+  },
+  "announcementBar": {
+    "enabled": true,
+    "text": "FRETE GRÁTIS para compras acima de R$ 199",
+    "linkUrl": "/collections/all",
+    "linkText": "Compre agora"
+  },
+  "header": {
+    "navLinks": [
+      {
+        "title": "Masculino",
+        "href": "/collections/masculino"
+      },
+      {
+        "title": "Feminino",
+        "href": "/collections/feminino"
+      },
+      {
+        "title": "Infantil",
+        "href": "/collections/infantil"
+      },
+      {
+        "title": "Calçados",
+        "href": "/collections/calcados"
+      },
+      {
+        "title": "Acessórios",
+        "href": "/collections/acessorios"
+      },
+      {
+        "title": "Outlet",
+        "href": "/collections/outlet"
+      }
+    ]
+  },
+  "footer": {
+    "blocks": [
+      {
+        "title": "Institucional",
+        "links": [
+          {
+            "label": "Sobre nós",
+            "href": "/about"
+          },
+          {
+            "label": "Blog",
+            "href": "/blog"
+          },
+          {
+            "label": "Contato",
+            "href": "/contact"
+          },
+          {
+            "label": "FAQ",
+            "href": "/faq"
+          }
+        ]
+      },
+      {
+        "title": "Políticas",
+        "links": [
+          {
+            "label": "Política de Privacidade",
+            "href": "/pages/privacidade"
+          },
+          {
+            "label": "Termos de Uso",
+            "href": "/pages/termos"
+          },
+          {
+            "label": "Trocas e Devoluções",
+            "href": "/pages/trocas"
+          },
+          {
+            "label": "Política de Envio",
+            "href": "/pages/envio"
+          }
+        ]
+      },
+      {
+        "title": "Minha Conta",
+        "links": [
+          {
+            "label": "Minha conta",
+            "href": "/account"
+          },
+          {
+            "label": "Meus pedidos",
+            "href": "/account/orders"
+          },
+          {
+            "label": "Meus endereços",
+            "href": "/account/addresses"
+          }
+        ]
+      }
+    ],
+    "socialLinks": {
+      "facebook": "https://facebook.com/importschinabrasil",
+      "instagram": "https://instagram.com/importschinabrasil",
+      "youtube": "https://youtube.com/importschinabrasil",
+      "tiktok": "https://tiktok.com/@importschinabrasil"
+    },
+    "copyrightText": "© 2026 Imports China Brasil. Todos os direitos reservados.",
+    "showNewsletter": true
+  },
+  "homeSections": [
+    {
+      "id": "slideshow-1",
+      "type": "slideshow",
+      "enabled": true,
+      "settings": {
+        "autoplay": true,
+        "autoplayInterval": 5000,
+        "slides": [
+          {
+            "imageUrl": "/uploads/1775086276739-psapdh.jpg",
+            "title": "Imports China Brasil",
+            "subtitle": "Produtos importados com os melhores preços",
+            "buttonText": "Ver produtos",
+            "buttonLink": "/collections/all"
+          },
+          {
+            "imageUrl": "/uploads/banner-2.jpg",
+            "title": "Oferta Relâmpago",
+            "subtitle": "Novas ofertas todos os dias! Frete grátis para todo Brasil",
+            "buttonText": "Aproveite",
+            "buttonLink": "/collections/ofertas"
+          },
+          {
+            "imageUrl": "/uploads/banner-3.jpg",
+            "title": "Nossa Loja",
+            "subtitle": "Imports China Brasil - Qualidade e variedade",
+            "buttonText": "Conheça",
+            "buttonLink": "/about"
+          },
+          {
+            "imageUrl": "/uploads/banner-4.jpg",
+            "title": "Smartphones com até 80% OFF",
+            "subtitle": "Entrega Full em até 48 horas",
+            "buttonText": "Compre agora",
+            "buttonLink": "/collections/smartphones"
+          }
+        ],
+        "bgColor": "#ffffff",
+        "textColor": "#181616",
+        "bgImage": "/uploads/1774730195322-x9fjsj.png"
+      }
+    },
+    {
+      "id": "text-icons-1",
+      "type": "text-with-icons",
+      "enabled": true,
+      "settings": {
+        "items": [
+          {
+            "icon": "truck",
+            "text": "Frete grátis acima de R$ 299"
+          },
+          {
+            "icon": "refresh",
+            "text": "Troca grátis em até 30 dias"
+          },
+          {
+            "icon": "shield",
+            "text": "Compra 100% segura"
+          },
+          {
+            "icon": "credit-card",
+            "text": "Parcele em até 10x sem juros"
+          }
+        ]
+      }
+    },
+    {
+      "id": "mosaic-1",
+      "type": "mosaic",
+      "enabled": true,
+      "settings": {
+        "blocks": [
+          {
+            "imageUrl": "/uploads/banner-4.jpg",
+            "title": "Smartphones",
+            "link": "/collections/smartphones"
+          },
+          {
+            "imageUrl": "/uploads/banner-2.jpg",
+            "title": "Ofertas",
+            "link": "/collections/ofertas"
+          }
+        ],
+        "items": []
+      }
+    },
+    {
+      "id": "featured-1",
+      "type": "featured-collection",
+      "enabled": true,
+      "settings": {
+        "title": "Novidades",
+        "collectionHandle": "novidades",
+        "linkTitle": "Ver todos",
+        "linkUrl": "/collections/novidades",
+        "productsToShow": 8
+      }
+    },
+    {
+      "id": "offers-1",
+      "type": "offers",
+      "enabled": true,
+      "settings": {
+        "items": [
+          {
+            "title": "Frete Grátis para todo Brasil",
+            "description": "Em compras acima de R$ 299",
+            "link": "/collections/all",
+            "backgroundColor": "#f08000",
+            "textColor": "#fff"
+          },
+          {
+            "title": "Entrega Full em 48h",
+            "description": "Para produtos selecionados",
+            "link": "/collections/all",
+            "backgroundColor": "#1e2d7d",
+            "textColor": "#fff"
+          }
+        ]
+      }
+    },
+    {
+      "id": "featured-2",
+      "type": "featured-collection",
+      "enabled": true,
+      "settings": {
+        "title": "Mais Vendidos",
+        "collectionHandle": "mais-vendidos",
+        "linkTitle": "Ver todos",
+        "linkUrl": "/collections/mais-vendidos",
+        "productsToShow": 8
+      }
+    },
+    {
+      "id": "image-text-1",
+      "type": "image-with-text",
+      "enabled": true,
+      "settings": {
+        "title": "Produtos importados com os melhores preços",
+        "content": "<p>A Imports China Brasil traz produtos de qualidade internacional diretamente para você, com preços acessíveis e entrega rápida para todo o Brasil.</p>",
+        "buttonText": "Conheça nossa loja",
+        "buttonLink": "/about",
+        "imagePosition": "left",
+        "imageUrl": "/uploads/banner-3.jpg"
+      }
+    },
+    {
+      "id": "collection-list-1",
+      "type": "collection-list",
+      "enabled": true,
+      "settings": {
+        "title": "Categorias",
+        "collections": []
+      }
+    },
+    {
+      "id": "info-bar-1",
+      "type": "info-bar",
+      "enabled": true,
+      "settings": {
+        "items": [
+          {
+            "icon": "truck",
+            "title": "Frete Grátis",
+            "text": "Para compras acima de R$ 299"
+          },
+          {
+            "icon": "refresh",
+            "title": "Troca Fácil",
+            "text": "Até 30 dias para trocar"
+          },
+          {
+            "icon": "shield",
+            "title": "Compra Segura",
+            "text": "Seus dados protegidos"
+          }
+        ]
+      }
+    },
+    {
+      "id": "logo-list-1",
+      "type": "logo-list",
+      "enabled": true,
+      "settings": {
+        "title": "Tecnologias",
+        "logos": []
+      }
+    }
+  ],
+  "product": {
+    "showVendor": true,
+    "showSecondaryImage": true,
+    "showDiscount": true,
+    "discountMode": "saving",
+    "pricePosition": "after_title",
+    "imageSize": "natural",
+    "showColorSwatch": true,
+    "showInventoryQuantity": false,
+    "lowInventoryThreshold": 0,
+    "showReviewsBadge": true
+  },
+  "cart": {
+    "type": "drawer",
+    "emptyButtonLink": "/collections/all",
+    "showCheckoutButton": true,
+    "showFreeShippingThreshold": true,
+    "freeShippingThreshold": 29900
+  },
+  "newsletter": {
+    "enabled": true,
+    "title": "Receba nossas novidades",
+    "subtitle": "Cadastre-se e fique por dentro das novidades e promoções exclusivas.",
+    "backgroundColor": "#1e2d7d",
+    "textColor": "#ffffff"
+  },
+  "seo": {
+    "titleTemplate": "{{page}} | Imports China Brasil",
+    "defaultDescription": "Compre produtos importados na Imports China Brasil. Smartphones, eletrônicos e mais. Frete grátis para todo Brasil."
+  },
+  "installments": {
+    "percentage": 2161
+  },
+  "checkout": {
+    "provider": "luna",
+    "lunaCheckoutUrl": "https://sua-loja.lunacheckout.com",
+    "lunaStoreUuid": "",
+    "webhookUrl": "/webhooks/luna"
+  }
+}

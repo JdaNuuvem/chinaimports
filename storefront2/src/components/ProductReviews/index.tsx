@@ -1,0 +1,188 @@
+"use client";
+import { useState, useEffect } from "react";
+
+interface Review {
+  id: string;
+  author: string;
+  rating: number;
+  title: string;
+  body: string;
+  images?: string;
+  createdAt?: string;
+  date?: string;
+}
+
+interface ProductReviewsProps {
+  productId: string;
+  reviews?: Review[];
+}
+
+function StarIcon({ filled, size = 18 }: { filled: boolean; size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill={filled ? "#f59e0b" : "#d1d5db"} xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+    </svg>
+  );
+}
+
+const DEMO_REVIEWS: Review[] = [
+  { id: "r1", author: "Renata C.", rating: 4, title: "Recomendo", body: "Produto muito bom, atendeu bem às minhas expectativas. Recomendo.", date: "2026-04-03" },
+  { id: "r2", author: "Leonardo M.", rating: 5, title: "Muito bom", body: "Qualidade absurda, grave muito forte e não distorce nem no máximo", date: "2026-04-03" },
+  { id: "r3", author: "Elizabeth M.", rating: 5, title: "Muito bom para churrasco e festa", body: "Usei na piscina sem medo, realmente resistente à água e poeira.", date: "2026-04-03" },
+  { id: "r4", author: "Alexandro S.", rating: 5, title: "", body: "Peguei na promoção e valeu MUITO a pena. Produto top demais!", date: "2026-04-03" },
+  { id: "r5", author: "Jefferson A.", rating: 5, title: "Melhor compra", body: "Troquei minha JBL antiga por esse, não me arrependo nem um pouco", date: "2026-04-03" },
+  { id: "r6", author: "Alexandre Z.", rating: 5, title: "Recomendo", body: "Bateria dura muito! Usei dois dias e ainda sobrou carga.", date: "2026-04-03" },
+  { id: "r7", author: "Edinalva P.", rating: 5, title: "Melhor compra do ano", body: "Muito potente! O grave é absurdo, treme tudo mesmo. Melhor compra que fiz.", date: "2026-04-03" },
+  { id: "r8", author: "Bruno A.", rating: 4, title: "Produto ok", body: "Está ok para o preço que paguei. Poderia ser melhor em alguns detalhes.", date: "2026-04-02" },
+  { id: "r9", author: "Carlos R.", rating: 5, title: "Superou minhas expectativas", body: "Já é a segunda vez que compro e continua com a mesma qualidade. Excelente!", date: "2026-03-30" },
+  { id: "r10", author: "Juliana M.", rating: 5, title: "Produto perfeito", body: "Melhor custo-benefício que encontrei. Produto chegou perfeito!", date: "2026-03-28" },
+  { id: "r11", author: "Beatriz P.", rating: 5, title: "Amei demais!", body: "Melhor custo-benefício que encontrei. Produto chegou perfeito!", date: "2026-03-27" },
+  { id: "r12", author: "Felipe R.", rating: 5, title: "Qualidade incrível", body: "Compra perfeita do início ao fim. Produto é tudo que eu esperava e mais.", date: "2026-03-27" },
+];
+
+export default function ProductReviews({ productId, reviews: propReviews }: ProductReviewsProps) {
+  const [reviews, setReviews] = useState<Review[]>(propReviews || DEMO_REVIEWS);
+
+  useEffect(() => {
+    if (propReviews) return;
+    const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+    fetch(`${backendUrl}/store/products/${productId}/reviews`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.reviews?.length > 0) setReviews(data.reviews);
+      })
+      .catch(() => {});
+  }, [productId, propReviews]);
+
+  const avgRating = reviews.length > 0
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : "0";
+
+  const parseImages = (images?: string): string[] => {
+    if (!images) return [];
+    try {
+      const parsed = JSON.parse(images);
+      return Array.isArray(parsed) ? parsed : [parsed];
+    } catch { return []; }
+  };
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("pt-BR");
+  };
+
+  return (
+    <div id="product-reviews">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes reviewSlideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .review-card { animation: reviewSlideUp 0.5s ease-out both; transition: box-shadow 0.25s ease, transform 0.25s ease; }
+        .review-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.06); transform: translateY(-2px); }
+      `}} />
+
+      {/* Header */}
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 24, fontWeight: 700, color: "#1a1c1e", margin: "0 0 8px 0" }}>
+          Avaliações dos Clientes
+        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ display: "inline-flex", gap: 2 }}>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <StarIcon key={n} filled={n <= Math.round(Number(avgRating))} size={20} />
+            ))}
+          </span>
+          <span style={{ fontSize: 14, color: "#6b7280" }}>
+            {avgRating} de 5 ({reviews.length} avaliações)
+          </span>
+        </div>
+      </div>
+
+      {/* Review cards — vertical list */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+        {reviews.map((review, idx) => {
+          const imgs = parseImages(review.images);
+          const initial = review.author.charAt(0).toUpperCase();
+          return (
+            <div
+              key={review.id}
+              className="review-card"
+              style={{
+                border: "1px solid #e5e7eb",
+                borderRadius: 12,
+                padding: "20px 24px",
+                background: "#fff",
+                animationDelay: `${Math.min(idx, 6) * 0.06}s`,
+              }}
+            >
+              {/* Author row */}
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
+                {/* Avatar initial */}
+                <div style={{
+                  width: 40, height: 40, borderRadius: "50%",
+                  background: "#16a34a", color: "#fff",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 16, fontWeight: 700, flexShrink: 0,
+                }}>
+                  {initial}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontWeight: 700, fontSize: 15, color: "#1a1c1e" }}>{review.author}</span>
+                    <span style={{ display: "inline-flex", gap: 1 }}>
+                      {[1, 2, 3, 4, 5].map((n) => (
+                        <StarIcon key={n} filled={n <= review.rating} size={16} />
+                      ))}
+                    </span>
+                    <span style={{
+                      background: "#f0fdf4", color: "#16a34a", border: "1px solid #bbf7d0",
+                      padding: "2px 8px", borderRadius: 4, fontSize: 11, fontWeight: 600,
+                    }}>
+                      Compra verificada
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>
+                    {formatDate(review.date || review.createdAt)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Title */}
+              {review.title && (
+                <p style={{ fontWeight: 700, fontSize: 15, color: "#1a1c1e", margin: "10px 0 4px 0" }}>
+                  {review.title}
+                </p>
+              )}
+
+              {/* Body */}
+              <p style={{ color: "#6b7280", lineHeight: 1.6, fontSize: 14, margin: "4px 0 0 0" }}>
+                {review.body}
+              </p>
+
+              {/* Images */}
+              {imgs.length > 0 && (
+                <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+                  {imgs.slice(0, 3).map((img, i) => (
+                    <div key={i} style={{ width: 80, height: 80, borderRadius: 8, overflow: "hidden", border: "1px solid #e5e7eb" }}>
+                      <img src={img} alt="Foto da avaliação" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Empty state */}
+      {reviews.length === 0 && (
+        <div style={{ textAlign: "center", padding: 40, color: "#9ca3af" }}>
+          <p style={{ fontSize: 16, marginBottom: 8 }}>Nenhuma avaliação ainda</p>
+          <p style={{ fontSize: 13 }}>Seja o primeiro a avaliar este produto!</p>
+        </div>
+      )}
+    </div>
+  );
+}

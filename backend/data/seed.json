@@ -1,0 +1,258 @@
+{
+  "store": {
+    "currencies": ["BRL"]
+  },
+  "regions": [
+    {
+      "id": "reg_brasil",
+      "name": "Brasil",
+      "currency_code": "BRL",
+      "tax_rate": 0,
+      "payment_providers": ["manual"],
+      "fulfillment_providers": ["manual"],
+      "countries": ["BR"]
+    }
+  ],
+  "shipping_options": [
+    {
+      "name": "Frete Grátis",
+      "region_id": "reg_brasil",
+      "provider_id": "manual",
+      "data": {},
+      "price_type": "flat_rate",
+      "amount": 0
+    },
+    {
+      "name": "Frete Padrão",
+      "region_id": "reg_brasil",
+      "provider_id": "manual",
+      "data": {},
+      "price_type": "flat_rate",
+      "amount": 1990
+    }
+  ],
+  "products": [
+    {
+      "title": "Camiseta UA Tech 2.0",
+      "subtitle": null,
+      "description": "A UA Tech é a nossa referência em equipamento de treino. O material ultrasuave proporciona a performance ideal com muito conforto.",
+      "handle": "camiseta-ua-tech-2",
+      "is_giftcard": false,
+      "weight": 200,
+      "images": [],
+      "options": [
+        { "title": "Tamanho" },
+        { "title": "Cor" }
+      ],
+      "variants": [
+        {
+          "title": "P / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 19900 }],
+          "options": [{ "value": "P" }, { "value": "Preto" }],
+          "inventory_quantity": 50,
+          "manage_inventory": true
+        },
+        {
+          "title": "M / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 19900 }],
+          "options": [{ "value": "M" }, { "value": "Preto" }],
+          "inventory_quantity": 30,
+          "manage_inventory": true
+        },
+        {
+          "title": "G / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 19900 }],
+          "options": [{ "value": "G" }, { "value": "Preto" }],
+          "inventory_quantity": 20,
+          "manage_inventory": true
+        },
+        {
+          "title": "P / Azul",
+          "prices": [{ "currency_code": "BRL", "amount": 19900 }],
+          "options": [{ "value": "P" }, { "value": "Azul" }],
+          "inventory_quantity": 25,
+          "manage_inventory": true
+        },
+        {
+          "title": "M / Azul",
+          "prices": [{ "currency_code": "BRL", "amount": 19900 }],
+          "options": [{ "value": "M" }, { "value": "Azul" }],
+          "inventory_quantity": 15,
+          "manage_inventory": true
+        }
+      ]
+    },
+    {
+      "title": "Bermuda UA Launch Run 7\"",
+      "description": "Bermuda leve e ventilada para corrida. Tecido com tecnologia de secagem rápida.",
+      "handle": "bermuda-ua-launch-run",
+      "is_giftcard": false,
+      "weight": 150,
+      "images": [],
+      "options": [
+        { "title": "Tamanho" }
+      ],
+      "variants": [
+        {
+          "title": "P",
+          "prices": [{ "currency_code": "BRL", "amount": 24900 }],
+          "options": [{ "value": "P" }],
+          "inventory_quantity": 40,
+          "manage_inventory": true
+        },
+        {
+          "title": "M",
+          "prices": [{ "currency_code": "BRL", "amount": 24900 }],
+          "options": [{ "value": "M" }],
+          "inventory_quantity": 35,
+          "manage_inventory": true
+        },
+        {
+          "title": "G",
+          "prices": [{ "currency_code": "BRL", "amount": 24900 }],
+          "options": [{ "value": "G" }],
+          "inventory_quantity": 25,
+          "manage_inventory": true
+        }
+      ]
+    },
+    {
+      "title": "Tênis UA Charged Pursuit 3",
+      "description": "O Charged Pursuit 3 oferece amortecimento responsivo e conforto durante todo o dia.",
+      "handle": "tenis-ua-charged-pursuit-3",
+      "is_giftcard": false,
+      "weight": 350,
+      "images": [],
+      "options": [
+        { "title": "Tamanho" },
+        { "title": "Cor" }
+      ],
+      "variants": [
+        {
+          "title": "40 / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 49900 }],
+          "options": [{ "value": "40" }, { "value": "Preto" }],
+          "inventory_quantity": 20,
+          "manage_inventory": true
+        },
+        {
+          "title": "41 / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 49900 }],
+          "options": [{ "value": "41" }, { "value": "Preto" }],
+          "inventory_quantity": 18,
+          "manage_inventory": true
+        },
+        {
+          "title": "42 / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 49900 }],
+          "options": [{ "value": "42" }, { "value": "Preto" }],
+          "inventory_quantity": 15,
+          "manage_inventory": true
+        },
+        {
+          "title": "43 / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 49900 }],
+          "options": [{ "value": "43" }, { "value": "Preto" }],
+          "inventory_quantity": 12,
+          "manage_inventory": true
+        }
+      ]
+    },
+    {
+      "title": "Regata UA Streaker",
+      "description": "Regata ultraconfortável com tecnologia anti-odor e tecido que seca rapidamente.",
+      "handle": "regata-ua-streaker",
+      "is_giftcard": false,
+      "weight": 120,
+      "images": [],
+      "options": [
+        { "title": "Tamanho" }
+      ],
+      "variants": [
+        {
+          "title": "P",
+          "prices": [{ "currency_code": "BRL", "amount": 14900 }],
+          "options": [{ "value": "P" }],
+          "inventory_quantity": 60,
+          "manage_inventory": true
+        },
+        {
+          "title": "M",
+          "prices": [{ "currency_code": "BRL", "amount": 14900 }],
+          "options": [{ "value": "M" }],
+          "inventory_quantity": 45,
+          "manage_inventory": true
+        },
+        {
+          "title": "G",
+          "prices": [{ "currency_code": "BRL", "amount": 14900 }],
+          "options": [{ "value": "G" }],
+          "inventory_quantity": 30,
+          "manage_inventory": true
+        }
+      ]
+    },
+    {
+      "title": "Legging UA HeatGear Feminina",
+      "description": "Legging de compressão com tecido HeatGear que mantém você fresca e seca durante treinos intensos.",
+      "handle": "legging-ua-heatgear-feminina",
+      "is_giftcard": false,
+      "weight": 180,
+      "images": [],
+      "options": [
+        { "title": "Tamanho" },
+        { "title": "Cor" }
+      ],
+      "variants": [
+        {
+          "title": "PP / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 29900 }],
+          "options": [{ "value": "PP" }, { "value": "Preto" }],
+          "inventory_quantity": 30,
+          "manage_inventory": true
+        },
+        {
+          "title": "P / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 29900 }],
+          "options": [{ "value": "P" }, { "value": "Preto" }],
+          "inventory_quantity": 25,
+          "manage_inventory": true
+        },
+        {
+          "title": "M / Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 29900 }],
+          "options": [{ "value": "M" }, { "value": "Preto" }],
+          "inventory_quantity": 20,
+          "manage_inventory": true
+        }
+      ]
+    },
+    {
+      "title": "Mochila UA Hustle 5.0",
+      "description": "Mochila resistente à água com compartimento para notebook e organização interna.",
+      "handle": "mochila-ua-hustle-5",
+      "is_giftcard": false,
+      "weight": 600,
+      "images": [],
+      "options": [
+        { "title": "Cor" }
+      ],
+      "variants": [
+        {
+          "title": "Preto",
+          "prices": [{ "currency_code": "BRL", "amount": 39900 }],
+          "options": [{ "value": "Preto" }],
+          "inventory_quantity": 50,
+          "manage_inventory": true
+        },
+        {
+          "title": "Cinza",
+          "prices": [{ "currency_code": "BRL", "amount": 39900 }],
+          "options": [{ "value": "Cinza" }],
+          "inventory_quantity": 35,
+          "manage_inventory": true
+        }
+      ]
+    }
+  ]
+}

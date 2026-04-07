@@ -1,0 +1,61 @@
+{
+  "collections": [
+    {
+      "id": "cmngnn9ka0000rjuo9495g0lz",
+      "title": "Masculino",
+      "handle": "masculino",
+      "imageUrl": null,
+      "productCount": 3
+    },
+    {
+      "id": "cmngnn9kd0001rjuoefz3np3j",
+      "title": "Feminino",
+      "handle": "feminino",
+      "imageUrl": null,
+      "productCount": 1
+    },
+    {
+      "id": "cmngnn9kf0002rjuod7rw93oo",
+      "title": "Infantil",
+      "handle": "infantil",
+      "imageUrl": null,
+      "productCount": 0
+    },
+    {
+      "id": "cmngnn9ki0003rjuokgnwd855",
+      "title": "Calçados",
+      "handle": "calcados",
+      "imageUrl": null,
+      "productCount": 1
+    },
+    {
+      "id": "cmngnn9kk0004rjuo5d0w611u",
+      "title": "Acessórios",
+      "handle": "acessorios",
+      "imageUrl": null,
+      "productCount": 1
+    },
+    {
+      "id": "cmngnn9ko0005rjuojkjjksiq",
+      "title": "Outlet",
+      "handle": "outlet",
+      "imageUrl": null,
+      "productCount": 1
+    },
+    {
+      "id": "cmngnn9kr0006rjuoxxbfqv88",
+      "title": "Lançamentos",
+      "handle": "lancamentos",
+      "imageUrl": null,
+      "productCount": 2
+    },
+    {
+      "id": "cmngnn9kt0007rjuooh2r3sk4",
+      "title": "Mais Vendidos",
+      "handle": "mais-vendidos",
+      "imageUrl": null,
+      "productCount": 2
+    }
+  ],
+  "count": 8
+}

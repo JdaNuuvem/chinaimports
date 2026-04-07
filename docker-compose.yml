@@ -1,0 +1,74 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-underarmour_store}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      args:
+        DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-underarmour_store}
+    ports:
+      - "${BACKEND_PORT:-9000}:9000"
+    environment:
+      PORT: 9000
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-underarmour_store}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_SECRET: ${THEME_ADMIN_PASSWORD}
+      THEME_ADMIN_PASSWORD: ${THEME_ADMIN_PASSWORD}
+      STORE_URL: ${SITE_URL:-http://localhost:3000}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      AUTO_MIGRATE: "true"
+      # Optional env fallbacks (admin UI overrides these)
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      ABANDONED_CART_COUPON: ${ABANDONED_CART_COUPON:-VOLTEI10}
+    volumes:
+      - uploads:/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  storefront:
+    build:
+      context: ./storefront2
+      args:
+        NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${BACKEND_PUBLIC_URL:-http://localhost:9000}
+    ports:
+      - "${STOREFRONT_PORT:-3000}:3000"
+    environment:
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${BACKEND_PUBLIC_URL:-http://localhost:9000}
+      NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://localhost:3000}
+      THEME_ADMIN_PASSWORD: ${THEME_ADMIN_PASSWORD}
+      REVALIDATION_SECRET: ${REVALIDATION_SECRET}
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  uploads:

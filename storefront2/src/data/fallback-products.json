@@ -1,0 +1,831 @@
+{
+  "products": [
+    {
+      "id": "cmngnn9og002srjuo876jfioj",
+      "title": "Mochila UA Hustle 5.0",
+      "description": "Mochila resistente à água com compartimento para notebook e organização interna.",
+      "handle": "mochila-ua-hustle-5",
+      "thumbnail": "https://placehold.co/600x600/1e2d7d/ffffff?text=Mochila%20UA%20Hustle%205.",
+      "images": [
+        {
+          "id": "cmngnn9og002trjuoo9zk72en",
+          "url": "https://placehold.co/600x600/1e2d7d/ffffff?text=Mochila%20UA%20Hust"
+        },
+        {
+          "id": "cmngnn9og002urjuo7bn14o94",
+          "url": "https://placehold.co/600x600/00badb/ffffff?text=Detalhe"
+        },
+        {
+          "id": "cmngnn9og002vrjuo63fonq9q",
+          "url": "https://placehold.co/600x600/333333/ffffff?text=Costas"
+        }
+      ],
+      "options": [
+        {
+          "id": "cmngnn9ol002xrjuo7c5bcqfg",
+          "title": "Cor",
+          "values": [
+            {
+              "id": "cmngnn9ol002yrjuo9rccfkpx",
+              "value": "Preto"
+            },
+            {
+              "id": "cmngnn9ol002zrjuoh8nyi2yi",
+              "value": "Cinza"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "cmngnn9oo0031rjuopb0dir1y",
+          "title": "Preto",
+          "sku": "MOCHILA-UA-HUSTLE-5-0",
+          "prices": [
+            {
+              "amount": 39900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 45,
+          "original_price": 49875,
+          "calculated_price": 39900,
+          "options": [
+            {
+              "id": "cmngnn9oo0031rjuopb0dir1y_opt_0",
+              "value": "Preto",
+              "option_id": "cmngnn9ol002xrjuo7c5bcqfg"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9os0033rjuoht6wu2z6",
+          "title": "Cinza",
+          "sku": "MOCHILA-UA-HUSTLE-5-1",
+          "prices": [
+            {
+              "amount": 39900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 35,
+          "original_price": 49875,
+          "calculated_price": 39900,
+          "options": [
+            {
+              "id": "cmngnn9os0033rjuoht6wu2z6_opt_0",
+              "value": "Cinza",
+              "option_id": "cmngnn9ol002xrjuo7c5bcqfg"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "collection_id": "cmngnn9kk0004rjuo5d0w611u",
+      "collection": {
+        "id": "cmngnn9kk0004rjuo5d0w611u",
+        "title": "Acessórios",
+        "handle": "acessorios"
+      },
+      "created_at": "2026-04-01T23:06:19.456Z",
+      "updated_at": "2026-04-01T23:06:19.456Z"
+    },
+    {
+      "id": "cmngnn9np002arjuon9aj8cwc",
+      "title": "Legging UA HeatGear Feminina",
+      "description": "Legging de compressão com tecido HeatGear que mantém você fresca e seca durante treinos intensos.",
+      "handle": "legging-ua-heatgear-feminina",
+      "thumbnail": "https://placehold.co/600x600/1e2d7d/ffffff?text=Legging%20UA%20HeatGear%20",
+      "images": [
+        {
+          "id": "cmngnn9np002brjuo8jxd0s3p",
+          "url": "https://placehold.co/600x600/1e2d7d/ffffff?text=Legging%20UA%20Heat"
+        },
+        {
+          "id": "cmngnn9np002crjuoksx18xl5",
+          "url": "https://placehold.co/600x600/00badb/ffffff?text=Detalhe"
+        },
+        {
+          "id": "cmngnn9np002drjuofstxtbb9",
+          "url": "https://placehold.co/600x600/333333/ffffff?text=Costas"
+        }
+      ],
+      "options": [
+        {
+          "id": "cmngnn9ns002frjuofuxzgfsf",
+          "title": "Tamanho",
+          "values": [
+            {
+              "id": "cmngnn9ns002grjuopjjz1i97",
+              "value": "PP"
+            },
+            {
+              "id": "cmngnn9ns002hrjuomwqjpepv",
+              "value": "P"
+            },
+            {
+              "id": "cmngnn9ns002irjuo08dahmau",
+              "value": "M"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9nw002krjuoiy2fxqmq",
+          "title": "Cor",
+          "values": [
+            {
+              "id": "cmngnn9nw002lrjuov25spcx1",
+              "value": "Preto"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "cmngnn9o2002nrjuoze7e5d5e",
+          "title": "PP / Preto",
+          "sku": "LEGGING-UA-HEATGEAR-FEMININA-0",
+          "prices": [
+            {
+              "amount": 29900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 30,
+          "original_price": 37375,
+          "calculated_price": 29900,
+          "options": [
+            {
+              "id": "cmngnn9o2002nrjuoze7e5d5e_opt_0",
+              "value": "PP",
+              "option_id": "cmngnn9ns002frjuofuxzgfsf"
+            },
+            {
+              "id": "cmngnn9o2002nrjuoze7e5d5e_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9nw002krjuoiy2fxqmq"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9o5002prjuo3c1qopj8",
+          "title": "P / Preto",
+          "sku": "LEGGING-UA-HEATGEAR-FEMININA-1",
+          "prices": [
+            {
+              "amount": 29900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 25,
+          "original_price": 37375,
+          "calculated_price": 29900,
+          "options": [
+            {
+              "id": "cmngnn9o5002prjuo3c1qopj8_opt_0",
+              "value": "P",
+              "option_id": "cmngnn9ns002frjuofuxzgfsf"
+            },
+            {
+              "id": "cmngnn9o5002prjuo3c1qopj8_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9nw002krjuoiy2fxqmq"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9o8002rrjuo414fsgg4",
+          "title": "M / Preto",
+          "sku": "LEGGING-UA-HEATGEAR-FEMININA-2",
+          "prices": [
+            {
+              "amount": 29900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 20,
+          "original_price": 37375,
+          "calculated_price": 29900,
+          "options": [
+            {
+              "id": "cmngnn9o8002rrjuo414fsgg4_opt_0",
+              "value": "M",
+              "option_id": "cmngnn9ns002frjuofuxzgfsf"
+            },
+            {
+              "id": "cmngnn9o8002rrjuo414fsgg4_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9nw002krjuoiy2fxqmq"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "collection_id": "cmngnn9kd0001rjuoefz3np3j",
+      "collection": {
+        "id": "cmngnn9kd0001rjuoefz3np3j",
+        "title": "Feminino",
+        "handle": "feminino"
+      },
+      "created_at": "2026-04-01T23:06:19.430Z",
+      "updated_at": "2026-04-01T23:06:19.430Z"
+    },
+    {
+      "id": "cmngnn9n6001vrjuom5l8infv",
+      "title": "Regata UA Streaker",
+      "description": "Regata ultraconfortável com tecnologia anti-odor e tecido que seca rapidamente.",
+      "handle": "regata-ua-streaker",
+      "thumbnail": "https://placehold.co/600x600/1e2d7d/ffffff?text=Regata%20UA%20Streaker",
+      "images": [
+        {
+          "id": "cmngnn9n6001wrjuoffvcg2u4",
+          "url": "https://placehold.co/600x600/1e2d7d/ffffff?text=Regata%20UA%20Strea"
+        },
+        {
+          "id": "cmngnn9n6001xrjuozse2y5x6",
+          "url": "https://placehold.co/600x600/00badb/ffffff?text=Detalhe"
+        },
+        {
+          "id": "cmngnn9n6001yrjuojltrv4aa",
+          "url": "https://placehold.co/600x600/333333/ffffff?text=Costas"
+        }
+      ],
+      "options": [
+        {
+          "id": "cmngnn9n90020rjuostjxzwnr",
+          "title": "Tamanho",
+          "values": [
+            {
+              "id": "cmngnn9n90021rjuofvnvfl50",
+              "value": "P"
+            },
+            {
+              "id": "cmngnn9n90022rjuo9hb3gd5i",
+              "value": "M"
+            },
+            {
+              "id": "cmngnn9n90023rjuof5s2e5oo",
+              "value": "G"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "cmngnn9nb0025rjuohsvzy64a",
+          "title": "P",
+          "sku": "REGATA-UA-STREAKER-0",
+          "prices": [
+            {
+              "amount": 14900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 60,
+          "original_price": 18625,
+          "calculated_price": 14900,
+          "options": [
+            {
+              "id": "cmngnn9nb0025rjuohsvzy64a_opt_0",
+              "value": "P",
+              "option_id": "cmngnn9n90020rjuostjxzwnr"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9ne0027rjuo5k7zc3fm",
+          "title": "M",
+          "sku": "REGATA-UA-STREAKER-1",
+          "prices": [
+            {
+              "amount": 14900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 45,
+          "original_price": 18625,
+          "calculated_price": 14900,
+          "options": [
+            {
+              "id": "cmngnn9ne0027rjuo5k7zc3fm_opt_0",
+              "value": "M",
+              "option_id": "cmngnn9n90020rjuostjxzwnr"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9nh0029rjuowvrvhxoe",
+          "title": "G",
+          "sku": "REGATA-UA-STREAKER-2",
+          "prices": [
+            {
+              "amount": 14900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 30,
+          "original_price": 18625,
+          "calculated_price": 14900,
+          "options": [
+            {
+              "id": "cmngnn9nh0029rjuowvrvhxoe_opt_0",
+              "value": "G",
+              "option_id": "cmngnn9n90020rjuostjxzwnr"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "collection_id": "cmngnn9ka0000rjuo9495g0lz",
+      "collection": {
+        "id": "cmngnn9ka0000rjuo9495g0lz",
+        "title": "Masculino",
+        "handle": "masculino"
+      },
+      "created_at": "2026-04-01T23:06:19.410Z",
+      "updated_at": "2026-04-01T23:06:19.410Z"
+    },
+    {
+      "id": "cmngnn9mc001arjuo0ma5d3x7",
+      "title": "Tênis UA Charged Pursuit 3",
+      "description": "O Charged Pursuit 3 oferece amortecimento responsivo e conforto durante todo o dia.",
+      "handle": "tenis-ua-charged-pursuit-3",
+      "thumbnail": "https://placehold.co/600x600/1e2d7d/ffffff?text=T%C3%AAnis%20UA%20Charged%20Pur",
+      "images": [
+        {
+          "id": "cmngnn9mc001brjuooolmo8h1",
+          "url": "https://placehold.co/600x600/1e2d7d/ffffff?text=T%C3%AAnis%20UA%20Charge"
+        },
+        {
+          "id": "cmngnn9mc001crjuoato40a3e",
+          "url": "https://placehold.co/600x600/00badb/ffffff?text=Detalhe"
+        },
+        {
+          "id": "cmngnn9mc001drjuojzw9jicr",
+          "url": "https://placehold.co/600x600/333333/ffffff?text=Costas"
+        }
+      ],
+      "options": [
+        {
+          "id": "cmngnn9mg001frjuo6p6apefg",
+          "title": "Tamanho",
+          "values": [
+            {
+              "id": "cmngnn9mg001grjuo0vwrr4h7",
+              "value": "40"
+            },
+            {
+              "id": "cmngnn9mg001hrjuoea2rnk8d",
+              "value": "41"
+            },
+            {
+              "id": "cmngnn9mg001irjuoowb0s9d3",
+              "value": "42"
+            },
+            {
+              "id": "cmngnn9mg001jrjuo69jnbazu",
+              "value": "43"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9mj001lrjuoglg638fz",
+          "title": "Cor",
+          "values": [
+            {
+              "id": "cmngnn9mj001mrjuochikfqis",
+              "value": "Preto"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "cmngnn9mm001orjuoonsgdmn7",
+          "title": "40 / Preto",
+          "sku": "TENIS-UA-CHARGED-PURSUIT-3-0",
+          "prices": [
+            {
+              "amount": 49900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 20,
+          "original_price": 62375,
+          "calculated_price": 49900,
+          "options": [
+            {
+              "id": "cmngnn9mm001orjuoonsgdmn7_opt_0",
+              "value": "40",
+              "option_id": "cmngnn9mg001frjuo6p6apefg"
+            },
+            {
+              "id": "cmngnn9mm001orjuoonsgdmn7_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9mj001lrjuoglg638fz"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9mp001qrjuoz0dl6pcl",
+          "title": "41 / Preto",
+          "sku": "TENIS-UA-CHARGED-PURSUIT-3-1",
+          "prices": [
+            {
+              "amount": 49900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 18,
+          "original_price": 62375,
+          "calculated_price": 49900,
+          "options": [
+            {
+              "id": "cmngnn9mp001qrjuoz0dl6pcl_opt_0",
+              "value": "41",
+              "option_id": "cmngnn9mg001frjuo6p6apefg"
+            },
+            {
+              "id": "cmngnn9mp001qrjuoz0dl6pcl_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9mj001lrjuoglg638fz"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9ms001srjuo9k9tbeo6",
+          "title": "42 / Preto",
+          "sku": "TENIS-UA-CHARGED-PURSUIT-3-2",
+          "prices": [
+            {
+              "amount": 49900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 15,
+          "original_price": 62375,
+          "calculated_price": 49900,
+          "options": [
+            {
+              "id": "cmngnn9ms001srjuo9k9tbeo6_opt_0",
+              "value": "42",
+              "option_id": "cmngnn9mg001frjuo6p6apefg"
+            },
+            {
+              "id": "cmngnn9ms001srjuo9k9tbeo6_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9mj001lrjuoglg638fz"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9mw001urjuofj5vlfn6",
+          "title": "43 / Preto",
+          "sku": "TENIS-UA-CHARGED-PURSUIT-3-3",
+          "prices": [
+            {
+              "amount": 49900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 12,
+          "original_price": 62375,
+          "calculated_price": 49900,
+          "options": [
+            {
+              "id": "cmngnn9mw001urjuofj5vlfn6_opt_0",
+              "value": "43",
+              "option_id": "cmngnn9mg001frjuo6p6apefg"
+            },
+            {
+              "id": "cmngnn9mw001urjuofj5vlfn6_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9mj001lrjuoglg638fz"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "collection_id": "cmngnn9ki0003rjuokgnwd855",
+      "collection": {
+        "id": "cmngnn9ki0003rjuokgnwd855",
+        "title": "Calçados",
+        "handle": "calcados"
+      },
+      "created_at": "2026-04-01T23:06:19.381Z",
+      "updated_at": "2026-04-01T23:06:19.381Z"
+    },
+    {
+      "id": "cmngnn9lp000vrjuoooeehd2g",
+      "title": "Bermuda UA Launch Run 7\"",
+      "description": "Bermuda leve e ventilada para corrida. Tecido com tecnologia de secagem rápida.",
+      "handle": "bermuda-ua-launch-run",
+      "thumbnail": "https://placehold.co/600x600/1e2d7d/ffffff?text=Bermuda%20UA%20Launch%20Ru",
+      "images": [
+        {
+          "id": "cmngnn9lp000wrjuocjf7y4cc",
+          "url": "https://placehold.co/600x600/1e2d7d/ffffff?text=Bermuda%20UA%20Laun"
+        },
+        {
+          "id": "cmngnn9lp000xrjuo9as76ytq",
+          "url": "https://placehold.co/600x600/00badb/ffffff?text=Detalhe"
+        },
+        {
+          "id": "cmngnn9lp000yrjuooqtoau61",
+          "url": "https://placehold.co/600x600/333333/ffffff?text=Costas"
+        }
+      ],
+      "options": [
+        {
+          "id": "cmngnn9ls0010rjuoq3xip468",
+          "title": "Tamanho",
+          "values": [
+            {
+              "id": "cmngnn9ls0011rjuovzcvicos",
+              "value": "P"
+            },
+            {
+              "id": "cmngnn9ls0012rjuodeivxnfu",
+              "value": "M"
+            },
+            {
+              "id": "cmngnn9ls0013rjuowlmqyt6c",
+              "value": "G"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "cmngnn9lw0015rjuotaz64zt0",
+          "title": "P",
+          "sku": "BERMUDA-UA-LAUNCH-RUN-0",
+          "prices": [
+            {
+              "amount": 24900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 40,
+          "original_price": 31125,
+          "calculated_price": 24900,
+          "options": [
+            {
+              "id": "cmngnn9lw0015rjuotaz64zt0_opt_0",
+              "value": "P",
+              "option_id": "cmngnn9ls0010rjuoq3xip468"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9lz0017rjuovrqr7f9a",
+          "title": "M",
+          "sku": "BERMUDA-UA-LAUNCH-RUN-1",
+          "prices": [
+            {
+              "amount": 24900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 35,
+          "original_price": 31125,
+          "calculated_price": 24900,
+          "options": [
+            {
+              "id": "cmngnn9lz0017rjuovrqr7f9a_opt_0",
+              "value": "M",
+              "option_id": "cmngnn9ls0010rjuoq3xip468"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9m10019rjuoskekubx6",
+          "title": "G",
+          "sku": "BERMUDA-UA-LAUNCH-RUN-2",
+          "prices": [
+            {
+              "amount": 24900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 25,
+          "original_price": 31125,
+          "calculated_price": 24900,
+          "options": [
+            {
+              "id": "cmngnn9m10019rjuoskekubx6_opt_0",
+              "value": "G",
+              "option_id": "cmngnn9ls0010rjuoq3xip468"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "collection_id": "cmngnn9ka0000rjuo9495g0lz",
+      "collection": {
+        "id": "cmngnn9ka0000rjuo9495g0lz",
+        "title": "Masculino",
+        "handle": "masculino"
+      },
+      "created_at": "2026-04-01T23:06:19.357Z",
+      "updated_at": "2026-04-01T23:06:19.357Z"
+    },
+    {
+      "id": "cmngnn9kw0008rjuok7isqkx7",
+      "title": "Camiseta UA Tech 2.0",
+      "description": "A UA Tech é a nossa referência em equipamento de treino. O material ultrasuave proporciona a performance ideal com muito conforto.",
+      "handle": "camiseta-ua-tech-2",
+      "thumbnail": "https://placehold.co/600x600/1e2d7d/ffffff?text=Camiseta%20UA%20Tech%202.0",
+      "images": [
+        {
+          "id": "cmngnn9kw0009rjuozliy3vwf",
+          "url": "https://placehold.co/600x600/1e2d7d/ffffff?text=Camiseta%20UA%20Tec"
+        },
+        {
+          "id": "cmngnn9kw000arjuociq8n0sx",
+          "url": "https://placehold.co/600x600/00badb/ffffff?text=Detalhe"
+        },
+        {
+          "id": "cmngnn9kw000brjuob9oynxe1",
+          "url": "https://placehold.co/600x600/333333/ffffff?text=Costas"
+        }
+      ],
+      "options": [
+        {
+          "id": "cmngnn9l0000drjuo2r4v9scl",
+          "title": "Tamanho",
+          "values": [
+            {
+              "id": "cmngnn9l1000erjuollxe96ch",
+              "value": "P"
+            },
+            {
+              "id": "cmngnn9l1000frjuor0t9fbup",
+              "value": "M"
+            },
+            {
+              "id": "cmngnn9l1000grjuopsjx7fif",
+              "value": "G"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9l3000irjuobd8rdpz9",
+          "title": "Cor",
+          "values": [
+            {
+              "id": "cmngnn9l3000jrjuociqbekf7",
+              "value": "Preto"
+            },
+            {
+              "id": "cmngnn9l3000krjuognn30cbo",
+              "value": "Azul"
+            }
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "cmngnn9l6000mrjuozkxz34gj",
+          "title": "P / Preto",
+          "sku": "CAMISETA-UA-TECH-2-0",
+          "prices": [
+            {
+              "amount": 19900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 50,
+          "original_price": 24875,
+          "calculated_price": 19900,
+          "options": [
+            {
+              "id": "cmngnn9l6000mrjuozkxz34gj_opt_0",
+              "value": "P",
+              "option_id": "cmngnn9l0000drjuo2r4v9scl"
+            },
+            {
+              "id": "cmngnn9l6000mrjuozkxz34gj_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9l3000irjuobd8rdpz9"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9l8000orjuowjub3qpz",
+          "title": "M / Preto",
+          "sku": "CAMISETA-UA-TECH-2-1",
+          "prices": [
+            {
+              "amount": 19900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 30,
+          "original_price": 24875,
+          "calculated_price": 19900,
+          "options": [
+            {
+              "id": "cmngnn9l8000orjuowjub3qpz_opt_0",
+              "value": "M",
+              "option_id": "cmngnn9l0000drjuo2r4v9scl"
+            },
+            {
+              "id": "cmngnn9l8000orjuowjub3qpz_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9l3000irjuobd8rdpz9"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9lb000qrjuo07mdti44",
+          "title": "G / Preto",
+          "sku": "CAMISETA-UA-TECH-2-2",
+          "prices": [
+            {
+              "amount": 19900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 20,
+          "original_price": 24875,
+          "calculated_price": 19900,
+          "options": [
+            {
+              "id": "cmngnn9lb000qrjuo07mdti44_opt_0",
+              "value": "G",
+              "option_id": "cmngnn9l0000drjuo2r4v9scl"
+            },
+            {
+              "id": "cmngnn9lb000qrjuo07mdti44_opt_1",
+              "value": "Preto",
+              "option_id": "cmngnn9l3000irjuobd8rdpz9"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9le000srjuo3nprz9gw",
+          "title": "P / Azul",
+          "sku": "CAMISETA-UA-TECH-2-3",
+          "prices": [
+            {
+              "amount": 19900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 25,
+          "original_price": 24875,
+          "calculated_price": 19900,
+          "options": [
+            {
+              "id": "cmngnn9le000srjuo3nprz9gw_opt_0",
+              "value": "P",
+              "option_id": "cmngnn9l0000drjuo2r4v9scl"
+            },
+            {
+              "id": "cmngnn9le000srjuo3nprz9gw_opt_1",
+              "value": "Azul",
+              "option_id": "cmngnn9l3000irjuobd8rdpz9"
+            }
+          ]
+        },
+        {
+          "id": "cmngnn9lh000urjuowd4bsvb2",
+          "title": "M / Azul",
+          "sku": "CAMISETA-UA-TECH-2-4",
+          "prices": [
+            {
+              "amount": 19900,
+              "currency_code": "BRL"
+            }
+          ],
+          "inventory_quantity": 15,
+          "original_price": 24875,
+          "calculated_price": 19900,
+          "options": [
+            {
+              "id": "cmngnn9lh000urjuowd4bsvb2_opt_0",
+              "value": "M",
+              "option_id": "cmngnn9l0000drjuo2r4v9scl"
+            },
+            {
+              "id": "cmngnn9lh000urjuowd4bsvb2_opt_1",
+              "value": "Azul",
+              "option_id": "cmngnn9l3000irjuobd8rdpz9"
+            }
+          ]
+        }
+      ],
+      "tags": [],
+      "collection_id": "cmngnn9ka0000rjuo9495g0lz",
+      "collection": {
+        "id": "cmngnn9ka0000rjuo9495g0lz",
+        "title": "Masculino",
+        "handle": "masculino"
+      },
+      "created_at": "2026-04-01T23:06:19.329Z",
+      "updated_at": "2026-04-01T23:06:19.329Z"
+    }
+  ],
+  "count": 6
+}

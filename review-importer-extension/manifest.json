@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "UA Review Importer",
+  "version": "1.0.0",
+  "description": "Importa avaliações da Shopee e Mercado Livre para sua loja Under Armour",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": [
+    "https://shopee.com.br/*",
+    "https://www.mercadolivre.com.br/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://shopee.com.br/*", "https://www.mercadolivre.com.br/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}
