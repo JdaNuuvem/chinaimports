@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@/styles/theme.css";
 import "@/styles/globals.css";
 import { getNonce } from "@/lib/csp-nonce";
 import { CartProvider } from "@/context/CartContext";
