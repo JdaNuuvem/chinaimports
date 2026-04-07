@@ -17,12 +17,9 @@ export default function SocialProof() {
   const [data, setData] = useState({ name: "", city: "", product: "", handle: "", minutes: 0 });
   const productsRef = useRef<ProductLite[]>([]);
 
-  // Don't render on admin or product pages
-  const hidden =
-    !pathname ||
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/produto") ||
-    pathname.startsWith("/checkout");
+  // Don't render on admin/checkout. On product page, render at top to avoid blocking sticky buy button.
+  const hidden = !pathname || pathname.startsWith("/admin") || pathname.startsWith("/checkout");
+  const isProductPage = !!pathname?.startsWith("/produto");
 
   // Fetch real products once on mount
   useEffect(() => {
@@ -71,7 +68,7 @@ export default function SocialProof() {
   if (hidden || !visible) return null;
 
   return (
-    <div className="social-proof-toast" onClick={() => setVisible(false)}>
+    <div className={`social-proof-toast${isProductPage ? " social-proof-toast--top" : ""}`} onClick={() => setVisible(false)}>
       <div className="social-proof-toast__icon">🛒</div>
       <div className="social-proof-toast__body">
         <div className="social-proof-toast__line1">
@@ -109,6 +106,10 @@ export default function SocialProof() {
           animation: slideInLeft 0.4s ease;
           border: 1px solid #e1e3e5;
           cursor: pointer;
+        }
+        .social-proof-toast--top {
+          bottom: auto;
+          top: 90px;
         }
         .social-proof-toast__icon {
           width: 40px;
@@ -164,6 +165,10 @@ export default function SocialProof() {
             max-width: calc(100vw - 20px);
             padding: 10px 28px 10px 12px;
             gap: 10px;
+          }
+          .social-proof-toast--top {
+            top: 70px;
+            bottom: auto;
           }
           .social-proof-toast__icon {
             width: 34px;
