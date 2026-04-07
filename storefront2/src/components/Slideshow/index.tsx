@@ -59,8 +59,8 @@ export default function Slideshow({ slides = DEFAULT_SLIDES, autoPlay = true, cy
   }, [autoPlay, cycleSpeed, next, slides.length]);
 
   return (
-    <section className="slideshow-section" data-section-type="slideshow">
-      <div className="slideshow slideshow--preserve-ratio">
+    <section className="slideshow-section" data-section-type="slideshow" style={{ margin: 0, padding: 0 }}>
+      <div className="slideshow slideshow--preserve-ratio slideshow--edge2edge">
         {slides.map((slide, index) => (
           <div
             key={slide.id}
@@ -82,37 +82,15 @@ export default function Slideshow({ slides = DEFAULT_SLIDES, autoPlay = true, cy
                     />
                   </picture>
                 );
-                const overlayEl = !slide.imageOnly && (slide.title || slide.content) && (
-                  <div className="slideshow__content-wrapper" style={{
-                    position: "absolute",
-                    top: 0, left: 0, right: 0, bottom: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    textAlign: "center",
-                    pointerEvents: "none",
-                  }}>
-                    <div className="container">
-                      {slide.title && <h2 className="slideshow__title heading h1">{slide.title}</h2>}
-                      {slide.content && <p className="slideshow__content">{slide.content}</p>}
-                    </div>
-                  </div>
-                );
-                // If a link is set, the entire banner is clickable (no button).
+                // If a link is set, the entire banner is clickable.
                 if (slide.link) {
                   return (
-                    <Link href={slide.link} aria-label={slide.title || "Banner"} style={{ display: "block", position: "relative" }}>
+                    <Link href={slide.link} aria-label={slide.title || "Banner"} style={{ display: "block" }}>
                       {imageEl}
-                      {overlayEl}
                     </Link>
                   );
                 }
-                return (
-                  <>
-                    {imageEl}
-                    {overlayEl}
-                  </>
-                );
+                return imageEl;
               })()}
             </div>
           </div>
