@@ -9,7 +9,12 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "placehold.co" },
       { protocol: "http", hostname: "localhost" },
       { protocol: "https", hostname: "**" },
+      { protocol: "http", hostname: "**" },
     ],
+    // Allow SVG (placehold.co returns SVG by default). Mitigated by sandbox CSP.
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   async rewrites() {
     const backendUrl = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
