@@ -112,7 +112,7 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
             <ColorField label="Cor do texto" value={(s.textColor as string) || "#ffffff"} onChange={(v) => set("textColor", v)} />
 
             <p style={{ fontSize: 12, fontWeight: 600, color: "#202223", marginBottom: 8, marginTop: 12 }}>Slides</p>
-            {((s.slides as Array<{ imageUrl?: string; mobileImageUrl?: string; title?: string; subtitle?: string; buttonText?: string; buttonLink?: string; imageOnly?: boolean }>) || []).map((slide, i) => {
+            {((s.slides as Array<{ imageUrl?: string; mobileImageUrl?: string; title?: string; subtitle?: string; buttonText?: string; buttonLink?: string; imageOnly?: boolean; showButton?: boolean }>) || []).map((slide, i) => {
               const updateSlide = (patch: Record<string, unknown>) => {
                 const slides = [...((s.slides as Array<Record<string, unknown>>) || [])];
                 slides[i] = { ...slides[i], ...patch };
@@ -143,7 +143,22 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
                     <>
                       <Field label="Título" value={slide.title || ""} onChange={(v) => updateSlide({ title: v })} />
                       <Field label="Subtítulo" value={slide.subtitle || ""} onChange={(v) => updateSlide({ subtitle: v })} />
-                      <Field label="Texto do botão" value={slide.buttonText || ""} onChange={(v) => updateSlide({ buttonText: v })} />
+
+                      {/* Show/hide button toggle */}
+                      <div style={{ marginTop: 8, marginBottom: 8, padding: "10px 12px", background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 6 }}>
+                        <CheckboxField
+                          label="Mostrar botão de ação no banner"
+                          checked={slide.showButton !== false}
+                          onChange={(v) => updateSlide({ showButton: v })}
+                        />
+                        <p style={{ fontSize: 11, color: "#92400e", margin: "2px 0 0 22px", lineHeight: 1.4 }}>
+                          Desmarque para ocultar o botão. Você pode manter o link preenchido para o caso de reativar depois.
+                        </p>
+                      </div>
+
+                      {slide.showButton !== false && (
+                        <Field label="Texto do botão" value={slide.buttonText || ""} onChange={(v) => updateSlide({ buttonText: v })} />
+                      )}
                     </>
                   )}
                   <Field
@@ -155,7 +170,7 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
                 </div>
               );
             })}
-            <button onClick={() => set("slides", [...((s.slides as unknown[]) || []), { imageUrl: "", mobileImageUrl: "", title: "", subtitle: "", buttonText: "", buttonLink: "", imageOnly: false }])} style={{ width: "100%", padding: "8px", border: "1px dashed #c9cccf", borderRadius: 6, background: "none", cursor: "pointer", fontSize: 12, color: "#008060" }}>
+            <button onClick={() => set("slides", [...((s.slides as unknown[]) || []), { imageUrl: "", mobileImageUrl: "", title: "", subtitle: "", buttonText: "", buttonLink: "", imageOnly: false, showButton: true }])} style={{ width: "100%", padding: "8px", border: "1px dashed #c9cccf", borderRadius: 6, background: "none", cursor: "pointer", fontSize: 12, color: "#008060" }}>
               + Adicionar slide
             </button>
           </>

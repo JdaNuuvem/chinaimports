@@ -18,6 +18,9 @@ interface Slide {
   // even if filled in. Useful for banners that have the call-to-action baked
   // into the image itself.
   imageOnly?: boolean;
+  // When false, hides the action button even if buttonText/link are filled.
+  // Default: true (show button when buttonText + link are present).
+  showButton?: boolean;
 }
 
 interface SlideshowProps {
@@ -115,7 +118,7 @@ export default function Slideshow({ slides = DEFAULT_SLIDES, autoPlay = true, cy
                   <div className="container">
                     {slide.title && <h2 className="slideshow__title heading h1">{slide.title}</h2>}
                     {slide.content && <p className="slideshow__content">{slide.content}</p>}
-                    {slide.link && slide.buttonText && (
+                    {slide.showButton !== false && slide.link && slide.buttonText && (
                       <Link
                         href={slide.link}
                         className="slideshow__button button cta-pulse-primary"
