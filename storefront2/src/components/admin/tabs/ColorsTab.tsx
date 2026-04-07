@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import type { ThemeConfig } from "@/lib/theme-config";
-import { Section, ColorField, ColorGroup, SaveButton } from "./shared";
+import { Section, ColorField, SaveButton } from "./shared";
 
 interface ColorsTabProps {
   config: ThemeConfig;
@@ -10,98 +11,282 @@ interface ColorsTabProps {
   updateField: <K extends keyof ThemeConfig>(section: K, field: string, value: unknown) => void;
 }
 
+// Apply a preset by updating multiple color fields at once
+function applyPreset(
+  updateField: ColorsTabProps["updateField"],
+  preset: Partial<ThemeConfig["colors"]>
+) {
+  Object.entries(preset).forEach(([k, v]) => updateField("colors", k, v));
+}
+
+const PRESETS: { name: string; colors: Partial<ThemeConfig["colors"]> }[] = [
+  {
+    name: "Azul Clássico",
+    colors: {
+      accentColor: "#1e2d7d",
+      primaryButtonBg: "#1e2d7d",
+      primaryButtonText: "#ffffff",
+      headerBg: "#ffffff",
+      headerText: "#202223",
+      headerAccent: "#1e2d7d",
+      footerBg: "#1e2d7d",
+      footerHeadingText: "#ffffff",
+      footerBodyText: "#d4d4d4",
+    },
+  },
+  {
+    name: "Verde Natureza",
+    colors: {
+      accentColor: "#008060",
+      primaryButtonBg: "#008060",
+      primaryButtonText: "#ffffff",
+      headerBg: "#ffffff",
+      headerText: "#202223",
+      headerAccent: "#008060",
+      footerBg: "#004c3f",
+      footerHeadingText: "#ffffff",
+      footerBodyText: "#c8e8dd",
+    },
+  },
+  {
+    name: "Preto Minimalista",
+    colors: {
+      accentColor: "#000000",
+      primaryButtonBg: "#000000",
+      primaryButtonText: "#ffffff",
+      headerBg: "#ffffff",
+      headerText: "#000000",
+      headerAccent: "#000000",
+      footerBg: "#000000",
+      footerHeadingText: "#ffffff",
+      footerBodyText: "#9ca3af",
+    },
+  },
+  {
+    name: "Vermelho Oferta",
+    colors: {
+      accentColor: "#e11d48",
+      primaryButtonBg: "#e11d48",
+      primaryButtonText: "#ffffff",
+      headerBg: "#ffffff",
+      headerText: "#202223",
+      headerAccent: "#e11d48",
+      footerBg: "#1f1f1f",
+      footerHeadingText: "#ffffff",
+      footerBodyText: "#d4d4d4",
+    },
+  },
+];
+
 export default function ColorsTab({ config, saving, onSave, updateField }: ColorsTabProps) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const c = config.colors;
+
   return (
     <Section title="Cores">
-      <p style={{ fontSize: 13, color: "#666", marginBottom: 20 }}>
-        Personalize todas as cores da loja. As mudan\ças s\ão aplicadas em tempo real ap\ós salvar.
+      <p style={{ fontSize: 13, color: "#666", marginBottom: 16 }}>
+        Escolha um tema pronto ou ajuste as cores principais. O resto é opcional.
       </p>
 
-      {/* Preview */}
-      <div style={{ border: "1px solid #ddd", borderRadius: 8, overflow: "hidden", marginBottom: 24 }}>
-        <div style={{ background: config.colors.headerBg, color: config.colors.headerText, padding: "12px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontWeight: 700, fontSize: 14 }}>PREVIEW DA LOJA</span>
-          <span style={{ color: config.colors.headerAccent, fontSize: 12 }}>Link de destaque</span>
+      {/* Presets */}
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: "#6d7175", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
+          Temas prontos
         </div>
-        <div style={{ background: config.colors.backgroundColor, padding: 16 }}>
-          <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
-            <button style={{ padding: "8px 16px", background: config.colors.primaryButtonBg, color: config.colors.primaryButtonText, border: "none", borderRadius: 4, fontWeight: 600, fontSize: 12 }}>Bot\ão Prim\ário</button>
-            <button style={{ padding: "8px 16px", background: config.colors.secondaryButtonBg, color: config.colors.secondaryButtonText, border: "none", borderRadius: 4, fontWeight: 600, fontSize: 12 }}>Bot\ão Secund\ário</button>
-          </div>
-          <p style={{ color: config.colors.headingColor, fontWeight: 700, fontSize: 14, marginBottom: 4 }}>T\ítulo do produto</p>
-          <p style={{ color: config.colors.textColor, fontSize: 12, marginBottom: 4 }}>Descri\ç\ão do produto em texto normal</p>
-          <div style={{ display: "flex", gap: 8, fontSize: 12 }}>
-            <span style={{ color: config.colors.onSaleAccent, fontWeight: 700 }}>R$ 199,00</span>
-            <span style={{ textDecoration: "line-through", color: "#999" }}>R$ 249,00</span>
-            <span style={{ color: config.colors.inStockColor }}>Em estoque</span>
-          </div>
-        </div>
-        <div style={{ background: config.colors.footerBg, padding: "10px 20px", display: "flex", justifyContent: "space-between" }}>
-          <span style={{ color: config.colors.footerHeadingText, fontWeight: 600, fontSize: 12 }}>Footer</span>
-          <span style={{ color: config.colors.footerBodyText, fontSize: 11 }}>Texto do rodap\é</span>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {PRESETS.map((p) => (
+            <button
+              key={p.name}
+              onClick={() => applyPreset(updateField, p.colors)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 14px",
+                borderRadius: 8,
+                border: "1px solid #c9cccf",
+                background: "#fff",
+                cursor: "pointer",
+                fontSize: 13,
+                fontWeight: 500,
+              }}
+            >
+              <span
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  background: p.colors.accentColor,
+                  border: "1px solid #00000020",
+                }}
+              />
+              {p.name}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Geral */}
-      <ColorGroup title="Geral" description="Cores base usadas em toda a loja">
-        <ColorField label="Cor dos t\ítulos" value={config.colors.headingColor} onChange={(v) => updateField("colors", "headingColor", v)} />
-        <ColorField label="Cor do texto" value={config.colors.textColor} onChange={(v) => updateField("colors", "textColor", v)} />
-        <ColorField label="Cor do texto forte" value={config.colors.textStrongColor} onChange={(v) => updateField("colors", "textStrongColor", v)} />
-        <ColorField label="Cor de destaque (accent)" value={config.colors.accentColor} onChange={(v) => updateField("colors", "accentColor", v)} />
-        <ColorField label="Cor dos links" value={config.colors.linkColor} onChange={(v) => updateField("colors", "linkColor", v)} />
-        <ColorField label="Cor das bordas" value={config.colors.borderColor} onChange={(v) => updateField("colors", "borderColor", v)} />
-        <ColorField label="Fundo principal" value={config.colors.backgroundColor} onChange={(v) => updateField("colors", "backgroundColor", v)} />
-        <ColorField label="Fundo secund\ário" value={config.colors.secondaryBackground} onChange={(v) => updateField("colors", "secondaryBackground", v)} />
-      </ColorGroup>
+      {/* Preview */}
+      <div style={{ border: "1px solid #ddd", borderRadius: 8, overflow: "hidden", marginBottom: 24 }}>
+        <div
+          style={{
+            background: c.headerBg,
+            color: c.headerText,
+            padding: "12px 20px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <span style={{ fontWeight: 700, fontSize: 14 }}>PREVIEW DA LOJA</span>
+          <span style={{ color: c.headerAccent, fontSize: 12 }}>Link de destaque</span>
+        </div>
+        <div style={{ background: c.backgroundColor, padding: 16 }}>
+          <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+            <button
+              style={{
+                padding: "8px 16px",
+                background: c.primaryButtonBg,
+                color: c.primaryButtonText,
+                border: "none",
+                borderRadius: 4,
+                fontWeight: 600,
+                fontSize: 12,
+              }}
+            >
+              Comprar agora
+            </button>
+            <button
+              style={{
+                padding: "8px 16px",
+                background: c.secondaryButtonBg,
+                color: c.secondaryButtonText,
+                border: "none",
+                borderRadius: 4,
+                fontWeight: 600,
+                fontSize: 12,
+              }}
+            >
+              Ver mais
+            </button>
+          </div>
+          <p style={{ color: c.headingColor, fontWeight: 700, fontSize: 14, marginBottom: 4 }}>Título do produto</p>
+          <p style={{ color: c.textColor, fontSize: 12, marginBottom: 4 }}>Descrição do produto em texto normal</p>
+          <div style={{ display: "flex", gap: 8, fontSize: 12 }}>
+            <span style={{ color: c.onSaleAccent, fontWeight: 700 }}>R$ 199,00</span>
+            <span style={{ textDecoration: "line-through", color: "#999" }}>R$ 249,00</span>
+          </div>
+        </div>
+        <div style={{ background: c.footerBg, padding: "10px 20px", display: "flex", justifyContent: "space-between" }}>
+          <span style={{ color: c.footerHeadingText, fontWeight: 600, fontSize: 12 }}>Rodapé</span>
+          <span style={{ color: c.footerBodyText, fontSize: 11 }}>Texto do rodapé</span>
+        </div>
+      </div>
 
-      {/* Bot\ões */}
-      <ColorGroup title="Bot\ões" description="Bot\ão de compra e bot\ão secund\ário">
-        <ColorField label="Fundo do bot\ão prim\ário" value={config.colors.primaryButtonBg} onChange={(v) => updateField("colors", "primaryButtonBg", v)} />
-        <ColorField label="Texto do bot\ão prim\ário" value={config.colors.primaryButtonText} onChange={(v) => updateField("colors", "primaryButtonText", v)} />
-        <ColorField label="Fundo do bot\ão secund\ário" value={config.colors.secondaryButtonBg} onChange={(v) => updateField("colors", "secondaryButtonBg", v)} />
-        <ColorField label="Texto do bot\ão secund\ário" value={config.colors.secondaryButtonText} onChange={(v) => updateField("colors", "secondaryButtonText", v)} />
-      </ColorGroup>
+      {/* Essential colors */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+          gap: 14,
+          marginBottom: 20,
+        }}
+      >
+        <ColorField
+          label="Cor principal (botão comprar)"
+          value={c.primaryButtonBg}
+          onChange={(v) => {
+            updateField("colors", "primaryButtonBg", v);
+            updateField("colors", "accentColor", v);
+          }}
+        />
+        <ColorField
+          label="Fundo do cabeçalho"
+          value={c.headerBg}
+          onChange={(v) => updateField("colors", "headerBg", v)}
+        />
+        <ColorField
+          label="Texto do cabeçalho"
+          value={c.headerText}
+          onChange={(v) => updateField("colors", "headerText", v)}
+        />
+        <ColorField
+          label="Fundo do rodapé"
+          value={c.footerBg}
+          onChange={(v) => updateField("colors", "footerBg", v)}
+        />
+        <ColorField
+          label="Fundo da página"
+          value={c.backgroundColor}
+          onChange={(v) => updateField("colors", "backgroundColor", v)}
+        />
+        <ColorField
+          label="Preço em promoção"
+          value={c.onSaleAccent}
+          onChange={(v) => updateField("colors", "onSaleAccent", v)}
+        />
+      </div>
 
-      {/* Header */}
-      <ColorGroup title="Cabe\çalho (Header)" description="Barra de navega\ç\ão principal no topo">
-        <ColorField label="Fundo do cabe\çalho" value={config.colors.headerBg} onChange={(v) => updateField("colors", "headerBg", v)} />
-        <ColorField label="Texto do cabe\çalho" value={config.colors.headerText} onChange={(v) => updateField("colors", "headerText", v)} />
-        <ColorField label="Texto claro do cabe\çalho" value={config.colors.headerLightText} onChange={(v) => updateField("colors", "headerLightText", v)} />
-        <ColorField label="Destaque do cabe\çalho" value={config.colors.headerAccent} onChange={(v) => updateField("colors", "headerAccent", v)} />
-      </ColorGroup>
+      {/* Advanced toggle */}
+      <button
+        onClick={() => setShowAdvanced((v) => !v)}
+        style={{
+          background: "none",
+          border: "none",
+          color: "#008060",
+          fontSize: 13,
+          fontWeight: 600,
+          cursor: "pointer",
+          padding: "8px 0",
+          marginBottom: showAdvanced ? 16 : 0,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        {showAdvanced ? "▼" : "▶"} Cores avançadas ({showAdvanced ? "ocultar" : "mostrar todas"})
+      </button>
 
-      {/* Footer */}
-      <ColorGroup title="Rodap\é (Footer)" description="\Área de links e informa\ç\ões no final da p\ágina">
-        <ColorField label="Fundo do rodap\é" value={config.colors.footerBg} onChange={(v) => updateField("colors", "footerBg", v)} />
-        <ColorField label="T\ítulos do rodap\é" value={config.colors.footerHeadingText} onChange={(v) => updateField("colors", "footerHeadingText", v)} />
-        <ColorField label="Texto do rodap\é" value={config.colors.footerBodyText} onChange={(v) => updateField("colors", "footerBodyText", v)} />
-        <ColorField label="Destaque do rodap\é" value={config.colors.footerAccent} onChange={(v) => updateField("colors", "footerAccent", v)} />
-      </ColorGroup>
-
-      {/* Produto */}
-      <ColorGroup title="Produto" description="Pre\ços, estoque e etiquetas nos cards de produto">
-        <ColorField label="Pre\ço em promo\ç\ão" value={config.colors.onSaleAccent} onChange={(v) => updateField("colors", "onSaleAccent", v)} />
-        <ColorField label="Em estoque" value={config.colors.inStockColor} onChange={(v) => updateField("colors", "inStockColor", v)} />
-        <ColorField label="Estoque baixo" value={config.colors.lowStockColor} onChange={(v) => updateField("colors", "lowStockColor", v)} />
-        <ColorField label="Esgotado" value={config.colors.soldOutColor} onChange={(v) => updateField("colors", "soldOutColor", v)} />
-        <ColorField label="Etiqueta personalizada 1" value={config.colors.customLabel1Bg} onChange={(v) => updateField("colors", "customLabel1Bg", v)} />
-        <ColorField label="Etiqueta personalizada 2" value={config.colors.customLabel2Bg} onChange={(v) => updateField("colors", "customLabel2Bg", v)} />
-        <ColorField label="Estrelas de avalia\ç\ão" value={config.colors.starColor} onChange={(v) => updateField("colors", "starColor", v)} />
-      </ColorGroup>
-
-      {/* Feedback */}
-      <ColorGroup title="Mensagens" description="Cores de erro e sucesso em formul\ários e alertas">
-        <ColorField label="Mensagem de erro" value={config.colors.errorColor} onChange={(v) => updateField("colors", "errorColor", v)} />
-        <ColorField label="Mensagem de sucesso" value={config.colors.successColor} onChange={(v) => updateField("colors", "successColor", v)} />
-      </ColorGroup>
-
-      {/* Barra */}
-      <ColorGroup title="Barras e Menu" description="Barra de an\úncio e menu de navega\ç\ão">
-        <ColorField label="Fundo da barra de an\úncio" value={config.colors.announcementBarBg} onChange={(v) => updateField("colors", "announcementBarBg", v)} />
-        <ColorField label="Texto da barra de an\úncio" value={config.colors.announcementBarText} onChange={(v) => updateField("colors", "announcementBarText", v)} />
-        <ColorField label="Fundo do menu" value={config.colors.menuBarBg} onChange={(v) => updateField("colors", "menuBarBg", v)} />
-        <ColorField label="Texto do menu" value={config.colors.menuBarText} onChange={(v) => updateField("colors", "menuBarText", v)} />
-      </ColorGroup>
+      {showAdvanced && (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gap: 12,
+            padding: 16,
+            background: "#f9fafb",
+            borderRadius: 8,
+            marginBottom: 20,
+          }}
+        >
+          <ColorField label="Títulos" value={c.headingColor} onChange={(v) => updateField("colors", "headingColor", v)} />
+          <ColorField label="Texto" value={c.textColor} onChange={(v) => updateField("colors", "textColor", v)} />
+          <ColorField label="Texto forte" value={c.textStrongColor} onChange={(v) => updateField("colors", "textStrongColor", v)} />
+          <ColorField label="Links" value={c.linkColor} onChange={(v) => updateField("colors", "linkColor", v)} />
+          <ColorField label="Bordas" value={c.borderColor} onChange={(v) => updateField("colors", "borderColor", v)} />
+          <ColorField label="Fundo secundário" value={c.secondaryBackground} onChange={(v) => updateField("colors", "secondaryBackground", v)} />
+          <ColorField label="Texto botão primário" value={c.primaryButtonText} onChange={(v) => updateField("colors", "primaryButtonText", v)} />
+          <ColorField label="Fundo botão secundário" value={c.secondaryButtonBg} onChange={(v) => updateField("colors", "secondaryButtonBg", v)} />
+          <ColorField label="Texto botão secundário" value={c.secondaryButtonText} onChange={(v) => updateField("colors", "secondaryButtonText", v)} />
+          <ColorField label="Destaque cabeçalho" value={c.headerAccent} onChange={(v) => updateField("colors", "headerAccent", v)} />
+          <ColorField label="Texto claro cabeçalho" value={c.headerLightText} onChange={(v) => updateField("colors", "headerLightText", v)} />
+          <ColorField label="Títulos do rodapé" value={c.footerHeadingText} onChange={(v) => updateField("colors", "footerHeadingText", v)} />
+          <ColorField label="Texto do rodapé" value={c.footerBodyText} onChange={(v) => updateField("colors", "footerBodyText", v)} />
+          <ColorField label="Destaque rodapé" value={c.footerAccent} onChange={(v) => updateField("colors", "footerAccent", v)} />
+          <ColorField label="Em estoque" value={c.inStockColor} onChange={(v) => updateField("colors", "inStockColor", v)} />
+          <ColorField label="Estoque baixo" value={c.lowStockColor} onChange={(v) => updateField("colors", "lowStockColor", v)} />
+          <ColorField label="Esgotado" value={c.soldOutColor} onChange={(v) => updateField("colors", "soldOutColor", v)} />
+          <ColorField label="Etiqueta 1" value={c.customLabel1Bg} onChange={(v) => updateField("colors", "customLabel1Bg", v)} />
+          <ColorField label="Etiqueta 2" value={c.customLabel2Bg} onChange={(v) => updateField("colors", "customLabel2Bg", v)} />
+          <ColorField label="Estrelas avaliação" value={c.starColor} onChange={(v) => updateField("colors", "starColor", v)} />
+          <ColorField label="Mensagem de erro" value={c.errorColor} onChange={(v) => updateField("colors", "errorColor", v)} />
+          <ColorField label="Mensagem de sucesso" value={c.successColor} onChange={(v) => updateField("colors", "successColor", v)} />
+          <ColorField label="Fundo barra anúncio" value={c.announcementBarBg} onChange={(v) => updateField("colors", "announcementBarBg", v)} />
+          <ColorField label="Texto barra anúncio" value={c.announcementBarText} onChange={(v) => updateField("colors", "announcementBarText", v)} />
+          <ColorField label="Fundo menu" value={c.menuBarBg} onChange={(v) => updateField("colors", "menuBarBg", v)} />
+          <ColorField label="Texto menu" value={c.menuBarText} onChange={(v) => updateField("colors", "menuBarText", v)} />
+        </div>
+      )}
 
       <SaveButton saving={saving} onClick={() => onSave({ colors: config.colors })} />
     </Section>
