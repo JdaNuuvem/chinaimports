@@ -25,49 +25,84 @@
   function scrapeMLCurrentPage() {
     const reviews = [];
 
-    // The comments container holds individual review cards
-    const commentsContainer = document.querySelector(".ui-review-capability-comments");
-    if (!commentsContainer) return reviews;
+    // New ML reviews v3: each comment is an <article data-testid="comment-component">
+    // inside [data-testid="comments-component"] or .ui-review-capability-comments.
+    let cards = document.querySelectorAll('article[data-testid="comment-component"]');
+    if (cards.length === 0) {
+      // Fallback for older layouts
+      cards = document.querySelectorAll("article.ui-review-capability-comments__comment");
+    }
 
-    // Each comment is a direct child without a specific class, but contains
-    // .ui-review-capability-comments__comment__header as first meaningful child.
-    // We select all header elements and navigate to their parent card.
-    const headers = commentsContainer.querySelectorAll(".ui-review-capability-comments__comment__header");
+    cards.forEach((card) => {
+      // Rating: look for "Avaliação X de 5" inside the comment header rating block.
+      // Scope to the rating container so we don't accidentally pick up text from
+      // sibling elements (e.g. carousel thumb-rating).
+      let rating = 5;
+      const ratingContainer =
+        card.querySelector(".ui-review-capability-comments__comment__rating") ||
+        card.querySelector(".ui-review-capability-comments__comment__rating-container");
+      if (ratingContainer) {
+        const hidden = ratingContainer.querySelector(".andes-visually-hidden");
+        const m = hidden?.textContent?.match(/(\d+)\s*de\s*5/i);
+        if (m) rating = parseInt(m[1], 10);
+      }
 
-    headers.forEach((header) => {
-      const card = header.parentElement;
-      if (!card) return;
+      const date =
+        card.querySelector(".ui-review-capability-comments__comment__date")?.textContent?.trim() || "";
 
-      const ratingText = card.querySelector(".andes-visually-hidden")?.textContent || "";
-      const ratingMatch = ratingText.match(/(\d+) de 5/);
-      const rating = ratingMatch ? parseInt(ratingMatch[1]) : 5;
+      const title =
+        card.querySelector(".ui-review-capability-comments__comment__title")?.textContent?.trim() || "";
 
-      const date = card.querySelector(".ui-review-capability-comments__comment__date")?.textContent?.trim() || "";
-
-      const contentEl = card.querySelector(".ui-review-capability-comments__comment__content p");
+      // Content: prefer [data-testid="comment-content-component"]
+      const contentEl =
+        card.querySelector('[data-testid="comment-content-component"]') ||
+        card.querySelector(".ui-review-capability-comments__comment__content");
       const content = contentEl?.textContent?.trim() || "";
 
-      // ONLY get images from this comment's SECONDARY carousel (not the primary/global one)
+      // ONLY images from this comment's SECONDARY carousel (per-comment uploads)
       const images = [];
       const seen = new Set();
-      const secondaryCarousel = card.querySelector(".ui-review-capability-comments__comment__carousel--secondary");
+      const secondaryCarousel = card.querySelector(
+        ".ui-review-capability-comments__comment__carousel--secondary"
+      );
       if (secondaryCarousel) {
-        secondaryCarousel.querySelectorAll(
-          ".ui-review-capability-carousel__img-container.reviews-carousel-secondary img"
-        ).forEach((img) => {
-          const src = img.src || img.getAttribute("data-src") || img.getAttribute("data-zoom") || "";
-          if (src && src.startsWith("http") && !src.includes("icon") && !src.includes("svg")) {
-            // Get highest resolution: remove ML size suffixes
-            const fullRes = src.replace(/-[A-Z]\.jpg/, ".jpg").replace(/\?.*$/, "");
+        secondaryCarousel
+          .querySelectorAll(
+            ".ui-review-capability-carousel__img-container.reviews-carousel-secondary img.ui-review-capability-carousel__img, " +
+              ".ui-review-capability-carousel__img-container.reviews-carousel-secondary img"
+          )
+          .forEach((img) => {
+            const src =
+              img.currentSrc ||
+              img.src ||
+              img.getAttribute("data-src") ||
+              img.getAttribute("data-zoom") ||
+              "";
+            if (!src || !src.startsWith("http")) return;
+            if (!src.includes("mlstatic.com")) return;
+            // Upgrade to 2X if a smaller variant came back, drop query string.
+            // ML pattern: D_NQ_NP_{ID}-... or D_NQ_NP_2X_{ID}-...
+            const fullRes = src
+              .replace(/D_NQ_NP_(?!2X_)/, "D_NQ_NP_2X_")
+              .replace(/\?.*$/, "");
             if (!seen.has(fullRes)) {
               seen.add(fullRes);
               images.push(fullRes);
             }
-          }
-        });
+          });
       }
 
-      reviews.push({ rating, date, content, images, author: "Cliente Mercado Livre" });
+      // Skip empty comments (no text and no images)
+      if (!content && images.length === 0 && !title) return;
+
+      reviews.push({
+        rating,
+        date,
+        title,
+        content,
+        images,
+        author: "Cliente Mercado Livre",
+      });
     });
 
     return reviews;
@@ -105,9 +140,18 @@
       if (page > 50) break;
     }
 
-    const overallRating = document.querySelector(".ui-review-capability__rating__average")?.textContent?.trim();
-    const totalLabel = document.querySelector(".ui-review-capability__rating__label")?.textContent?.trim();
-    const productTitle = document.querySelector("h1.ui-pdp-title")?.textContent?.trim() || document.title;
+    const ratingScope =
+      document.querySelector('[data-testid="rating-component"]') || document;
+    const overallRating = ratingScope
+      .querySelector(
+        ".ui-review-capability__rating__average--desktop, .ui-review-capability__rating__average"
+      )
+      ?.textContent?.trim();
+    const totalLabel = ratingScope
+      .querySelector(".ui-review-capability__rating__label")
+      ?.textContent?.trim();
+    const productTitle =
+      document.querySelector("h1.ui-pdp-title")?.textContent?.trim() || document.title;
 
     return {
       platform: "mercadolivre",
