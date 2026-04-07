@@ -21,18 +21,16 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
 
   switch (section.type) {
     case "slideshow": {
-      const configSlides = s.slides as Array<{ imageUrl?: string; mobileImageUrl?: string; title?: string; subtitle?: string; buttonText?: string; buttonLink?: string; imageOnly?: boolean; showButton?: boolean }> | undefined;
+      const configSlides = s.slides as Array<{ imageUrl?: string; mobileImageUrl?: string; title?: string; subtitle?: string; buttonLink?: string; imageOnly?: boolean }> | undefined;
       const slides = configSlides?.length ? configSlides.map((slide, i) => ({
         id: String(i + 1),
         image: slide.imageUrl || "",
         mobileImage: slide.mobileImageUrl,
         title: slide.title,
         content: slide.subtitle,
-        buttonText: slide.buttonText,
         link: slide.buttonLink,
         textColor: (s.textColor as string) || "#ffffff",
         imageOnly: slide.imageOnly,
-        showButton: slide.showButton,
       })) : undefined;
       return <Slideshow slides={slides} autoPlay={s.autoplay as boolean} cycleSpeed={s.autoplayInterval as number} />;
     }

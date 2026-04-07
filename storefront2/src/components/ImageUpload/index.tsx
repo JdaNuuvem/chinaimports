@@ -41,9 +41,14 @@ export default function ImageUpload({
       const formData = new FormData();
       formData.append("file", file);
 
+      // The upload route is a Next.js API — it validates the Next-signed JWT
+      // (stored as `admin_next_token`), not the backend token passed via props.
+      const nextToken = typeof window !== "undefined" ? localStorage.getItem("admin_next_token") : null;
+      const authToken = nextToken || token;
+
       const res = await fetch("/api/theme-config/upload", {
         method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
         body: formData,
       });
 

@@ -51,9 +51,7 @@ export default function PreviewPanel({ config, sections, previewPage, previewDev
       case "slideshow":
         return (
           <div key={section.id} onClick={() => onSelectSection(index)} style={{ ...sectionStyle(index), background: (s.bgColor as string) || "#1e2d7d", color: (s.textColor as string) || "#fff", padding: isMobile ? "20px 12px" : "30px 16px", textAlign: "center" }} {...hoverBorder}>
-            <div style={{ fontSize: isMobile ? 12 : 14, fontWeight: 700 }}>{(s.title as string) || "Banner Principal"}</div>
-            {s.subtitle ? <div style={{ fontSize: 8, opacity: 0.7, marginTop: 3 }}>{String(s.subtitle)}</div> : null}
-            {s.buttonText ? <div style={{ marginTop: 6, display: "inline-block", background: "rgba(255,255,255,0.2)", padding: "3px 10px", borderRadius: 4, fontSize: 8 }}>{String(s.buttonText)}</div> : null}
+            <div style={{ fontSize: isMobile ? 12 : 14, fontWeight: 700 }}>Slideshow ({((s.slides as unknown[]) || []).length} slides)</div>
           </div>
         );
 

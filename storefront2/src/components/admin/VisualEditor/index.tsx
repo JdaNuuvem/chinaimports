@@ -201,7 +201,7 @@ export default function VisualEditor({ config, onSave, saving, token }: VisualEd
 
 function getDefaultSettings(type: HomeSectionType): Record<string, unknown> {
   switch (type) {
-    case "slideshow": return { title: "Novo Banner", subtitle: "Subtítulo", buttonText: "Ver mais", buttonUrl: "/collections/all", bgColor: "#1e2d7d", textColor: "#ffffff" };
+    case "slideshow": return { autoplay: true, textColor: "#ffffff", slides: [] };
     case "featured-collection": return { title: "Coleção em Destaque", collectionHandle: "", limit: 8 };
     case "text-with-icons": return { items: [{ icon: "🚚", title: "Frete Grátis", text: "Acima de R$ 299" }, { icon: "↩️", title: "Troca Grátis", text: "30 dias" }, { icon: "🔒", title: "Compra Segura", text: "SSL" }] };
     case "mosaic": return { items: [{ title: "Masculino", image: "", link: "/collections/masculino" }, { title: "Feminino", image: "", link: "/collections/feminino" }] };

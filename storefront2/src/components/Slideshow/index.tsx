@@ -8,19 +8,12 @@ interface Slide {
   mobileImage?: string;
   title?: string;
   content?: string;
-  buttonText?: string;
   link?: string;
   textColor?: string;
-  buttonBackground?: string;
-  buttonTextColor?: string;
   contentPosition?: string;
-  // When true, forces image-only mode — title/content/buttonText are ignored
-  // even if filled in. Useful for banners that have the call-to-action baked
-  // into the image itself.
+  // When true, hides title/content overlay. The whole banner is still
+  // clickable if `link` is set.
   imageOnly?: boolean;
-  // When false, hides the action button even if buttonText/link are filled.
-  // Default: true (show button when buttonText + link are present).
-  showButton?: boolean;
 }
 
 interface SlideshowProps {
@@ -36,11 +29,8 @@ const DEFAULT_SLIDES: Slide[] = [
     mobileImage: "https://placehold.co/750x1100/1e2d7d/ffffff?text=ICB",
     title: "Nova Coleção",
     content: "Performance que te leva além",
-    buttonText: "Comprar Agora",
     link: "/collections/all",
     textColor: "#ffffff",
-    buttonBackground: "#ffffff",
-    buttonTextColor: "#1e2d7d",
     contentPosition: "middle_center",
   },
   {
@@ -49,11 +39,8 @@ const DEFAULT_SLIDES: Slide[] = [
     mobileImage: "https://placehold.co/750x1100/e22120/ffffff?text=OUTLET",
     title: "Outlet",
     content: "Até 50% de desconto",
-    buttonText: "Ver Ofertas",
     link: "/collections/outlet",
     textColor: "#ffffff",
-    buttonBackground: "#ffffff",
-    buttonTextColor: "#e22120",
     contentPosition: "middle_center",
   },
 ];
@@ -95,41 +82,38 @@ export default function Slideshow({ slides = DEFAULT_SLIDES, autoPlay = true, cy
                     />
                   </picture>
                 );
-                // In image-only mode, wrap whole image in a link if available
-                if (slide.imageOnly && slide.link) {
+                const overlayEl = !slide.imageOnly && (slide.title || slide.content) && (
+                  <div className="slideshow__content-wrapper" style={{
+                    position: "absolute",
+                    top: 0, left: 0, right: 0, bottom: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    pointerEvents: "none",
+                  }}>
+                    <div className="container">
+                      {slide.title && <h2 className="slideshow__title heading h1">{slide.title}</h2>}
+                      {slide.content && <p className="slideshow__content">{slide.content}</p>}
+                    </div>
+                  </div>
+                );
+                // If a link is set, the entire banner is clickable (no button).
+                if (slide.link) {
                   return (
-                    <Link href={slide.link} aria-label={slide.title || "Banner"} style={{ display: "block" }}>
+                    <Link href={slide.link} aria-label={slide.title || "Banner"} style={{ display: "block", position: "relative" }}>
                       {imageEl}
+                      {overlayEl}
                     </Link>
                   );
                 }
-                return imageEl;
+                return (
+                  <>
+                    {imageEl}
+                    {overlayEl}
+                  </>
+                );
               })()}
-
-              {!slide.imageOnly && (slide.title || slide.content || slide.buttonText) && (
-                <div className="slideshow__content-wrapper" style={{
-                  position: "absolute",
-                  top: 0, left: 0, right: 0, bottom: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  textAlign: "center",
-                }}>
-                  <div className="container">
-                    {slide.title && <h2 className="slideshow__title heading h1">{slide.title}</h2>}
-                    {slide.content && <p className="slideshow__content">{slide.content}</p>}
-                    {slide.showButton !== false && slide.link && slide.buttonText && (
-                      <Link
-                        href={slide.link}
-                        className="slideshow__button button cta-pulse-primary"
-                        style={{ background: slide.buttonBackground, color: slide.buttonTextColor }}
-                      >
-                        {slide.buttonText}
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         ))}

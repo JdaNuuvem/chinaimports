@@ -172,28 +172,24 @@
             "imageUrl": "/uploads/1775086276739-psapdh.jpg",
             "title": "Imports China Brasil",
             "subtitle": "Produtos importados com os melhores preços",
-            "buttonText": "Ver produtos",
             "buttonLink": "/collections/all"
           },
           {
             "imageUrl": "/uploads/banner-2.jpg",
             "title": "Oferta Relâmpago",
             "subtitle": "Novas ofertas todos os dias! Frete grátis para todo Brasil",
-            "buttonText": "Aproveite",
             "buttonLink": "/collections/ofertas"
           },
           {
             "imageUrl": "/uploads/banner-3.jpg",
             "title": "Nossa Loja",
             "subtitle": "Imports China Brasil - Qualidade e variedade",
-            "buttonText": "Conheça",
             "buttonLink": "/about"
           },
           {
             "imageUrl": "/uploads/banner-4.jpg",
             "title": "Smartphones com até 80% OFF",
             "subtitle": "Entrega Full em até 48 horas",
-            "buttonText": "Compre agora",
             "buttonLink": "/collections/smartphones"
           }
         ],
