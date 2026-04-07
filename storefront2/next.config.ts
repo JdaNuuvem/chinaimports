@@ -31,7 +31,10 @@ const nextConfig: NextConfig = {
       { key: "X-XSS-Protection", value: "1; mode=block" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-      { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+      // HSTS only when serving over real HTTPS (set FORCE_HTTPS=true in env)
+      ...(process.env.FORCE_HTTPS === "true"
+        ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }]
+        : []),
     ];
 
     return [

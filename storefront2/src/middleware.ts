@@ -63,7 +63,9 @@ function applyCsp(response: NextResponse, nonce: string) {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    isDev ? "" : "upgrade-insecure-requests",
+    // upgrade-insecure-requests só faz sentido quando o site é servido via HTTPS.
+    // Habilitar via env var FORCE_HTTPS=true quando configurar SSL no Coolify.
+    process.env.FORCE_HTTPS === "true" ? "upgrade-insecure-requests" : "",
   ].filter(Boolean);
 
   response.headers.set(
