@@ -17,7 +17,14 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     title: string;
     handle: string;
     thumbnail: string | null;
-    variants: Array<{ prices: Array<{ amount: number }>; original_price: number | null }>;
+    luna_checkout_url?: string | null;
+    skip_cart?: boolean;
+    variants: Array<{
+      id?: string;
+      prices: Array<{ amount: number }>;
+      original_price: number | null;
+      inventory_quantity?: number;
+    }>;
   }> = [];
 
   let degraded = false;
