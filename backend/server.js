@@ -2497,50 +2497,50 @@ app.post("/webhooks/luna", async (req, res) => {
 
     console.log(`[LUNA WEBHOOK] ${event} | Order: ${id} | Amount: ${amount} | Method: ${method} | Status: ${status}`);
 
-    // ── Sentinel bridge: normalize Luna events into the GA4/Sentinel
-    // ecommerce vocabulary so the off-site checkout conversions still
-    // land in the Sentinel funnel.
-    const sentinelEventMap = {
-      sale_pending: "checkout_started",
-      sale_waiting_payment: "add_payment_info",
-      sale_approved: "purchase",
-      sale_cart_recovered: "purchase",
-      sale_refused: "payment_failed",
-      sale_refunded: "refund",
-      sale_chargeback: "refund",
-      sale_cancelled: "purchase_cancelled",
-      sale_cart_abandoned: "cart_abandoned",
-      tracking_posted: "shipment_created",
-      tracking_in_transit: "shipment_in_transit",
-      tracking_out_for_delivery: "shipment_out_for_delivery",
-      tracking_delivered: "shipment_delivered",
-      tracking_cancelled: "shipment_cancelled",
-      tracking_returned: "shipment_returned",
-    };
-    const sentinelEvent = sentinelEventMap[event];
-    if (sentinelEvent) {
+    // ── Sentinel bridge: the Sentinel API only recognizes the 4 standard
+    // ecommerce events (page_view, add_to_cart, init_checkout, purchase)
+    // plus `lead`. For Luna we only fire `purchase` on a successful sale;
+    // other Luna events are logged but not forwarded (they'd be rejected
+    // or land as noise in the Sentinel panel).
+    const isPurchaseEvent = event === "sale_approved" || event === "sale_cart_recovered";
+    if (isPurchaseEvent && amount) {
+      // Sentinel expects items[] with id/name/price/quantity. Keep the
+      // keys minimal per the docs examples.
       const itemsForSentinel = (items || []).map((item) => ({
-        item_id: item.id || item.sku || item.name,
-        item_name: item.name,
-        variant: item.variant,
+        id: item.id || item.sku || item.name,
+        name: item.name,
         quantity: item.quantity || 1,
         price: Number(item.price || 0),
       }));
-      // fire-and-forget — never blocks the webhook ack
-      forwardToSentinel(sentinelEvent, {
-        transaction_id: id,
-        provider: "luna",
+
+      // The visitor_id was appended to the Luna URL by
+      // Sentinel.redirectWithTracking on the storefront; try to recover
+      // it from Luna's utm payload or the checkout_url query string.
+      let visitorId = null;
+      try {
+        if (utm && typeof utm === "object" && utm.visitor_id) visitorId = utm.visitor_id;
+        if (!visitorId && checkout_url) {
+          const u = new URL(checkout_url);
+          visitorId = u.searchParams.get("visitor_id");
+        }
+      } catch { /* ignore parse errors */ }
+
+      forwardToSentinel("purchase", {
+        order_id: id,
         value: Number(amount || 0),
         currency: "BRL",
-        payment_method: method || null,
-        status: status || null,
-        email: client?.email || null,
-        phone: client?.phone || null,
-        customer_name: client?.name || null,
         items: itemsForSentinel,
+        customer: client
+          ? {
+              name: client.name || null,
+              email: client.email || null,
+              phone: client.phone || null,
+            }
+          : undefined,
+        payment_method: method || null,
+        visitor_id: visitorId,
         utm: utm || null,
-        checkout_url: checkout_url || null,
-        tracking: tracking || null,
+        source: "luna_webhook",
       }).catch(() => {});
     }
 
