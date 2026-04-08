@@ -2298,6 +2298,53 @@ app.post("/admin/abandoned-carts/send-recovery", authenticateAdmin, async (req, 
 });
 
 // ══════════════════════════════════════
+// SENTINEL — server-to-server bridge
+// ══════════════════════════════════════
+// Forwards an event to the Sentinel ingest API. Best-effort: never throws,
+// never blocks the caller, always logs the outcome. Used by the Luna webhook
+// handler so off-site checkout conversions still hit the Sentinel pipeline.
+async function forwardToSentinel(event, payload) {
+  try {
+    const apiKey = await getSetting("SENTINEL_API_KEY");
+    if (!apiKey) {
+      console.log(`[SENTINEL→] skipped ${event}: SENTINEL_API_KEY not configured`);
+      return { skipped: true, reason: "no_api_key" };
+    }
+    const ingestUrl =
+      (await getSetting("SENTINEL_INGEST_URL")) ||
+      process.env.SENTINEL_INGEST_URL ||
+      "https://api.sentineltracking.io/v1/events";
+
+    const body = JSON.stringify({
+      event,
+      ts: new Date().toISOString(),
+      source: "luna_webhook",
+      ...payload,
+    });
+
+    const response = await fetch(ingestUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        "X-Sentinel-Source": "backend",
+      },
+      body,
+    }).catch((e) => ({ ok: false, status: 0, statusText: String(e).slice(0, 100) }));
+
+    if (!response.ok) {
+      console.warn(`[SENTINEL→] ${event} failed: ${response.status} ${response.statusText}`);
+      return { sent: false, status: response.status };
+    }
+    console.log(`[SENTINEL→] ${event} forwarded ok`);
+    return { sent: true };
+  } catch (e) {
+    console.error("[SENTINEL→] forward error:", e.message);
+    return { sent: false, error: e.message };
+  }
+}
+
+// ══════════════════════════════════════
 // LUNA CHECKOUT WEBHOOKS
 // ══════════════════════════════════════
 
@@ -2325,6 +2372,53 @@ app.post("/webhooks/luna", async (req, res) => {
     if (!event) return res.status(400).json({ error: "Missing event field" });
 
     console.log(`[LUNA WEBHOOK] ${event} | Order: ${id} | Amount: ${amount} | Method: ${method} | Status: ${status}`);
+
+    // ── Sentinel bridge: normalize Luna events into the GA4/Sentinel
+    // ecommerce vocabulary so the off-site checkout conversions still
+    // land in the Sentinel funnel.
+    const sentinelEventMap = {
+      sale_pending: "checkout_started",
+      sale_waiting_payment: "add_payment_info",
+      sale_approved: "purchase",
+      sale_cart_recovered: "purchase",
+      sale_refused: "payment_failed",
+      sale_refunded: "refund",
+      sale_chargeback: "refund",
+      sale_cancelled: "purchase_cancelled",
+      sale_cart_abandoned: "cart_abandoned",
+      tracking_posted: "shipment_created",
+      tracking_in_transit: "shipment_in_transit",
+      tracking_out_for_delivery: "shipment_out_for_delivery",
+      tracking_delivered: "shipment_delivered",
+      tracking_cancelled: "shipment_cancelled",
+      tracking_returned: "shipment_returned",
+    };
+    const sentinelEvent = sentinelEventMap[event];
+    if (sentinelEvent) {
+      const itemsForSentinel = (items || []).map((item) => ({
+        item_id: item.id || item.sku || item.name,
+        item_name: item.name,
+        variant: item.variant,
+        quantity: item.quantity || 1,
+        price: Number(item.price || 0),
+      }));
+      // fire-and-forget — never blocks the webhook ack
+      forwardToSentinel(sentinelEvent, {
+        transaction_id: id,
+        provider: "luna",
+        value: Number(amount || 0),
+        currency: "BRL",
+        payment_method: method || null,
+        status: status || null,
+        email: client?.email || null,
+        phone: client?.phone || null,
+        customer_name: client?.name || null,
+        items: itemsForSentinel,
+        utm: utm || null,
+        checkout_url: checkout_url || null,
+        tracking: tracking || null,
+      }).catch(() => {});
+    }
 
     // ── Sale events ──
     if (event.startsWith("sale_")) {
