@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, ReactNode } from "react";
+import { createContext, useContext, ReactNode } from "react";
 import type { ThemeConfig } from "@/lib/theme-config";
 import { setRuntimeConfig } from "@/lib/theme-config";
 
@@ -12,14 +12,13 @@ interface ThemeConfigProviderProps {
 }
 
 export function ThemeConfigProvider({ config, children }: ThemeConfigProviderProps) {
-  // Keep the module-level runtimeConfig in sync so legacy code that calls
-  // getThemeConfig() directly (without useThemeConfig) still gets the
-  // latest server-provided values on the client.
-  useMemo(() => setRuntimeConfig(config), [config]);
-  useEffect(() => {
-    setRuntimeConfig(config);
-    return () => setRuntimeConfig(null);
-  }, [config]);
+  // Sync the module-level runtimeConfig during render (BEFORE children run).
+  // This guarantees Header/Footer/etc that call the synchronous
+  // getThemeConfig() helper always see the current request's config on
+  // both server and client, avoiding React hydration mismatches (#418)
+  // caused by a stale runtimeConfig leaking between requests or tabs.
+  // Setting a module-level variable is idempotent so it's safe in render.
+  setRuntimeConfig(config);
 
   return (
     <ThemeConfigContext.Provider value={config}>
