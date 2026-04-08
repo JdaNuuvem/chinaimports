@@ -960,32 +960,90 @@ app.post("/admin/scrape-reviews", authenticateAdmin, async (req, res) => {
         } catch {}
       }
 
-      // Fallback: parse HTML if API returned nothing
+      // Fallback: parse the SSR HTML directly. ML returns each review as
+      // an <article data-testid="comment-component"> with rating, content
+      // and a per-comment secondary carousel for the buyer's photos.
       if (reviews.length === 0) {
         try {
           const html = await fetchPage(url);
 
-          // Extract ratings and dates from visible HTML
-          const ratingPattern = /Avaliação (\d) de 5/g;
-          const datePattern = /(\d{2} \w{3}\. \d{4})/g;
+          // Split the document on each comment-component article opening
+          // tag. A simple regex with a `</section>` end-anchor doesn't work
+          // because the secondary carousel uses its own <section> elements
+          // and would prematurely cut off each card.
+          const parts = html.split(/(?=<article[^>]*data-testid="comment-component")/);
+          const cards = parts.slice(1).map((part, idx, arr) => {
+            // For the last card, trim at the end of the comments section
+            // so we don't drag in unrelated DOM (related products, footer).
+            if (idx !== arr.length - 1) return part;
+            const endMarkers = [
+              part.indexOf('data-testid="comments-pagination"'),
+              part.indexOf('ui-review-capability-comments__paging'),
+              part.indexOf('</section>'),
+            ].filter((i) => i > 0);
+            const cut = endMarkers.length ? Math.min(...endMarkers) : part.length;
+            return part.slice(0, cut);
+          });
 
-          const ratings = [];
-          let rMatch;
-          while ((rMatch = ratingPattern.exec(html)) !== null) ratings.push(parseInt(rMatch[1]));
+          const decode = (s) => s
+            .replace(/&amp;/g, "&")
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'")
+            .replace(/&apos;/g, "'")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&nbsp;/g, " ");
 
-          const dates = [];
-          let dMatch;
-          while ((dMatch = datePattern.exec(html)) !== null) dates.push(dMatch[1]);
+          for (const card of cards) {
+            // Rating: scope to the rating block to avoid matching the
+            // carousel thumb-rating ("Avaliação 4 de 5" inside the photo).
+            let rating = 5;
+            const ratingBlock = card.match(/comment__rating(?:-container)?[\s\S]*?<\/div>/);
+            const ratingMatch = (ratingBlock?.[0] || card).match(/Avaliação\s*(\d)\s*de\s*5/);
+            if (ratingMatch) rating = parseInt(ratingMatch[1], 10);
 
-          // HTML fallback cannot reliably map images to individual reviews,
-          // so we create reviews WITHOUT images to avoid duplication
-          for (let i = 0; i < ratings.length; i++) {
+            // Date
+            const dateMatch = card.match(/comment__date[^>]*>([^<]+)</);
+            const date = dateMatch ? dateMatch[1].trim() : "";
+
+            // Title
+            const titleMatch = card.match(/comment__title[^>]*>([^<]+)</);
+            const title = titleMatch ? decode(titleMatch[1].trim()) : "";
+
+            // Content (comment text)
+            const contentMatch = card.match(/data-testid="comment-content-component"[^>]*>([\s\S]*?)<\/p>/);
+            let content = "";
+            if (contentMatch) {
+              content = decode(contentMatch[1].replace(/<[^>]+>/g, "").trim());
+            }
+
+            // Images: only the secondary (per-comment) carousel. Anchor at
+            // </article> instead of </section> because the Andes carousel
+            // uses nested sections.
+            const images = [];
+            const secMatch = card.match(/comment__carousel--secondary[\s\S]*?(?=<\/article|$)/);
+            if (secMatch) {
+              const imgRegex = /<img[^>]*ui-review-capability-carousel__img[^>]*\bsrc="([^"]+)"/g;
+              let m;
+              while ((m = imgRegex.exec(secMatch[0])) !== null) {
+                let src = m[1];
+                if (!src.includes("mlstatic.com")) continue;
+                src = src
+                  .replace(/D_NQ_NP_(?!2X_)/, "D_NQ_NP_2X_")
+                  .replace(/\?.*$/, "");
+                if (!images.includes(src)) images.push(src);
+              }
+            }
+
+            if (!content && images.length === 0 && !title) continue;
+
             reviews.push({
-              rating: ratings[i],
-              content: "",
+              rating,
+              content,
+              title,
               author: "Cliente Mercado Livre",
-              date: dates[i] || "",
-              images: [],
+              date,
+              images,
             });
           }
         } catch (e) {
