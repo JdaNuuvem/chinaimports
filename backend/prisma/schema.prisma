@@ -24,6 +24,7 @@ model Product {
   metaTitle       String?
   metaDescription String?
   lunaCheckoutUrl String?  // Optional per-product Luna checkout URL — if set, replaces buy CTA action
+  skipCart    Boolean  @default(false) // When true, "Comprar" sends the buyer straight to the checkout, never to the cart
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

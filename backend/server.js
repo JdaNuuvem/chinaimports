@@ -343,6 +343,7 @@ function formatProduct(p) {
   return {
     id: p.id, title: p.title, description: p.description, handle: p.handle, thumbnail: p.thumbnail,
     luna_checkout_url: p.lunaCheckoutUrl || null,
+    skip_cart: p.skipCart === true,
     images: (p.images || []).map((img) => ({ id: img.id, url: img.url })),
     options: optionsList,
     variants: (p.variants || []).map((v) => {
@@ -1639,7 +1640,7 @@ app.get("/admin/products", authenticateAdmin, async (req, res) => {
 
 app.post("/admin/products", authenticateAdmin, async (req, res) => {
   try {
-    const { title, description, handle, thumbnail, videoUrl, weight, productType, isFeatured, tags, metaTitle, metaDescription, lunaCheckoutUrl, options, variants, images, collectionIds } = req.body;
+    const { title, description, handle, thumbnail, videoUrl, weight, productType, isFeatured, tags, metaTitle, metaDescription, lunaCheckoutUrl, skipCart, options, variants, images, collectionIds } = req.body;
     if (!title || !handle) return res.status(400).json({ error: "Title and handle required" });
     const product = await prisma.product.create({
       data: {
@@ -1648,6 +1649,7 @@ app.post("/admin/products", authenticateAdmin, async (req, res) => {
         tags: tags ? JSON.stringify(tags) : null,
         metaTitle, metaDescription,
         lunaCheckoutUrl: lunaCheckoutUrl || null,
+        skipCart: skipCart === true,
         options: options ? { create: options.map((o) => ({ title: o.title, values: { create: (o.values || []).map((v) => ({ value: v })) } })) } : undefined,
         variants: variants ? { create: variants.map((v) => ({ title: v.title, sku: v.sku, barcode: v.barcode, price: v.price, compareAtPrice: v.compareAtPrice, inventoryQuantity: v.inventoryQuantity || 0 })) } : undefined,
         images: images ? { create: images.map((img, i) => ({ url: img.url || img, altText: img.altText, position: i })) } : undefined,
@@ -1666,9 +1668,10 @@ app.post("/admin/products", authenticateAdmin, async (req, res) => {
 
 app.put("/admin/products/:id", authenticateAdmin, async (req, res) => {
   try {
-    const { title, description, thumbnail, videoUrl, weight, productType, isFeatured, tags, metaTitle, metaDescription, lunaCheckoutUrl } = req.body;
+    const { title, description, thumbnail, videoUrl, weight, productType, isFeatured, tags, metaTitle, metaDescription, lunaCheckoutUrl, skipCart } = req.body;
     const data = { title, description, thumbnail, videoUrl, weight, productType, isFeatured, tags: tags ? JSON.stringify(tags) : undefined, metaTitle, metaDescription };
     if (lunaCheckoutUrl !== undefined) data.lunaCheckoutUrl = lunaCheckoutUrl || null;
+    if (skipCart !== undefined) data.skipCart = skipCart === true;
     const product = await prisma.product.update({
       where: { id: req.params.id },
       data,

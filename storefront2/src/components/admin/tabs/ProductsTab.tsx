@@ -16,6 +16,7 @@ interface AdminProduct {
   images: Array<{ id: string; url: string }>;
   options: Array<{ id: string; title: string; values: Array<{ id: string; value: string }> }>;
   luna_checkout_url?: string | null;
+  skip_cart?: boolean;
   created_at: string;
 }
 
@@ -37,6 +38,7 @@ interface EditForm {
   metaTitle: string;
   metaDescription: string;
   lunaCheckoutUrl: string;
+  skipCart: boolean;
   variants: EditableVariant[];
   images: string[];
   options: Array<{ title: string; values: string[] }>;
@@ -101,6 +103,7 @@ export default function ProductsTab({ backendUrl, token }: { backendUrl: string;
       metaTitle: "",
       metaDescription: "",
       lunaCheckoutUrl: p.luna_checkout_url || "",
+      skipCart: p.skip_cart === true,
       variants: p.variants.map((v) => ({
         id: v.id,
         title: v.title,
@@ -133,6 +136,7 @@ export default function ProductsTab({ backendUrl, token }: { backendUrl: string;
         metaTitle: editForm.metaTitle || null,
         metaDescription: editForm.metaDescription || null,
         lunaCheckoutUrl: editForm.lunaCheckoutUrl?.trim() || null,
+        skipCart: editForm.skipCart === true,
       }),
     });
 
@@ -495,8 +499,35 @@ export default function ProductsTab({ backendUrl, token }: { backendUrl: string;
                   style={inputStyle}
                 />
                 <p style={{ fontSize: 11, color: "#9ca3af", marginTop: 4 }}>
-                  Se preenchido, o botão &quot;Comprar Agora&quot; deste produto vai redirecionar diretamente para esta URL em vez de adicionar ao carrinho.
+                  Se preenchido, o botão &quot;Comprar Agora&quot; deste produto vai redirecionar diretamente para esta URL em vez de adicionar ao carrinho. <strong>O carrinho é sempre pulado quando a URL Luna está preenchida.</strong>
                 </p>
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "flex-start",
+                    gap: 8,
+                    cursor: editForm.lunaCheckoutUrl ? "not-allowed" : "pointer",
+                    fontSize: 13,
+                    opacity: editForm.lunaCheckoutUrl ? 0.6 : 1,
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={editForm.skipCart || !!editForm.lunaCheckoutUrl}
+                    disabled={!!editForm.lunaCheckoutUrl}
+                    onChange={(e) => setEditForm({ ...editForm, skipCart: e.target.checked })}
+                    style={{ marginTop: 2 }}
+                  />
+                  <span>
+                    <strong>Pular carrinho ao comprar</strong>
+                    <br />
+                    <span style={{ fontSize: 11, color: "#9ca3af" }}>
+                      Quando ativado, o botão &quot;Comprar Agora&quot; adiciona o item e leva o cliente direto pro checkout, sem abrir o mini-carrinho. (Forçado quando há URL Luna acima.)
+                    </span>
+                  </span>
+                </label>
               </div>
             </Section>
           </div>

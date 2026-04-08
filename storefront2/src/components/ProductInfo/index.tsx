@@ -47,6 +47,7 @@ export default function ProductInfo({ product, onVariantChange }: ProductInfoPro
   const discount = hasDiscount ? calculateDiscount(comparePrice!, price) : 0;
   const inStock = (selectedVariant?.inventory_quantity ?? 0) > 0;
   const lunaCheckoutUrl = (product as Product & { luna_checkout_url?: string | null }).luna_checkout_url;
+  const skipCart = (product as Product & { skip_cart?: boolean }).skip_cart === true;
   // Luna URL bypasses cart so it's always "purchasable" if URL is set
   const canBuy = !!lunaCheckoutUrl || inStock;
   const pixPrice = Math.round(price * 0.95);
@@ -297,12 +298,21 @@ export default function ProductInfo({ product, onVariantChange }: ProductInfoPro
         type="button"
         aria-label={!canBuy ? `${product.title} esgotado` : `Comprar ${product.title}`}
         aria-disabled={loading || !canBuy}
-        onClick={() => {
+        onClick={async () => {
+          // Luna URL set → always skip cart and go straight to Luna.
           if (lunaCheckoutUrl) {
             window.location.href = lunaCheckoutUrl;
             return;
           }
-          if (selectedVariant && inStock) addItem(selectedVariant.id, 1);
+          if (!selectedVariant || !inStock) return;
+          // Skip-cart mode: add the item then jump straight to checkout
+          // instead of opening the mini-cart drawer.
+          if (skipCart) {
+            await addItem(selectedVariant.id, 1);
+            window.location.href = "/checkout";
+            return;
+          }
+          addItem(selectedVariant.id, 1);
         }}
         disabled={loading || !canBuy}
         className="buy-now-btn pi-fade-in pi-fade-7"
