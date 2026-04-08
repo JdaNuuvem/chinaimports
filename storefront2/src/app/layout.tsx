@@ -28,6 +28,10 @@ import SentinelTracker from "@/components/SentinelTracker";
 import { getPublicConfig } from "@/lib/public-config";
 import themeConfig from "@/data/theme-config.json";
 
+// Force the root layout to re-render on every request so Header/Footer
+// pick up the latest theme-config from disk (via getThemeConfig()).
+export const dynamic = "force-dynamic";
+
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://importschinabrasil.com.br";
 const storeName = themeConfig.identity.storeName || "Imports China Brasil";
 

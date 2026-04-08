@@ -174,6 +174,7 @@ export type HomeSectionType =
 import defaultConfig from "@/data/theme-config.json";
 import fs from "fs";
 import path from "path";
+import { unstable_noStore as noStore } from "next/cache";
 
 // In production (standalone) we write the theme-config to a persistent file
 // outside of the bundled src/. Default to /app/data/theme-config.json so it
@@ -191,8 +192,14 @@ export function getConfigPath(): string {
 }
 
 export function getThemeConfig(): ThemeConfig {
+  // Opt out of Next.js data cache so every render reads fresh from disk.
+  try {
+    noStore();
+  } catch {
+    // noStore may throw if called outside a request context (e.g. at build
+    // time or in a script) — safe to ignore.
+  }
   if (runtimeConfig) return runtimeConfig;
-  // Always read fresh from disk so admin edits show up without a rebuild.
   try {
     if (fs.existsSync(CONFIG_FILE)) {
       const raw = fs.readFileSync(CONFIG_FILE, "utf-8");
