@@ -8,9 +8,22 @@ const prisma = new PrismaClient();
 const seedData = JSON.parse(fs.readFileSync(path.join(__dirname, "data/seed.json"), "utf-8"));
 
 async function main() {
-  console.log("🌱 Seeding database...");
+  // Idempotency guard: skip the entire seed (including the destructive
+  // deleteMany block below) if the DB already has products. This file is
+  // invoked from the Dockerfile CMD on every container startup, so
+  // without this check every redeploy wipes imported products, orders,
+  // customers, etc.
+  const existingProducts = await prisma.product.count();
+  if (existingProducts > 0) {
+    console.log(`🌱 Seed skipped — DB already has ${existingProducts} products.`);
+    return;
+  }
 
-  // Clear existing data
+  console.log("🌱 Seeding database (empty DB detected)...");
+
+  // Clear existing data (safe — the guard above ensures we only get here
+  // when the DB is effectively empty; this deleteMany is just cleanup of
+  // partial/leftover rows from a failed previous seed).
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.cartItem.deleteMany();
