@@ -148,11 +148,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
           }
         } else if (isVariantGone) {
           // ISR cache is stale — the page was built with an older variant
-          // id. Force Next.js to revalidate the current route so the user
-          // gets fresh variant ids on retry.
+          // id. Invalidate the RSC cache for this specific product and
+          // then reload so the user gets fresh variant ids on retry.
           setError("Produto indisponível. Atualizando a página...");
           if (typeof window !== "undefined") {
-            setTimeout(() => window.location.reload(), 1200);
+            const match = window.location.pathname.match(/\/product\/([a-zA-Z0-9-_]+)/);
+            const handle = match?.[1];
+            const afterRevalidate = () => {
+              setTimeout(() => window.location.reload(), 400);
+            };
+            if (handle) {
+              fetch("/api/revalidate-product", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ handle }),
+              }).finally(afterRevalidate);
+            } else {
+              afterRevalidate();
+            }
           }
         } else {
           enqueueCartOp({ action: "add", cartId: cart.id, variantId, quantity });
