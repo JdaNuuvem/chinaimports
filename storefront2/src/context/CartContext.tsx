@@ -40,12 +40,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const existingCartId = localStorage.getItem("cart_id");
         if (existingCartId) {
           const result = await getCart(existingCartId);
-          if (result.data?.cart) {
-            setCart(result.data.cart);
+          const loaded = result.data?.cart;
+          // A cart is "corrupted" when the server returns it but one or
+          // more lines reference a variant that no longer exists (DB
+          // reseed, product re-import, etc). The line still has an id
+          // but variant === null. Drop the cart and start fresh so the
+          // user doesn't get stuck in a 400 loop on every add.
+          const hasOrphanLine = loaded?.items?.some((it) => !it.variant || !it.variant.id);
+          if (loaded && !hasOrphanLine) {
+            setCart(loaded);
             setDegraded(result.degraded);
             return;
           }
           localStorage.removeItem("cart_id");
+          // Also nuke any queued ops that reference the dead cart so
+          // the retry loop doesn't keep hammering it.
+          try {
+            const { clearCartQueue } = await import("@/lib/cart-queue");
+            clearCartQueue?.();
+          } catch { /* clearCartQueue may not exist; ignore */ }
         }
 
         const result = await createCart();
@@ -83,6 +96,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
             setCart(result.data.cart);
             dequeueCartOp(i);
             i--; // Adjust index after removal
+          } else {
+            // Permanent 4xx (variant_not_found, cart_not_found, etc) —
+            // don't keep this op forever. Drop it so the retry loop
+            // doesn't burn requests on a dead variant.
+            const msg = String(result?.error || "");
+            const isPermanent = /variant_not_found|cart_not_found|Produto indisponível|variant|cart/i.test(msg);
+            if (isPermanent) {
+              dequeueCartOp(i);
+              i--;
+            } else {
+              break; // transient — try again next tick
+            }
           }
         } catch {
           break; // Stop retrying if still failing
