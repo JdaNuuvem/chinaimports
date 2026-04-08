@@ -2662,13 +2662,17 @@ app.post("/webhooks/luna", async (req, res) => {
         // job can email the customer.
         const orderCount = await prisma.order.count();
 
-        // Map Luna items to our order items
+        // Map Luna items to our order items. Luna sometimes sends
+        // numeric fields as strings ("1", "99.75") — coerce to Int/Float
+        // before handing to Prisma or it throws PrismaClientValidationError.
         const orderItems = (items || []).map((item) => {
+          const qty = parseInt(item.quantity, 10) || 1;
+          const price = parseFloat(item.price) || 0;
           return {
             title: `${item.name}${item.variant ? ` - ${item.variant}` : ""}`,
-            quantity: item.quantity || 1,
-            unitPrice: Math.round((item.price || 0) * 100),
-            total: Math.round((item.price || 0) * (item.quantity || 1) * 100),
+            quantity: qty,
+            unitPrice: Math.round(price * 100),
+            total: Math.round(price * qty * 100),
           };
         });
 
