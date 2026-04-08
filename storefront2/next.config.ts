@@ -23,10 +23,11 @@ const nextConfig: NextConfig = {
         source: "/api/medusa/:path*",
         destination: `${backendUrl}/:path*`,
       },
-      {
-        source: "/uploads/:path*",
-        destination: `${backendUrl}/uploads/:path*`,
-      },
+      // Note: /uploads/:path* is NOT rewritten — it is served locally by
+      // the storefront. Static files under public/uploads/ are served by
+      // Next.js's built-in static handler; files uploaded at runtime live
+      // in UPLOADS_DIR (/app/data/uploads in production) and are served by
+      // the route handler at src/app/uploads/[...path]/route.ts.
     ];
   },
   async headers() {
