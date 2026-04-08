@@ -124,6 +124,7 @@ export default function CollectionProductGrid({ products }: Props) {
               compareAtPrice={product.variants?.[0]?.original_price}
               variantId={product.variants?.[0]?.id}
               inStock={(product.variants?.[0]?.inventory_quantity ?? 0) > 0}
+              inventoryQuantity={product.variants?.[0]?.inventory_quantity}
             />
           ))}
         </div>

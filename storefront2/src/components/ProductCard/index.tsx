@@ -18,7 +18,11 @@ interface ProductCardProps {
   showDiscount?: boolean;
   variantId?: string;
   inStock?: boolean;
+  /** Total stock for the displayed variant. Renders "Última peça" badge when ≤ 3. */
+  inventoryQuantity?: number;
 }
+
+const LOW_STOCK_THRESHOLD = 3;
 
 export default function ProductCard({
   title,
@@ -31,7 +35,13 @@ export default function ProductCard({
   showDiscount = true,
   variantId,
   inStock = true,
+  inventoryQuantity,
 }: ProductCardProps) {
+  const isLowStock =
+    inStock &&
+    typeof inventoryQuantity === "number" &&
+    inventoryQuantity > 0 &&
+    inventoryQuantity <= LOW_STOCK_THRESHOLD;
   const hasDiscount = compareAtPrice && compareAtPrice > price;
   const discount = hasDiscount ? calculateDiscount(compareAtPrice!, price) : 0;
   const { addItem, loading } = useCart();
@@ -81,6 +91,19 @@ export default function ProductCard({
           borderRadius: 4, fontSize: 10, fontWeight: 700,
         }}>
           Esgotado
+        </div>
+      )}
+
+      {isLowStock && (
+        <div style={{
+          position: "absolute", top: 8, right: 8, zIndex: 2,
+          background: "#dc2626", color: "#fff", padding: "4px 10px",
+          borderRadius: 4, fontSize: 10, fontWeight: 800,
+          letterSpacing: 0.5, textTransform: "uppercase",
+          boxShadow: "0 2px 6px rgba(220,38,38,0.4)",
+          animation: "pulse 2s ease-in-out infinite",
+        }}>
+          {inventoryQuantity === 1 ? "Última peça!" : `Só ${inventoryQuantity} restantes`}
         </div>
       )}
 
@@ -151,6 +174,11 @@ export default function ProductCard({
             {formatMoney(price)}
           </span>
         </div>
+        {hasDiscount && (
+          <div style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: "#dc2626" }}>
+            Economize {formatMoney(compareAtPrice! - price)}
+          </div>
+        )}
         {/* VER DETALHES CTA — like reference */}
         <Link
           href={`/product/${handle}`}

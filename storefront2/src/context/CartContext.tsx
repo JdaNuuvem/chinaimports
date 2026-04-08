@@ -165,12 +165,26 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const removeItemFn = useCallback(async (itemId: string) => {
     if (!cart) return;
+    // Snapshot the line BEFORE the request so we can fire the tracker
+    // event with real data even after the line is gone.
+    const removedLine = cart.items.find((i) => i.id === itemId);
     setLoading(true);
     setError(null);
     try {
       const result = await removeFromCart(cart.id, itemId);
       if (result.data?.cart) {
         setCart(result.data.cart);
+        if (removedLine) {
+          import("@/lib/sentinel").then(({ trackRemoveFromCart }) => {
+            trackRemoveFromCart({
+              variantId: removedLine.variant?.id || "",
+              productId: "",
+              title: removedLine.title || "",
+              price: removedLine.unit_price || 0,
+              quantity: removedLine.quantity || 1,
+            });
+          }).catch(() => {});
+        }
       } else {
         enqueueCartOp({ action: "remove", cartId: cart.id, itemId });
         setError("Não foi possível remover. Tentaremos novamente.");

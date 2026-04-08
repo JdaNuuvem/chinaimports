@@ -42,6 +42,9 @@ export default function FirstPurchasePopup() {
       body: JSON.stringify({ email }),
     }).catch(() => {});
 
+    // Forward to Sentinel as a lead event
+    import("@/lib/sentinel").then(({ trackLead }) => trackLead(email, "first_purchase_popup")).catch(() => {});
+
     setSubmitted(true);
     localStorage.setItem("first_purchase_popup_dismissed", "1");
     setTimeout(() => setShow(false), 5000);

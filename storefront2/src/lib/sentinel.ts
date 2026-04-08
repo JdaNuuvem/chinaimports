@@ -124,3 +124,76 @@ export function trackSearch(query: string, resultCount?: number) {
 export function trackLead(email: string, source?: string) {
   trackEvent("lead", { email, source });
 }
+
+/**
+ * Fired when a list of products is rendered (collection page, search results,
+ * "you might also like" carousels). Helps Sentinel attribute product views to
+ * the place that surfaced them.
+ */
+export function trackViewItemList(listName: string, items: Array<{ id: string; title: string; price: number }>) {
+  trackEvent("view_item_list", {
+    item_list_name: listName,
+    items: items.slice(0, 30).map((i) => ({
+      item_id: i.id,
+      item_name: i.title,
+      price: i.price / 100,
+    })),
+  });
+}
+
+/** Fired when a user clicks a product in a list to open its detail page. */
+export function trackSelectItem(listName: string, item: { id: string; title: string; price: number }) {
+  trackEvent("select_item", {
+    item_list_name: listName,
+    item_id: item.id,
+    item_name: item.title,
+    price: item.price / 100,
+  });
+}
+
+/** Fired when a line is removed from the cart. */
+export function trackRemoveFromCart(item: {
+  variantId: string;
+  productId: string;
+  title: string;
+  price: number;
+  quantity: number;
+}) {
+  trackEvent("remove_from_cart", {
+    item_id: item.productId,
+    variant_id: item.variantId,
+    item_name: item.title,
+    price: item.price / 100,
+    quantity: item.quantity,
+    value: (item.price * item.quantity) / 100,
+    currency: "BRL",
+  });
+}
+
+/** Fired when the user reaches the payment step in the local checkout. */
+export function trackAddPaymentInfo(payload: {
+  cart_id: string;
+  value: number;
+  payment_method?: string;
+}) {
+  trackEvent("add_payment_info", {
+    cart_id: payload.cart_id,
+    value: payload.value / 100,
+    currency: "BRL",
+    payment_method: payload.payment_method,
+  });
+}
+
+/** Fired when the user confirms a shipping address in the local checkout. */
+export function trackAddShippingInfo(payload: {
+  cart_id: string;
+  value: number;
+  shipping_tier?: string;
+}) {
+  trackEvent("add_shipping_info", {
+    cart_id: payload.cart_id,
+    value: payload.value / 100,
+    currency: "BRL",
+    shipping_tier: payload.shipping_tier,
+  });
+}
