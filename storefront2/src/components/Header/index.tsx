@@ -40,7 +40,7 @@ export default function Header() {
             <div className="header__logo">
               <Link href="/" className="header__logo-link">
                 {identity.logoUrl ? (
-                  <img src={identity.logoUrl} alt={identity.storeName} style={{ height: 40 }} />
+                  <img src={identity.logoUrl} alt={identity.storeName} style={{ height: identity.logoHeight || 40, width: "auto" }} />
                 ) : (
                   <span className="header__logo-text" style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "2px" }}>
                     {identity.logoText}

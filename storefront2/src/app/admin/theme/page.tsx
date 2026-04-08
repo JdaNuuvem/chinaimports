@@ -548,6 +548,7 @@ export default function ThemeAdminPage() {
             <Field label="Nome da loja" value={config.identity.storeName} onChange={(v) => updateField("identity", "storeName", v)} />
             <Field label="Texto do logo" value={config.identity.logoText} onChange={(v) => updateField("identity", "logoText", v)} />
             <ImageUpload label="Logo da loja" value={config.identity.logoUrl || ""} onChange={(v) => updateField("identity", "logoUrl", v || null)} token={token} previewSize={60} />
+            <NumberField label="Altura da logo no header (px)" value={config.identity.logoHeight || 40} min={20} max={200} onChange={(v) => updateField("identity", "logoHeight", v)} />
             <ImageUpload label="Favicon" value={config.identity.faviconUrl || ""} onChange={(v) => updateField("identity", "faviconUrl", v || null)} token={token} previewSize={48} />
             <SaveButton saving={saving} onClick={() => saveConfig({ identity: config.identity })} />
           </Section>
