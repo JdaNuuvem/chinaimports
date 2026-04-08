@@ -2388,25 +2388,47 @@ async function forwardToSentinel(event, payload) {
       process.env.SENTINEL_INGEST_URL ||
       "https://api.specterfilter.com/sentinel-bff/api/events";
 
+    // Match the exact payload shape the client SDK sends — observed from
+    // a real tracker.js request. The Specterfilter API expects these
+    // top-level fields and rejects payloads that use alternative names.
+    const eventId = (typeof crypto !== "undefined" && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : `ev_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+    // Extract visitor_id and attribution (UTM/click_id/etc) from payload
+    // if the caller provided them. Otherwise leave empty.
+    const { visitor_id, utm, ...customData } = payload || {};
+    const attribution = {};
+    if (utm && typeof utm === "object") {
+      for (const k of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "click_id", "pixel_id", "gclid", "fbclid", "ttclid"]) {
+        if (utm[k]) attribution[k] = utm[k];
+      }
+    }
+
     const body = JSON.stringify({
-      event,
-      ts: new Date().toISOString(),
-      source: "luna_webhook",
-      ...payload,
+      api_key: apiKey,
+      visitor_id: visitor_id || null,
+      event_name: event,
+      event_id: eventId,
+      timestamp: new Date().toISOString(),
+      attribution,
+      custom_data: customData,
     });
 
     const response = await fetch(ingestUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "X-Sentinel-Source": "backend",
       },
       body,
     }).catch((e) => ({ ok: false, status: 0, statusText: String(e).slice(0, 100) }));
 
     if (!response.ok) {
-      console.warn(`[SENTINEL→] ${event} failed: ${response.status} ${response.statusText}`);
+      let detail = "";
+      try {
+        detail = typeof response.text === "function" ? (await response.text()).slice(0, 200) : "";
+      } catch { /* ignore */ }
+      console.warn(`[SENTINEL→] ${event} failed: ${response.status} ${response.statusText} ${detail}`);
       return { sent: false, status: response.status };
     }
     console.log(`[SENTINEL→] ${event} forwarded ok`);
