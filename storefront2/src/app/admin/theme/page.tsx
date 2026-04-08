@@ -41,7 +41,7 @@ import {
   SaveButton,
 } from "@/components/admin/tabs/shared";
 
-type Tab = "identity" | "colors" | "typography" | "header" | "footer" | "announcement" | "home" | "product" | "cart" | "newsletter" | "seo" | "reviews" | "import-products" | "i18n" | "products-list" | "collections-list" | "dashboard" | "orders-list" | "visual-editor" | "settings" | "sentinel" | "integrations" | "transactions" | "notifications";
+type Tab = "identity" | "colors" | "typography" | "header" | "footer" | "announcement" | "home" | "product" | "cart" | "newsletter" | "seo" | "reviews" | "import-products" | "i18n" | "products-list" | "collections-list" | "dashboard" | "orders-list" | "visual-editor" | "settings" | "sentinel" | "integrations" | "transactions" | "notifications" | "popups";
 
 interface TabGroup {
   label: string;
@@ -92,6 +92,7 @@ const TAB_GROUPS: TabGroup[] = [
       { id: "product", label: "Produto", icon: <Package {...IC} />, desc: "Exibição e variantes" },
       { id: "cart", label: "Carrinho", icon: <ShoppingCart {...IC} />, desc: "Tipo e frete grátis" },
       { id: "newsletter", label: "Newsletter", icon: <Mail {...IC} />, desc: "Captura de e-mails" },
+      { id: "popups", label: "Pop-ups", icon: <Megaphone {...IC} />, desc: "Boas-vindas, exit-intent" },
       { id: "seo", label: "SEO", icon: <Search {...IC} />, desc: "Título e meta tags" },
       { id: "i18n", label: "Idiomas & Moedas", icon: <Globe {...IC} />, desc: "Multi-idioma e câmbio" },
     ],
@@ -714,6 +715,41 @@ export default function ThemeAdminPage() {
             <SaveButton saving={saving} onClick={() => saveConfig({ newsletter: config.newsletter })} />
           </Section>
         )}
+
+        {activeTab === "popups" && (() => {
+          const popups = config.popups || {
+            firstPurchase: { enabled: true, headline: "Ganhe 10% OFF na primeira compra", subheadline: "Cadastre seu e-mail e receba o cupom direto no seu inbox.", discountLabel: "10% OFF", submitLabel: "Quero meu cupom", successMessage: "Pronto! Confira seu e-mail.", delaySeconds: 15 },
+            exitIntent: { enabled: true, headline: "Espera! Antes de ir...", subheadline: "Aproveite 10% de desconto em qualquer produto agora.", couponCode: "VOLTA10", activationDelaySeconds: 10 },
+            newsletter: { enabled: false, headline: "Receba ofertas exclusivas", subheadline: "Cadastre-se para não perder nenhum lançamento.", submitLabel: "Cadastrar", delaySeconds: 30 },
+          };
+          const updatePopup = <K extends keyof NonNullable<typeof config.popups>>(key: K, patch: Partial<NonNullable<typeof config.popups>[K]>) => {
+            const next = { ...popups, [key]: { ...popups[key], ...patch } };
+            setConfig({ ...config, popups: next });
+          };
+          return (
+            <>
+              <Section title="Pop-up de boas-vindas (primeira visita)" description="Aparece após X segundos para visitantes novos. Captura e-mails em troca de um cupom.">
+                <CheckboxField label="Ativado" checked={popups.firstPurchase.enabled} onChange={(v) => updatePopup("firstPurchase", { enabled: v })} />
+                <Field label="Headline" value={popups.firstPurchase.headline} onChange={(v) => updatePopup("firstPurchase", { headline: v })} />
+                <Field label="Subtítulo" value={popups.firstPurchase.subheadline} onChange={(v) => updatePopup("firstPurchase", { subheadline: v })} />
+                <Field label="Selo de desconto (badge superior)" value={popups.firstPurchase.discountLabel} onChange={(v) => updatePopup("firstPurchase", { discountLabel: v })} />
+                <Field label="Texto do botão" value={popups.firstPurchase.submitLabel} onChange={(v) => updatePopup("firstPurchase", { submitLabel: v })} />
+                <Field label="Mensagem de sucesso" value={popups.firstPurchase.successMessage} onChange={(v) => updatePopup("firstPurchase", { successMessage: v })} />
+                <NumberField label="Atraso para abrir (segundos)" value={popups.firstPurchase.delaySeconds} min={0} max={600} onChange={(v) => updatePopup("firstPurchase", { delaySeconds: v })} />
+                <SaveButton saving={saving} onClick={() => saveConfig({ popups: config.popups })} />
+              </Section>
+
+              <Section title="Pop-up de saída (exit-intent)" description="Aparece quando o visitante move o mouse pra fechar a aba. Mostra um cupom de retenção.">
+                <CheckboxField label="Ativado" checked={popups.exitIntent.enabled} onChange={(v) => updatePopup("exitIntent", { enabled: v })} />
+                <Field label="Headline" value={popups.exitIntent.headline} onChange={(v) => updatePopup("exitIntent", { headline: v })} />
+                <Field label="Subtítulo" value={popups.exitIntent.subheadline} onChange={(v) => updatePopup("exitIntent", { subheadline: v })} />
+                <Field label="Código do cupom" value={popups.exitIntent.couponCode} onChange={(v) => updatePopup("exitIntent", { couponCode: v.toUpperCase() })} />
+                <NumberField label="Atraso de ativação (segundos)" value={popups.exitIntent.activationDelaySeconds} min={0} max={600} onChange={(v) => updatePopup("exitIntent", { activationDelaySeconds: v })} />
+                <SaveButton saving={saving} onClick={() => saveConfig({ popups: config.popups })} />
+              </Section>
+            </>
+          );
+        })()}
 
         {activeTab === "seo" && (
           <Section title="SEO">

@@ -384,5 +384,30 @@
     "lunaCheckoutUrl": "https://sua-loja.lunacheckout.com",
     "lunaStoreUuid": "",
     "webhookUrl": "/webhooks/luna"
+  },
+  "popups": {
+    "firstPurchase": {
+      "enabled": true,
+      "headline": "Ganhe 10% OFF na primeira compra",
+      "subheadline": "Cadastre seu e-mail e receba o cupom direto no seu inbox.",
+      "discountLabel": "10% OFF",
+      "submitLabel": "Quero meu cupom",
+      "successMessage": "Pronto! Confira seu e-mail.",
+      "delaySeconds": 15
+    },
+    "exitIntent": {
+      "enabled": true,
+      "headline": "Espera! Antes de ir...",
+      "subheadline": "Aproveite 10% de desconto em qualquer produto agora.",
+      "couponCode": "VOLTA10",
+      "activationDelaySeconds": 10
+    },
+    "newsletter": {
+      "enabled": false,
+      "headline": "Receba ofertas exclusivas",
+      "subheadline": "Cadastre-se para não perder nenhum lançamento.",
+      "submitLabel": "Cadastrar",
+      "delaySeconds": 30
+    }
   }
 }

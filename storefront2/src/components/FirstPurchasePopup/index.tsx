@@ -1,22 +1,31 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { getThemeConfig } from "@/lib/theme-config";
 
 export default function FirstPurchasePopup() {
+  const cfg = getThemeConfig().popups?.firstPurchase;
+  const enabled = cfg?.enabled !== false;
+  const headline = cfg?.headline || "Ganhe 10% OFF na primeira compra";
+  const subheadline = cfg?.subheadline || "Cadastre-se e ganhe um cupom exclusivo de desconto.";
+  const discountLabel = cfg?.discountLabel || "10% OFF";
+  const submitLabel = cfg?.submitLabel || "Quero meu cupom";
+  const successMessage = cfg?.successMessage || "Pronto! Confira seu e-mail.";
+  const delayMs = (cfg?.delaySeconds ?? 15) * 1000;
+
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    // Only show if user hasn't seen it before and hasn't made a purchase
+    if (!enabled) return;
     const dismissed = localStorage.getItem("first_purchase_popup_dismissed");
     const hasPurchased = localStorage.getItem("has_purchased");
     if (dismissed || hasPurchased) return;
 
-    // Show after 15 seconds on site
-    const timer = setTimeout(() => setShow(true), 15000);
+    const timer = setTimeout(() => setShow(true), delayMs);
     return () => clearTimeout(timer);
-  }, []);
+  }, [enabled, delayMs]);
 
   const dismiss = () => {
     setShow(false);
@@ -38,7 +47,7 @@ export default function FirstPurchasePopup() {
     setTimeout(() => setShow(false), 5000);
   };
 
-  if (!show) return null;
+  if (!enabled || !show) return null;
 
   return (
     <>
@@ -59,15 +68,15 @@ export default function FirstPurchasePopup() {
 
         <div style={{ background: "linear-gradient(135deg, #1e2d7d 0%, #3b5bdb 100%)", padding: "32px 24px", textAlign: "center", color: "#fff" }}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>🎉</div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>10% OFF</h2>
-          <p style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>na sua primeira compra!</p>
+          <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>{discountLabel}</h2>
+          <p style={{ fontSize: 14, opacity: 0.9, marginTop: 4 }}>{headline}</p>
         </div>
 
         <div style={{ padding: "24px" }}>
           {!submitted ? (
             <>
               <p style={{ fontSize: 14, color: "#6b7280", textAlign: "center", marginBottom: 16 }}>
-                Cadastre-se e ganhe um cupom exclusivo de desconto.
+                {subheadline}
               </p>
               <form onSubmit={handleSubmit}>
                 <input
@@ -82,7 +91,7 @@ export default function FirstPurchasePopup() {
                   type="submit"
                   style={{ width: "100%", padding: "14px", background: "#1e2d7d", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 15, cursor: "pointer" }}
                 >
-                  Quero meu desconto!
+                  {submitLabel}
                 </button>
               </form>
               <p style={{ textAlign: "center", fontSize: 11, color: "#9ca3af", marginTop: 12 }}>
@@ -92,7 +101,7 @@ export default function FirstPurchasePopup() {
           ) : (
             <div style={{ textAlign: "center", padding: "8px 0" }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>✅</div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: "#16a34a", margin: "0 0 8px" }}>Cupom ativado!</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: "#16a34a", margin: "0 0 8px" }}>{successMessage}</h3>
               <div style={{ background: "#f0fdf4", border: "2px dashed #16a34a", borderRadius: 8, padding: "12px", marginBottom: 12 }}>
                 <p style={{ fontSize: 24, fontWeight: 800, color: "#16a34a", letterSpacing: 2, margin: 0 }}>BEMVINDO10</p>
               </div>

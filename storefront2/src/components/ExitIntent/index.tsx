@@ -1,19 +1,25 @@
 "use client";
 import { useState, useEffect } from "react";
+import { getThemeConfig } from "@/lib/theme-config";
 
 const STORAGE_KEY = "ua_exit_popup_shown";
 
 export default function ExitIntent() {
+  const cfg = getThemeConfig().popups?.exitIntent;
+  const enabled = cfg?.enabled !== false;
+  const headline = cfg?.headline || "Espera! Não vai embora!";
+  const subheadline = cfg?.subheadline || "Temos um presente exclusivo para você";
+  const couponCode = cfg?.couponCode || "VOLTA10";
+  const activationDelayMs = (cfg?.activationDelaySeconds ?? 10) * 1000;
+
   const [show, setShow] = useState(false);
   const [copied, setCopied] = useState(false);
-  const couponCode = "VOLTA10";
 
   useEffect(() => {
-    // Don't show if already shown this session
+    if (!enabled) return;
     if (sessionStorage.getItem(STORAGE_KEY)) return;
 
     const handler = (e: MouseEvent) => {
-      // Detect mouse leaving viewport (moving toward browser bar)
       if (e.clientY <= 5 && e.movementY < -10) {
         setShow(true);
         sessionStorage.setItem(STORAGE_KEY, "true");
@@ -21,16 +27,15 @@ export default function ExitIntent() {
       }
     };
 
-    // Only activate after 10 seconds on page
     const timeout = setTimeout(() => {
       document.addEventListener("mousemove", handler);
-    }, 10000);
+    }, activationDelayMs);
 
     return () => {
       clearTimeout(timeout);
       document.removeEventListener("mousemove", handler);
     };
-  }, []);
+  }, [enabled, activationDelayMs]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(couponCode);
@@ -38,7 +43,7 @@ export default function ExitIntent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!show) return null;
+  if (!enabled || !show) return null;
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 10001, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -55,8 +60,8 @@ export default function ExitIntent() {
         {/* Top banner */}
         <div style={{ background: "linear-gradient(135deg, #1e2d7d, #00badb)", padding: "30px 24px", textAlign: "center", color: "#fff" }}>
           <div style={{ fontSize: 36, marginBottom: 8 }}>🎁</div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Espera! Não vai embora!</h2>
-          <p style={{ fontSize: 14, opacity: 0.9, marginTop: 6 }}>Temos um presente exclusivo para você</p>
+          <h2 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>{headline}</h2>
+          <p style={{ fontSize: 14, opacity: 0.9, marginTop: 6 }}>{subheadline}</p>
         </div>
 
         {/* Content */}

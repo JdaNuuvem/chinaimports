@@ -120,6 +120,33 @@ export interface ThemeConfig {
   installments: {
     percentage: number;
   };
+
+  popups?: {
+    firstPurchase: PopupConfig & {
+      headline: string;
+      subheadline: string;
+      discountLabel: string;
+      submitLabel: string;
+      successMessage: string;
+      delaySeconds: number;
+    };
+    exitIntent: PopupConfig & {
+      headline: string;
+      subheadline: string;
+      couponCode: string;
+      activationDelaySeconds: number;
+    };
+    newsletter: PopupConfig & {
+      headline: string;
+      subheadline: string;
+      submitLabel: string;
+      delaySeconds: number;
+    };
+  };
+}
+
+export interface PopupConfig {
+  enabled: boolean;
 }
 
 export interface NavLink {
