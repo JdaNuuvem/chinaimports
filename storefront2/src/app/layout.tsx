@@ -12,6 +12,7 @@ import NewsletterBar from "@/components/Newsletter";
 import Footer from "@/components/Footer";
 import SupportButton from "@/components/SupportButton";
 import BackToTop from "@/components/BackToTop";
+import BottomNavMobile from "@/components/BottomNavMobile";
 import CookieConsent from "@/components/CookieConsent";
 import SocialProof from "@/components/SocialProof";
 import ExitIntent from "@/components/ExitIntent";
@@ -98,6 +99,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Footer />
             <SupportButton />
             <BackToTop />
+            <BottomNavMobile />
             <SocialProof />
             <ExitIntent />
             <FirstPurchasePopup />

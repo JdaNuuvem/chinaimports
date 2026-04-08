@@ -21,10 +21,26 @@ export default function MiniCart() {
 
         <div className="mini-cart__content">
           {!cart || cart.items.length === 0 ? (
-            <div className="mini-cart__empty">
-              <p>Seu carrinho está vazio</p>
+            <div className="mini-cart__empty" style={{ textAlign: "center", padding: "60px 24px" }}>
+              <div style={{
+                width: 96, height: 96, margin: "0 auto 16px",
+                borderRadius: "50%", background: "#f3f4f6",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="21" r="1" />
+                  <circle cx="20" cy="21" r="1" />
+                  <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                </svg>
+              </div>
+              <p style={{ fontSize: 16, fontWeight: 700, color: "#1a1c1e", marginBottom: 6 }}>
+                Seu carrinho está vazio
+              </p>
+              <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 20 }}>
+                Que tal adicionar algo legal aqui?
+              </p>
               <Link href="/collections/all" className="button button--primary" onClick={() => setCartOpen(false)}>
-                Veja nossos produtos
+                Explorar produtos
               </Link>
             </div>
           ) : (
