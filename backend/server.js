@@ -270,7 +270,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Visitor-Id", "X-Sentinel-Id", "X-Session-Id"],
 }));
 app.use(express.json({ limit: "10mb" }));
 
@@ -2313,7 +2313,7 @@ async function forwardToSentinel(event, payload) {
     const ingestUrl =
       (await getSetting("SENTINEL_INGEST_URL")) ||
       process.env.SENTINEL_INGEST_URL ||
-      "https://api.sentineltracking.io/v1/events";
+      "https://api.specterfilter.com/sentinel-bff/api/events";
 
     const body = JSON.stringify({
       event,
