@@ -131,15 +131,29 @@ export function CartProvider({ children }: { children: ReactNode }) {
       } else {
         // A 4xx from the backend (e.g. variant_not_found, cart_not_found)
         // is a permanent failure — retrying won't help. Surface the error
-        // to the user and skip the retry queue.
+        // and try to recover transparently.
         const msg = String(result.error || "");
-        const isPermanent = /not[_ ]found|Produto indisponível|variant_not_found|cart_not_found|invalid/i.test(msg);
-        if (isPermanent) {
-          setError(
-            msg.includes("variant") || msg.includes("Produto indisponível")
-              ? "Produto indisponível. Atualize a página e tente novamente."
-              : msg
-          );
+        const isVariantGone =
+          /variant_not_found|Produto indisponível|variant/i.test(msg);
+        const isCartGone = /cart_not_found|Cart not found/i.test(msg);
+
+        if (isCartGone) {
+          // Cart ID was invalidated server-side (DB reseed, etc). Drop
+          // the local reference and ask the caller to retry.
+          localStorage.removeItem("cart_id");
+          setCart(null);
+          setError("Sua sessão de carrinho expirou. Recarregando...");
+          if (typeof window !== "undefined") {
+            setTimeout(() => window.location.reload(), 800);
+          }
+        } else if (isVariantGone) {
+          // ISR cache is stale — the page was built with an older variant
+          // id. Force Next.js to revalidate the current route so the user
+          // gets fresh variant ids on retry.
+          setError("Produto indisponível. Atualizando a página...");
+          if (typeof window !== "undefined") {
+            setTimeout(() => window.location.reload(), 1200);
+          }
         } else {
           enqueueCartOp({ action: "add", cartId: cart.id, variantId, quantity });
           setError("Não foi possível adicionar ao carrinho. Tentaremos novamente.");

@@ -9,7 +9,7 @@ import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import { calculateDiscount } from "@/lib/utils";
 import fallbackData from "@/data/fallback-products.json";
 
-export const revalidate = 300; // ISR: revalidate every 5 minutes
+export const revalidate = 60; // ISR: revalidate every minute so variant IDs don't go stale for long
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
