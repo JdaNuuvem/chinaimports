@@ -160,12 +160,12 @@ export default function SettingsTab({ backendUrl, token }: { backendUrl: string;
         <div style={{ background: "#f0fdf4", border: "1px solid #aee9d1", borderRadius: 8, padding: 14, marginBottom: 16, fontSize: 12, lineHeight: 1.8 }}>
           <strong>Passo a passo:</strong><br />
           1. Crie sua conta em <a href="https://lunacheckout.com" target="_blank" rel="noopener noreferrer" style={{ color: "#008060", fontWeight: 600 }}>lunacheckout.com</a><br />
-          2. Copie a URL do checkout e o UUID da loja<br />
+          2. Copie a URL do checkout da sua loja<br />
           3. Configure o webhook no painel Luna para: <code style={{ background: "#e1e3e5", padding: "2px 6px", borderRadius: 4 }}>{keys.webhookUrl}</code><br />
           4. Ative todos os eventos de venda e rastreio
         </div>
         <Field label="URL do checkout Luna" value={keys.lunaCheckoutUrl} onChange={(v) => setKeys({ ...keys, lunaCheckoutUrl: v })} helpText="Ex: https://minha-loja.lunacheckout.com" />
-        <SecretField label="UUID da loja Luna" field="lunaStoreUuid" helpText="Encontrado no painel da Luna em Configurações > API" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" value={(keys as Record<string, string>)["lunaStoreUuid"] || ""} onChange={updateKey} isVisible={!!showSecrets["lunaStoreUuid"]} onToggleVisibility={toggleShow} />
+        <SecretField label="UUID da loja Luna (opcional)" field="lunaStoreUuid" helpText="Opcional. A Luna não exige UUID na integração via webhook — deixe em branco se sua versão do painel não fornecer este campo." placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (opcional)" value={(keys as Record<string, string>)["lunaStoreUuid"] || ""} onChange={updateKey} isVisible={!!showSecrets["lunaStoreUuid"]} onToggleVisibility={toggleShow} />
 
         <div style={{ padding: 12, background: "#f6f6f7", borderRadius: 8, fontSize: 12, marginTop: 8 }}>
           <strong>URL do Webhook (copie para o painel Luna):</strong>

@@ -50,7 +50,9 @@ export default function IntegrationsTab({ backendUrl, token, onNavigate }: Integ
 
   useEffect(() => { loadSettings(); }, [loadSettings]);
 
-  const isLunaActive = !!(settings.LUNA_CHECKOUT_URL || settings.LUNA_STORE_UUID);
+  // Luna is considered active as soon as the checkout URL is set — the
+  // store UUID is optional and the integration runs over webhooks alone.
+  const isLunaActive = !!settings.LUNA_CHECKOUT_URL;
   const isSentinelActive = !!(settings.SENTINEL_API_KEY && settings.SENTINEL_WEBHOOK_SECRET);
   const isGaActive = !!settings.GA_ID;
   const isMetaActive = !!settings.FB_PIXEL_ID;
