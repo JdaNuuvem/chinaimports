@@ -172,11 +172,35 @@ export type HomeSectionType =
 // ──────────────────────────────────────────────
 
 import defaultConfig from "@/data/theme-config.json";
+import fs from "fs";
+import path from "path";
+
+// In production (standalone) we write the theme-config to a persistent file
+// outside of the bundled src/. Default to /app/data/theme-config.json so it
+// survives rebuilds when mounted as a persistent volume.
+const CONFIG_FILE =
+  process.env.THEME_CONFIG_PATH ||
+  (process.env.NODE_ENV === "production"
+    ? "/app/data/theme-config.json"
+    : path.join(process.cwd(), "src/data/theme-config.json"));
 
 let runtimeConfig: ThemeConfig | null = null;
 
+export function getConfigPath(): string {
+  return CONFIG_FILE;
+}
+
 export function getThemeConfig(): ThemeConfig {
   if (runtimeConfig) return runtimeConfig;
+  // Always read fresh from disk so admin edits show up without a rebuild.
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const raw = fs.readFileSync(CONFIG_FILE, "utf-8");
+      return JSON.parse(raw) as ThemeConfig;
+    }
+  } catch {
+    // Fall through to bundled default.
+  }
   return defaultConfig as unknown as ThemeConfig;
 }
 

@@ -1,10 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { revalidatePath } from "next/cache";
 import { verifyToken } from "../admin/auth/route";
+import { getConfigPath } from "@/lib/theme-config";
+import defaultConfig from "@/data/theme-config.json";
 
-const CONFIG_PATH = path.join(process.cwd(), "src/data/theme-config.json");
+const CONFIG_PATH = getConfigPath();
 const ADMIN_PASSWORD = process.env.THEME_ADMIN_PASSWORD || "admin123";
+
+// In production the config file lives on a persistent volume. On a fresh
+// container there may be nothing there yet — seed it with the bundled
+// default so reads and merges do not blow up.
+function ensureConfigFile(): void {
+  try {
+    if (!fs.existsSync(CONFIG_PATH)) {
+      fs.mkdirSync(path.dirname(CONFIG_PATH), { recursive: true });
+      fs.writeFileSync(CONFIG_PATH, JSON.stringify(defaultConfig, null, 2));
+    }
+  } catch {
+    // Ignored — GET/PUT will surface the error.
+  }
+}
 
 function authenticate(request: NextRequest): boolean {
   const auth = request.headers.get("authorization");
@@ -19,6 +36,7 @@ function authenticate(request: NextRequest): boolean {
 
 export async function GET() {
   try {
+    ensureConfigFile();
     const raw = fs.readFileSync(CONFIG_PATH, "utf-8");
     return NextResponse.json(JSON.parse(raw));
   } catch {
@@ -32,6 +50,7 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
+    ensureConfigFile();
     const updates = await request.json();
     const existing = JSON.parse(fs.readFileSync(CONFIG_PATH, "utf-8"));
 
@@ -46,6 +65,14 @@ export async function PUT(request: NextRequest) {
     }
 
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(merged, null, 2));
+
+    // Invalidate cached pages so the storefront picks up the new config.
+    try {
+      revalidatePath("/", "layout");
+    } catch {
+      // revalidatePath is best-effort — ignore errors
+    }
+
     return NextResponse.json({ success: true, config: merged });
   } catch (err) {
     return NextResponse.json(
