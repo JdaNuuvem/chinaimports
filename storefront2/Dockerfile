@@ -37,11 +37,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Persistent data dir (mount a Coolify volume at /app/data to survive rebuilds).
-# Holds both uploaded files and the mutable theme-config.json.
+# Persistent data dir. Mount a Coolify volume at /app/data/uploads to keep
+# uploaded files AND the mutable theme-config.json across redeploys. The
+# config lives alongside the uploads as a dotfile so it piggybacks on the
+# same volume (the /uploads/:path* route handler blocks dotfiles).
 RUN mkdir -p /app/data/uploads && chown -R nextjs:nodejs /app/data
 ENV UPLOADS_DIR=/app/data/uploads
-ENV THEME_CONFIG_PATH=/app/data/theme-config.json
+ENV THEME_CONFIG_PATH=/app/data/uploads/.theme-config.json
 
 USER nextjs
 

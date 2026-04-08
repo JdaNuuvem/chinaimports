@@ -31,10 +31,22 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    // Sanitize: reject traversal attempts and absolute paths
+    // Sanitize: reject traversal attempts, absolute paths and dotfiles
     const joined = segments.join("/");
-    if (joined.includes("..") || joined.includes("\\") || joined.startsWith("/")) {
+    if (
+      joined.includes("..") ||
+      joined.includes("\\") ||
+      joined.startsWith("/") ||
+      segments.some((s) => s.startsWith("."))
+    ) {
       return NextResponse.json({ error: "Invalid path" }, { status: 400 });
+    }
+
+    // Only serve known image extensions — anything else (e.g. .json config
+    // files living in the same volume) is rejected.
+    const ext = path.extname(joined).toLowerCase();
+    if (!MIME[ext]) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     const filePath = path.join(UPLOADS_DIR, joined);
@@ -48,8 +60,7 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const ext = path.extname(resolved).toLowerCase();
-    const contentType = MIME[ext] || "application/octet-stream";
+    const contentType = MIME[ext];
     const data = fs.readFileSync(resolved);
 
     return new NextResponse(new Uint8Array(data), {

@@ -181,7 +181,7 @@ import path from "path";
 const CONFIG_FILE =
   process.env.THEME_CONFIG_PATH ||
   (process.env.NODE_ENV === "production"
-    ? "/app/data/theme-config.json"
+    ? "/app/data/uploads/.theme-config.json"
     : path.join(process.cwd(), "src/data/theme-config.json"));
 
 let runtimeConfig: ThemeConfig | null = null;
