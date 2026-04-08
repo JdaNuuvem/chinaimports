@@ -1350,6 +1350,13 @@ body:not(.is-tabbing) textarea:focus {
     height: 100%;
     -o-object-fit: contain;
        object-fit: contain;
+    /* Reset the centering transform from the legacy rule above so that
+       modern browsers (incl. next/image which sets inset:0) align the
+       image to the corner of the aspect-ratio box instead of being shifted
+       up-left by a translate(-50%,-50%). */
+    top: 0;
+    left: 0;
+    transform: none;
   }
 }
 
