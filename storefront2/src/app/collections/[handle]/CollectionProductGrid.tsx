@@ -5,6 +5,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import type { Product } from "@/lib/medusa-client";
 import ProductCard from "@/components/ProductCard";
 import CollectionFilters from "@/components/CollectionFilters";
+import { trackViewItemList } from "@/lib/sentinel";
 
 interface Props {
   products: Product[];
@@ -45,6 +46,20 @@ export default function CollectionProductGrid({ products }: Props) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => setFilters(newFilters), 150);
   }, []);
+
+  // Fire view_item_list once per mount with the visible products
+  useEffect(() => {
+    if (products.length === 0) return;
+    trackViewItemList(
+      pathname || "collection",
+      products.map((p) => ({
+        id: p.id,
+        title: p.title,
+        price: p.variants?.[0]?.prices?.[0]?.amount ?? 0,
+      }))
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   const filtered = useMemo(() => {
     let result = [...products];

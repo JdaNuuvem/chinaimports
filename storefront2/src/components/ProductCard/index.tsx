@@ -57,6 +57,13 @@ export default function ProductCard({
     setTimeout(() => setAdded(false), 2000);
   };
 
+  // Fire select_item when the user clicks the card to open the PDP
+  const trackClick = () => {
+    import("@/lib/sentinel").then(({ trackSelectItem }) => {
+      trackSelectItem("product_card", { id: handle, title, price });
+    }).catch(() => {});
+  };
+
   return (
     <div
       className="product-item product-item--vertical fade-in-up"
@@ -107,7 +114,7 @@ export default function ProductCard({
         </div>
       )}
 
-      <Link href={`/product/${handle}`} className="product-item__image-wrapper" style={{ position: "relative", display: "block", overflow: "hidden", background: "#f3f4f6" }}>
+      <Link href={`/product/${handle}`} onClick={trackClick} className="product-item__image-wrapper" style={{ position: "relative", display: "block", overflow: "hidden", background: "#f3f4f6" }}>
         <div className="aspect-ratio aspect-ratio--square" style={{ aspectRatio: "1/1", position: "relative" }}>
           <Image
             src={thumbnail || "https://placehold.co/400x400/f5f5f5/999?text=Sem+Imagem"}
