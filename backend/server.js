@@ -90,6 +90,23 @@ const app = express();
 const JWT_SECRET = process.env.JWT_SECRET || "change-me";
 const STORE_URL = process.env.STORE_URL || "http://localhost:3000";
 
+// Fire-and-forget call to the storefront's /api/revalidate so that a
+// newly created/updated/deleted product or collection becomes visible
+// immediately without waiting for the ISR revalidate timer.
+async function notifyStorefrontRevalidate(payload) {
+  try {
+    const secret = process.env.REVALIDATION_SECRET;
+    if (!secret || !STORE_URL) return;
+    await fetch(`${STORE_URL}/api/revalidate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Webhook-Secret": secret },
+      body: JSON.stringify(payload),
+    }).catch((e) => console.warn("[REVALIDATE→]", e.message));
+  } catch (e) {
+    console.warn("[REVALIDATE→]", e.message);
+  }
+}
+
 // ══════════════════════════════════════
 // SETTINGS STORE — DB-backed, fallback to env, in-memory cache
 // ══════════════════════════════════════
@@ -897,6 +914,8 @@ app.post("/admin/import-product", authenticateAdmin, async (req, res) => {
       }
     }
 
+    notifyStorefrontRevalidate({ type: "product", handle: product.handle });
+
     res.json({ success: true, product: formatProduct(product) });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -1683,6 +1702,7 @@ app.post("/admin/products", authenticateAdmin, async (req, res) => {
         await prisma.collectionProduct.create({ data: { productId: product.id, collectionId: colId } }).catch(() => {});
       }
     }
+    notifyStorefrontRevalidate({ type: "product", handle: product.handle });
     res.json({ product: formatProduct(product) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -1698,12 +1718,18 @@ app.put("/admin/products/:id", authenticateAdmin, async (req, res) => {
       data,
       include: productInclude,
     });
+    notifyStorefrontRevalidate({ type: "product", handle: product.handle });
     res.json({ product: formatProduct(product) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.delete("/admin/products/:id", authenticateAdmin, async (req, res) => {
-  try { await prisma.product.delete({ where: { id: req.params.id } }); res.json({ success: true }); }
+  try {
+    const prod = await prisma.product.findUnique({ where: { id: req.params.id }, select: { handle: true } }).catch(() => null);
+    await prisma.product.delete({ where: { id: req.params.id } });
+    notifyStorefrontRevalidate({ type: "product", handle: prod?.handle });
+    res.json({ success: true });
+  }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 

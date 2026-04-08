@@ -167,9 +167,11 @@ export async function getProducts(limit = 20, offset = 0) {
 }
 
 export async function getProduct(handle: string) {
+  // Short revalidate so newly imported / edited products become visible
+  // quickly. Matches the product page's own `revalidate = 60`.
   return resilientFetch<{ products: Product[] }>(
     `/store/products?handle=${handle}`,
-    { revalidate: 300 }
+    { revalidate: 60 }
   );
 }
 
