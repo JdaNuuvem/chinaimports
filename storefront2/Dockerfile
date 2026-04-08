@@ -33,9 +33,13 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nextjs
 
-COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Persistent uploads dir (mount a Coolify volume here to survive rebuilds)
+RUN mkdir -p /app/data/uploads && chown -R nextjs:nodejs /app/data
+ENV UPLOADS_DIR=/app/data/uploads
 
 USER nextjs
 

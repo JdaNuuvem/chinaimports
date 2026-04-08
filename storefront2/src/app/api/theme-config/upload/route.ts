@@ -3,7 +3,9 @@ import fs from "fs";
 import path from "path";
 import { verifyToken } from "../../admin/auth/route";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public/uploads");
+// In production we write to /app/data/uploads (persistent Coolify volume).
+// In dev, fall back to public/uploads so Next.js serves files directly.
+const UPLOAD_DIR = process.env.UPLOADS_DIR || path.join(process.cwd(), "public/uploads");
 const ADMIN_PASSWORD = process.env.THEME_ADMIN_PASSWORD || "admin123";
 
 function authenticate(request: NextRequest): boolean {
