@@ -94,14 +94,27 @@ const STORE_URL = process.env.STORE_URL || "http://localhost:3000";
 // newly created/updated/deleted product or collection becomes visible
 // immediately without waiting for the ISR revalidate timer.
 async function notifyStorefrontRevalidate(payload) {
+  if (!STORE_URL) return;
+  const secret = process.env.REVALIDATION_SECRET;
   try {
-    const secret = process.env.REVALIDATION_SECRET;
-    if (!secret || !STORE_URL) return;
-    await fetch(`${STORE_URL}/api/revalidate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Webhook-Secret": secret },
-      body: JSON.stringify(payload),
-    }).catch((e) => console.warn("[REVALIDATE→]", e.message));
+    if (secret) {
+      // Authenticated path — revalidates product + listings
+      await fetch(`${STORE_URL}/api/revalidate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Webhook-Secret": secret },
+        body: JSON.stringify(payload),
+      }).catch((e) => console.warn("[REVALIDATE→]", e.message));
+    }
+    // Fallback: public per-product endpoint (no secret required). Always
+    // call this for product events so a missing/mismatched secret doesn't
+    // leave the PDP stuck on a stale 404 from ISR.
+    if (payload?.type === "product" && payload?.handle) {
+      await fetch(`${STORE_URL}/api/revalidate-product`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ handle: payload.handle }),
+      }).catch((e) => console.warn("[REVALIDATE-PRODUCT→]", e.message));
+    }
   } catch (e) {
     console.warn("[REVALIDATE→]", e.message);
   }
