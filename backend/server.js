@@ -2036,8 +2036,34 @@ app.delete("/admin/redirects/:id", authenticateAdmin, async (req, res) => {
 app.get("/admin/abandoned-carts", authenticateAdmin, async (req, res) => {
   try {
     const oneHourAgo = new Date(Date.now() - 3600000);
-    const carts = await prisma.cart.findMany({ where: { updatedAt: { lt: oneHourAgo }, items: { some: {} } }, include: cartInclude, orderBy: { updatedAt: "desc" } });
-    res.json({ carts: carts.map(formatCart), count: carts.length });
+    const [carts, lunaAbandoned] = await Promise.all([
+      prisma.cart.findMany({ where: { updatedAt: { lt: oneHourAgo }, items: { some: {} } }, include: cartInclude, orderBy: { updatedAt: "desc" } }),
+      prisma.order.findMany({ where: { status: "abandoned" }, include: { items: true, customer: true }, orderBy: { createdAt: "desc" }, take: 200 }),
+    ]);
+    // Normalize Luna abandoned orders into the same shape as carts so the
+    // admin UI can render both lists together.
+    const lunaCarts = lunaAbandoned.map((o) => ({
+      id: o.id,
+      source: "luna",
+      email: o.customer?.email || null,
+      total: o.total,
+      shipping_total: 0,
+      discount_total: 0,
+      items: o.items.map((it) => ({
+        id: it.id,
+        title: it.title,
+        quantity: it.quantity,
+        unit_price: it.unitPrice,
+        total: it.total,
+        thumbnail: null,
+        variant: { id: "", title: "" },
+      })),
+      created_at: o.createdAt,
+      updated_at: o.createdAt,
+      luna_event: o.tags ? (() => { try { return JSON.parse(o.tags).lunaEvent; } catch { return null; } })() : null,
+    }));
+    const all = [...carts.map(formatCart), ...lunaCarts];
+    res.json({ carts: all, count: all.length, local_count: carts.length, luna_count: lunaCarts.length });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -2349,10 +2375,30 @@ async function forwardToSentinel(event, payload) {
 // ══════════════════════════════════════
 
 // Receive Luna Checkout webhook events
+// Luna webhook health check — used by the admin "Test connection" button
+app.get("/webhooks/luna/ping", async (req, res) => {
+  const secret = await getSetting("LUNA_WEBHOOK_SECRET");
+  res.json({
+    ok: true,
+    timestamp: new Date().toISOString(),
+    signature_required: !!secret,
+    accepted_events: [
+      "sale_pending", "sale_waiting_payment", "sale_approved", "sale_refused",
+      "sale_chargeback", "sale_refunded", "sale_cancelled",
+      "sale_cart_abandoned", "sale_cart_recovered",
+      "tracking_posted", "tracking_in_transit", "tracking_out_for_delivery",
+      "tracking_delivered", "tracking_cancelled", "tracking_returned",
+    ],
+  });
+});
+
 app.post("/webhooks/luna", async (req, res) => {
   try {
-    // Optional webhook signature validation
-    const LUNA_WEBHOOK_SECRET = process.env.LUNA_WEBHOOK_SECRET;
+    // Optional webhook signature validation. The secret can come from the
+    // admin Settings page (preferred) or fall back to the LUNA_WEBHOOK_SECRET
+    // env var. When empty, signatures are not enforced (dev / Luna doesn't
+    // sign yet).
+    const LUNA_WEBHOOK_SECRET = await getSetting("LUNA_WEBHOOK_SECRET");
     if (LUNA_WEBHOOK_SECRET) {
       const signature = req.headers["x-luna-signature"] || req.headers["x-webhook-signature"];
       if (!signature) {
@@ -2486,8 +2532,10 @@ app.post("/webhooks/luna", async (req, res) => {
             }
           }
         }
-      } else if (event !== "sale_cart_abandoned") {
-        // Create new order
+      } else {
+        // Create new order. We DO create rows for sale_cart_abandoned so the
+        // /admin/abandoned-carts endpoint can surface them and the recovery
+        // job can email the customer.
         const orderCount = await prisma.order.count();
 
         // Map Luna items to our order items
@@ -2546,9 +2594,8 @@ app.post("/webhooks/luna", async (req, res) => {
         }
       }
 
-      // Save abandoned cart for recovery
       if (event === "sale_cart_abandoned" && client?.email) {
-        console.log(`[LUNA] Cart abandoned: ${client.email} | ${amount} | Items: ${items?.length}`);
+        console.log(`[LUNA] Cart abandoned saved: ${client.email} | ${amount} | Items: ${items?.length}`);
       }
     }
 
