@@ -39,6 +39,17 @@ export default function SentinelTracker({ apiKey, nonce }: SentinelTrackerProps)
 
   const configScript = buildSentinelConfigScript(apiKey);
 
+  // NOTE: the tracker.js script at cdn.sentineltracking.io posts to
+  // api.specterfilter.com, which rejects the preflight because it doesn't
+  // whitelist the custom `x-visitor-id` header. Every request it makes
+  // floods the console with CORS errors and accomplishes nothing.
+  //
+  // We skip loading it and route events through /api/sentinel/events
+  // (a same-origin Next.js API proxy that forwards to specterfilter
+  // server-side). To re-enable the autonomous tracker, set
+  // NEXT_PUBLIC_SENTINEL_AUTO=1 at build time.
+  const autoTracker = process.env.NEXT_PUBLIC_SENTINEL_AUTO === "1";
+
   return (
     <>
       <Script
@@ -47,12 +58,14 @@ export default function SentinelTracker({ apiKey, nonce }: SentinelTrackerProps)
         nonce={nonce}
         dangerouslySetInnerHTML={{ __html: configScript }}
       />
-      <Script
-        id="sentinel-tracker"
-        strategy="beforeInteractive"
-        nonce={nonce}
-        src={SENTINEL_TRACKER_SRC}
-      />
+      {autoTracker && (
+        <Script
+          id="sentinel-tracker"
+          strategy="beforeInteractive"
+          nonce={nonce}
+          src={SENTINEL_TRACKER_SRC}
+        />
+      )}
     </>
   );
 }

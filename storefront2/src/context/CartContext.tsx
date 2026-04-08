@@ -129,10 +129,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
           }).catch(() => {});
         }
       } else {
-        // Queue for retry
-        enqueueCartOp({ action: "add", cartId: cart.id, variantId, quantity });
-        setError("Não foi possível adicionar ao carrinho. Tentaremos novamente.");
-        setDegraded(true);
+        // A 4xx from the backend (e.g. variant_not_found, cart_not_found)
+        // is a permanent failure — retrying won't help. Surface the error
+        // to the user and skip the retry queue.
+        const msg = String(result.error || "");
+        const isPermanent = /not[_ ]found|Produto indisponível|variant_not_found|cart_not_found|invalid/i.test(msg);
+        if (isPermanent) {
+          setError(
+            msg.includes("variant") || msg.includes("Produto indisponível")
+              ? "Produto indisponível. Atualize a página e tente novamente."
+              : msg
+          );
+        } else {
+          enqueueCartOp({ action: "add", cartId: cart.id, variantId, quantity });
+          setError("Não foi possível adicionar ao carrinho. Tentaremos novamente.");
+          setDegraded(true);
+        }
       }
     } catch {
       enqueueCartOp({ action: "add", cartId: cart.id, variantId, quantity });

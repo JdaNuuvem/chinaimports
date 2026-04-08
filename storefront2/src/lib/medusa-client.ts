@@ -106,8 +106,16 @@ export async function resilientFetch<T>(
         continue; // retry on 5xx
       }
 
-      // 4xx errors — don't retry, don't trip circuit breaker
+      // 4xx errors — don't retry, don't trip circuit breaker. Try to
+      // surface the backend's actual error payload so the UI can show
+      // something like "variant not found" instead of just "400".
       lastError = `Medusa API error: ${response.status}`;
+      try {
+        const errorBody = await response.json();
+        if (errorBody?.error) {
+          lastError = String(errorBody.error);
+        }
+      } catch { /* body wasn't JSON — keep generic message */ }
       return { data: null, source: "api", degraded: false, error: lastError };
     } catch (err) {
       lastError =
