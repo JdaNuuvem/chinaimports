@@ -42,6 +42,24 @@ const DEMO_REVIEWS: Review[] = [
 
 export default function ProductReviews({ productId, reviews: propReviews }: ProductReviewsProps) {
   const [reviews, setReviews] = useState<Review[]>(propReviews || DEMO_REVIEWS);
+  const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+
+  // Close lightbox on Escape and lock body scroll
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+      if (e.key === "ArrowLeft") setLightbox((lb) => lb ? { ...lb, index: (lb.index - 1 + lb.images.length) % lb.images.length } : null);
+      if (e.key === "ArrowRight") setLightbox((lb) => lb ? { ...lb, index: (lb.index + 1) % lb.images.length } : null);
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [lightbox]);
 
   useEffect(() => {
     if (propReviews) return;
@@ -163,11 +181,35 @@ export default function ProductReviews({ productId, reviews: propReviews }: Prod
 
               {/* Images */}
               {imgs.length > 0 && (
-                <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                  {imgs.slice(0, 3).map((img, i) => (
-                    <div key={i} style={{ width: 80, height: 80, borderRadius: 8, overflow: "hidden", border: "1px solid #e5e7eb" }}>
-                      <img src={img} alt="Foto da avaliação" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    </div>
+                <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
+                  {imgs.map((img, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setLightbox({ images: imgs, index: i })}
+                      aria-label={`Abrir foto ${i + 1} de ${imgs.length}`}
+                      style={{
+                        width: 140,
+                        height: 140,
+                        borderRadius: 10,
+                        overflow: "hidden",
+                        border: "1px solid #e5e7eb",
+                        padding: 0,
+                        background: "#fff",
+                        cursor: "zoom-in",
+                        position: "relative",
+                        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.03)"; e.currentTarget.style.boxShadow = "0 6px 18px rgba(0,0,0,.12)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "none"; }}
+                    >
+                      <img
+                        src={img}
+                        alt={`Foto da avaliação ${i + 1}`}
+                        loading="lazy"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      />
+                    </button>
                   ))}
                 </div>
               )}
@@ -181,6 +223,128 @@ export default function ProductReviews({ productId, reviews: propReviews }: Prod
         <div style={{ textAlign: "center", padding: 40, color: "#9ca3af" }}>
           <p style={{ fontSize: 16, marginBottom: 8 }}>Nenhuma avaliação ainda</p>
           <p style={{ fontSize: 13 }}>Seja o primeiro a avaliar este produto!</p>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setLightbox(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.92)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+          }}
+        >
+          {/* Close */}
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setLightbox(null); }}
+            aria-label="Fechar"
+            style={{
+              position: "absolute",
+              top: 16,
+              right: 20,
+              background: "rgba(255,255,255,0.1)",
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: "50%",
+              width: 44,
+              height: 44,
+              color: "#fff",
+              fontSize: 24,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
+
+          {/* Counter */}
+          <div style={{ position: "absolute", top: 24, left: 24, color: "rgba(255,255,255,0.7)", fontSize: 13, fontWeight: 600 }}>
+            {lightbox.index + 1} / {lightbox.images.length}
+          </div>
+
+          {/* Prev */}
+          {lightbox.images.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setLightbox((lb) => lb ? { ...lb, index: (lb.index - 1 + lb.images.length) % lb.images.length } : null); }}
+              aria-label="Anterior"
+              style={{
+                position: "absolute",
+                left: 20,
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: "50%",
+                width: 48,
+                height: 48,
+                color: "#fff",
+                fontSize: 28,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                lineHeight: 1,
+              }}
+            >
+              ‹
+            </button>
+          )}
+
+          {/* Image */}
+          <img
+            src={lightbox.images[lightbox.index]}
+            alt={`Foto ${lightbox.index + 1}`}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: "min(92vw, 1200px)",
+              maxHeight: "88vh",
+              objectFit: "contain",
+              borderRadius: 8,
+              boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+            }}
+          />
+
+          {/* Next */}
+          {lightbox.images.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setLightbox((lb) => lb ? { ...lb, index: (lb.index + 1) % lb.images.length } : null); }}
+              aria-label="Próxima"
+              style={{
+                position: "absolute",
+                right: 20,
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: "50%",
+                width: 48,
+                height: 48,
+                color: "#fff",
+                fontSize: 28,
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                lineHeight: 1,
+              }}
+            >
+              ›
+            </button>
+          )}
         </div>
       )}
     </div>
