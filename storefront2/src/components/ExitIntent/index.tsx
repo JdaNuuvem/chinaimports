@@ -41,8 +41,9 @@ export default function ExitIntent() {
     navigator.clipboard.writeText(couponCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    // Track as a lead-style intent (cupom claimed)
-    import("@/lib/sentinel").then(({ trackEvent }) => trackEvent("coupon_claimed", { code: couponCode, source: "exit_intent" })).catch(() => {});
+    // Sentinel spec only has `lead` for this kind of soft conversion —
+    // the cupom claim acts as a lead signal.
+    import("@/lib/sentinel").then(({ trackLead }) => trackLead("", "exit_intent_coupon_" + couponCode)).catch(() => {});
   };
 
   if (!enabled || !show) return null;

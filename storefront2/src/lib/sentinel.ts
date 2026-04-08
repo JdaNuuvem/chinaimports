@@ -33,11 +33,32 @@ function getSDK(): SentinelSDK | null {
 }
 
 /**
+ * The only event names Sentinel's API recognizes. Anything else is
+ * rejected or becomes noise in the funnel. Source:
+ * https://docs.sentineltracking.io/docs/configuracao/dados-dos-eventos
+ */
+const ALLOWED_EVENTS = new Set([
+  "page_view",
+  "add_to_cart",
+  "init_checkout",
+  "purchase",
+  "lead",
+]);
+
+/**
  * Core helper. Calls Sentinel.track when available, otherwise queues the
  * event on window._sQueue so a late-loading SDK can drain it.
  */
 export function trackEvent(event: string, data?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
+
+  if (!ALLOWED_EVENTS.has(event)) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(`[Sentinel] ignoring unknown event '${event}' — must be one of ${Array.from(ALLOWED_EVENTS).join(", ")}`);
+    }
+    return;
+  }
+
   const sdk = getSDK();
   if (sdk?.track) {
     try {

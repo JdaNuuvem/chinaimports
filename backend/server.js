@@ -2419,11 +2419,22 @@ async function forwardToSentinel(event, payload) {
 
 // Public — storefront proxies client-side Sentinel events here so we can
 // add the API key server-side without exposing it to the browser.
+const ALLOWED_SENTINEL_EVENTS = new Set([
+  "page_view",
+  "add_to_cart",
+  "init_checkout",
+  "purchase",
+  "lead",
+]);
 app.post("/store/sentinel/events", async (req, res) => {
   try {
     const { event, data, ts, url: pageUrl } = req.body || {};
     if (!event) {
       return res.status(400).json({ error: "Missing event field" });
+    }
+    if (!ALLOWED_SENTINEL_EVENTS.has(event)) {
+      console.warn(`[STOREFRONT SENTINEL] ignored unknown event '${event}'`);
+      return res.json({ received: true, ignored: true });
     }
     const visitorId = req.headers["x-visitor-id"] || null;
     const userAgent = req.headers["user-agent"] || null;
