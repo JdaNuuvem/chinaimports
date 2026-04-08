@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import ptBR from "@/data/locales/pt-BR.json";
 import en from "@/data/locales/en.json";
 import es from "@/data/locales/es.json";
@@ -49,21 +49,29 @@ const LocaleContext = createContext<LocaleContextType | null>(null);
 
 // ── Provider ──
 
-function getSavedLocale(): Locale {
-  if (typeof window === "undefined") return "pt-BR";
-  const saved = localStorage.getItem("ua_locale") as Locale | null;
-  return saved && LOCALE_MESSAGES[saved] ? saved : "pt-BR";
-}
-
-function getSavedCurrency(): CurrencyConfig {
-  if (typeof window === "undefined") return SUPPORTED_CURRENCIES[0];
-  const saved = localStorage.getItem("ua_currency");
-  return SUPPORTED_CURRENCIES.find((c) => c.code === saved) || SUPPORTED_CURRENCIES[0];
-}
-
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(getSavedLocale);
-  const [currency, setCurrencyState] = useState<CurrencyConfig>(getSavedCurrency);
+  // ALWAYS start with the default on both server and client so the first
+  // render matches. Then read localStorage in useEffect after mount.
+  // Doing this in useState's lazy init would make the client render
+  // different text than the server, causing React error #418.
+  const [locale, setLocaleState] = useState<Locale>("pt-BR");
+  const [currency, setCurrencyState] = useState<CurrencyConfig>(SUPPORTED_CURRENCIES[0]);
+
+  useEffect(() => {
+    try {
+      const savedLocale = localStorage.getItem("ua_locale") as Locale | null;
+      if (savedLocale && LOCALE_MESSAGES[savedLocale] && savedLocale !== "pt-BR") {
+        setLocaleState(savedLocale);
+      }
+      const savedCurrency = localStorage.getItem("ua_currency");
+      if (savedCurrency) {
+        const found = SUPPORTED_CURRENCIES.find((c) => c.code === savedCurrency);
+        if (found && found.code !== SUPPORTED_CURRENCIES[0].code) {
+          setCurrencyState(found);
+        }
+      }
+    } catch { /* localStorage unavailable */ }
+  }, []);
 
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);
