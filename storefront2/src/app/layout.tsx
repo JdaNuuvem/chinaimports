@@ -26,6 +26,8 @@ import ErrorTrackingInit from "@/components/ErrorTrackingInit";
 import WebVitalsReporter from "@/components/WebVitalsReporter";
 import SentinelTracker from "@/components/SentinelTracker";
 import { getPublicConfig } from "@/lib/public-config";
+import { readThemeConfigFromDisk, ensureConfigFile } from "@/lib/theme-config.server";
+import { ThemeConfigProvider } from "@/context/ThemeConfigContext";
 import themeConfig from "@/data/theme-config.json";
 
 // Force the root layout to re-render on every request so Header/Footer
@@ -57,6 +59,8 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = await getNonce();
   const publicConfig = await getPublicConfig();
+  ensureConfigFile();
+  const liveThemeConfig = readThemeConfigFromDisk();
 
   return (
     <html lang="pt-BR">
@@ -78,6 +82,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className="Evolution--v1">
+        <ThemeConfigProvider config={liveThemeConfig}>
         <LocaleProvider>
         <CartErrorBoundary>
           <CartProvider>
@@ -107,6 +112,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </CartProvider>
         </CartErrorBoundary>
         </LocaleProvider>
+        </ThemeConfigProvider>
       </body>
     </html>
   );

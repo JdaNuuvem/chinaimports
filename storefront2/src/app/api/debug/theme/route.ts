@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
-import { getConfigPath, getThemeConfig } from "@/lib/theme-config";
+import { getConfigPath, readThemeConfigFromDisk } from "@/lib/theme-config.server";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +18,7 @@ export async function GET() {
       diskRaw = `read error: ${(e as Error).message}`;
     }
   }
-  const fromHelper = getThemeConfig();
+  const fromHelper = readThemeConfigFromDisk();
   return NextResponse.json({
     configPath,
     exists,

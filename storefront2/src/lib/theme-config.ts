@@ -171,46 +171,19 @@ export type HomeSectionType =
 // Load theme config (static import for build-time)
 // ──────────────────────────────────────────────
 
-import defaultConfig from "@/data/theme-config.json";
-import fs from "fs";
-import path from "path";
-import { unstable_noStore as noStore } from "next/cache";
+// NOTE: this file is imported by both server and client components.
+// Do NOT import 'fs', 'path' or other Node built-ins here — that would
+// break the client bundle. Disk-based reads live in `theme-config.server.ts`.
 
-// In production (standalone) we write the theme-config to a persistent file
-// outside of the bundled src/. Default to /app/data/theme-config.json so it
-// survives rebuilds when mounted as a persistent volume.
-const CONFIG_FILE =
-  process.env.THEME_CONFIG_PATH ||
-  (process.env.NODE_ENV === "production"
-    ? "/app/data/uploads/.theme-config.json"
-    : path.join(process.cwd(), "src/data/theme-config.json"));
+import defaultConfig from "@/data/theme-config.json";
 
 let runtimeConfig: ThemeConfig | null = null;
 
-export function getConfigPath(): string {
-  return CONFIG_FILE;
-}
-
 export function getThemeConfig(): ThemeConfig {
-  // Opt out of Next.js data cache so every render reads fresh from disk.
-  try {
-    noStore();
-  } catch {
-    // noStore may throw if called outside a request context (e.g. at build
-    // time or in a script) — safe to ignore.
-  }
   if (runtimeConfig) return runtimeConfig;
-  try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      const raw = fs.readFileSync(CONFIG_FILE, "utf-8");
-      return JSON.parse(raw) as ThemeConfig;
-    }
-  } catch {
-    // Fall through to bundled default.
-  }
   return defaultConfig as unknown as ThemeConfig;
 }
 
-export function setRuntimeConfig(config: ThemeConfig): void {
+export function setRuntimeConfig(config: ThemeConfig | null): void {
   runtimeConfig = config;
 }
