@@ -2,6 +2,7 @@ import { getProduct, getProducts, type Product } from "@/lib/medusa-client";
 import Breadcrumb from "@/components/Breadcrumb";
 import ProductDetailLayout from "@/components/ProductDetailLayout";
 import ProductReviews from "@/components/ProductReviews";
+import ProductRecommendations from "@/components/ProductRecommendations";
 import StickyAddToCart from "@/components/StickyAddToCart";
 import DegradedBanner from "@/components/DegradedBanner";
 import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
@@ -101,6 +102,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {/* Reviews section */}
         <div style={{ marginBottom: 60 }}>
           <ProductReviews productId={displayProduct.id} />
+        </div>
+
+        {/* Recommendations */}
+        <div style={{ marginBottom: 60 }}>
+          <ProductRecommendations excludeProductId={displayProduct.id} title="Você também pode gostar" />
         </div>
       </div>
 
