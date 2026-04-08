@@ -17,6 +17,7 @@ interface SentinelGlobal {
 interface WindowWithSentinel extends Window {
   sentinel?: SentinelGlobal;
   _sQueue?: Array<{ event: string; data?: Record<string, unknown> }>;
+  __sentinel_visitor_id?: string;
 }
 
 function getSentinel(): SentinelGlobal | null {
@@ -25,19 +26,72 @@ function getSentinel(): SentinelGlobal | null {
   return w.sentinel || null;
 }
 
+function readVisitorId(): string {
+  if (typeof window === "undefined") return "";
+  const w = window as unknown as WindowWithSentinel;
+  // Prefer a value set by the tracker if it loaded successfully.
+  if (w.__sentinel_visitor_id) return w.__sentinel_visitor_id;
+  // Otherwise use a stable one from localStorage (generate on first run).
+  try {
+    const k = "s_visitor_id";
+    let v = localStorage.getItem(k);
+    if (!v) {
+      v = "v_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem(k, v);
+    }
+    return v;
+  } catch {
+    return "";
+  }
+}
+
 /**
- * Track a generic event. If the tracker hasn't loaded yet, the event is
- * queued on `window._sQueue` so the tracker can drain it on load.
+ * Track a generic event. We always post to our own /api/sentinel/events
+ * proxy, which forwards to api.specterfilter.com server-side. This avoids
+ * the CORS block that kills the official tracker.js when the Specterfilter
+ * preflight refuses our `x-visitor-id` header. The tracker.js call is kept
+ * as a best-effort fallback so the tracker can still do its own thing
+ * when it actually works.
  */
 export function trackEvent(event: string, data?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
+
+  // Best-effort tracker.js push (so it can batch/auto-attribute if CORS ever
+  // gets fixed on their end).
   const s = getSentinel();
-  if (s?.track) { s.track(event, data); return; }
-  if (s?.push) { s.push(event, data); return; }
-  // Queue for later
-  const w = window as unknown as WindowWithSentinel;
-  w._sQueue = w._sQueue || [];
-  w._sQueue.push({ event, data });
+  try {
+    if (s?.track) s.track(event, data);
+    else if (s?.push) s.push(event, data);
+    else {
+      const w = window as unknown as WindowWithSentinel;
+      w._sQueue = w._sQueue || [];
+      w._sQueue.push({ event, data });
+    }
+  } catch { /* ignore */ }
+
+  // Authoritative: POST to our own proxy (same-origin, no CORS).
+  const visitorId = readVisitorId();
+  try {
+    const body = JSON.stringify({
+      event,
+      ts: new Date().toISOString(),
+      url: typeof location !== "undefined" ? location.href : "",
+      data: data || {},
+    });
+    if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+      // sendBeacon is fire-and-forget and survives page navigation — ideal
+      // for things like purchase/select_item on click-through.
+      const blob = new Blob([body], { type: "application/json" });
+      navigator.sendBeacon("/api/sentinel/events", blob);
+    } else {
+      fetch("/api/sentinel/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Visitor-Id": visitorId },
+        body,
+        keepalive: true,
+      }).catch(() => {});
+    }
+  } catch { /* ignore */ }
 }
 
 // ── Standard ecommerce events ──────────────────────────────
