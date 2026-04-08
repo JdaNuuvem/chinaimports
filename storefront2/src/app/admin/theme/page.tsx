@@ -256,14 +256,19 @@ export default function ThemeAdminPage() {
     field: string,
     value: unknown
   ) => {
-    if (!config) return;
-    const sectionData = config[section];
-    if (typeof sectionData === "object" && sectionData !== null) {
-      setConfig({
-        ...config,
+    // Use functional setState so rapid successive calls (e.g. applying a
+    // color preset that updates 9 fields in a forEach) compose correctly.
+    // Reading `config` from closure here would make each call see the
+    // stale snapshot and only the last field would survive.
+    setConfig((prev) => {
+      if (!prev) return prev;
+      const sectionData = prev[section];
+      if (typeof sectionData !== "object" || sectionData === null) return prev;
+      return {
+        ...prev,
         [section]: { ...sectionData, [field]: value },
-      });
-    }
+      };
+    });
   };
 
   // ── Admin-only shell (hides store header/footer via CSS) ──
