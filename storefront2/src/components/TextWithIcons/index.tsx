@@ -1,5 +1,8 @@
 interface TextWithIconItem {
+  /** Emoji or short text used when no `iconImage` is provided. */
   icon: string;
+  /** Optional uploaded image. When set, replaces the emoji icon. */
+  iconImage?: string;
   title: string;
   content?: string;
 }
@@ -22,7 +25,15 @@ export default function TextWithIcons({ items = DEFAULT_ITEMS }: TextWithIconsPr
         <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: "20px" }}>
           {items.map((item, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 0" }}>
-              <span style={{ fontSize: "28px" }}>{item.icon}</span>
+              {item.iconImage ? (
+                <img
+                  src={item.iconImage}
+                  alt={item.title}
+                  style={{ width: 36, height: 36, objectFit: "contain", flexShrink: 0 }}
+                />
+              ) : (
+                <span style={{ fontSize: "28px" }}>{item.icon}</span>
+              )}
               <div>
                 <p style={{ fontWeight: 600, fontSize: "14px", margin: 0 }}>{item.title}</p>
                 {item.content && <p style={{ fontSize: "12px", color: "#888", margin: 0 }}>{item.content}</p>}

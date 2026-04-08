@@ -172,18 +172,29 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
         {/* ──── TEXT WITH ICONS ──── */}
         {section.type === "text-with-icons" && (
           <>
-            <p style={{ fontSize: 12, color: "#6d7175", marginBottom: 12 }}>Itens da barra de benefícios:</p>
-            {((s.items as Array<{ icon: string; title: string; text: string }>) || []).map((item, i) => (
-              <div key={i} style={{ background: "#f9fafb", borderRadius: 8, padding: 12, marginBottom: 8, border: "1px solid #e5e7eb" }}>
-                <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                  <Field label="Ícone" value={item.icon} onChange={(v) => { const items = [...(s.items as Array<{ icon: string; title: string; text: string }>)]; items[i] = { ...items[i], icon: v }; set("items", items); }} />
-                  <button onClick={() => { const items = (s.items as Array<{ icon: string; title: string; text: string }>).filter((_, j) => j !== i); set("items", items); }} style={{ fontSize: 14, color: "#e53e3e", background: "none", border: "none", cursor: "pointer", alignSelf: "flex-start", marginTop: 20 }}>✕</button>
+            <p style={{ fontSize: 12, color: "#6d7175", marginBottom: 12 }}>
+              Itens da barra de benefícios. Você pode usar emoji <strong>OU</strong> fazer upload de uma imagem (a imagem prevalece).
+            </p>
+            {((s.items as Array<{ icon: string; iconImage?: string; title: string; text: string }>) || []).map((item, i) => {
+              const updateItem = (patch: Partial<{ icon: string; iconImage?: string; title: string; text: string }>) => {
+                const items = [...((s.items as Array<{ icon: string; iconImage?: string; title: string; text: string }>) || [])];
+                items[i] = { ...items[i], ...patch };
+                set("items", items);
+              };
+              return (
+                <div key={i} style={{ background: "#f9fafb", borderRadius: 8, padding: 12, marginBottom: 8, border: "1px solid #e5e7eb" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: 12, fontWeight: 600 }}>Item {i + 1}</span>
+                    <button onClick={() => { const items = ((s.items as unknown[]) || []).filter((_, j) => j !== i); set("items", items); }} style={{ fontSize: 12, color: "#e53e3e", background: "none", border: "none", cursor: "pointer" }}>Remover</button>
+                  </div>
+                  <Field label="Ícone (emoji ou texto curto)" value={item.icon || ""} onChange={(v) => updateItem({ icon: v })} helpText="Usado quando não há imagem carregada abaixo." />
+                  <ImageUpload label="Imagem do ícone (opcional)" value={item.iconImage || ""} onChange={(v) => updateItem({ iconImage: v || undefined })} token={token} previewSize={48} />
+                  <Field label="Título" value={item.title || ""} onChange={(v) => updateItem({ title: v })} />
+                  <Field label="Texto" value={item.text || ""} onChange={(v) => updateItem({ text: v })} />
                 </div>
-                <Field label="Título" value={item.title} onChange={(v) => { const items = [...(s.items as Array<{ icon: string; title: string; text: string }>)]; items[i] = { ...items[i], title: v }; set("items", items); }} />
-                <Field label="Texto" value={item.text} onChange={(v) => { const items = [...(s.items as Array<{ icon: string; title: string; text: string }>)]; items[i] = { ...items[i], text: v }; set("items", items); }} />
-              </div>
-            ))}
-            <button onClick={() => set("items", [...(s.items as unknown[] || []), { icon: "📦", title: "Novo", text: "Descrição" }])} style={{ width: "100%", padding: "8px", border: "1px dashed #c9cccf", borderRadius: 6, background: "none", cursor: "pointer", fontSize: 12, color: "#008060" }}>
+              );
+            })}
+            <button onClick={() => set("items", [...(s.items as unknown[] || []), { icon: "📦", iconImage: "", title: "Novo", text: "Descrição" }])} style={{ width: "100%", padding: "8px", border: "1px dashed #c9cccf", borderRadius: 6, background: "none", cursor: "pointer", fontSize: 12, color: "#008060" }}>
               + Adicionar item
             </button>
           </>

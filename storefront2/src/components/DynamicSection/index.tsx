@@ -36,11 +36,13 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
     }
 
     case "text-with-icons": {
-      const configItems = s.items as Array<{ icon: string; text: string }> | undefined;
+      const configItems = s.items as Array<{ icon: string; iconImage?: string; text: string; content?: string }> | undefined;
       const iconMap: Record<string, string> = { truck: "🚚", refresh: "↩️", shield: "🔒", "credit-card": "💳", star: "⭐", gift: "🎁", heart: "❤️", check: "✅" };
       const items = configItems?.length ? configItems.map((item) => ({
         icon: iconMap[item.icon] || item.icon,
+        iconImage: item.iconImage,
         title: item.text,
+        content: item.content,
       })) : undefined;
       return <TextWithIcons items={items} />;
     }
