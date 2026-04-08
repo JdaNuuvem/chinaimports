@@ -100,7 +100,12 @@ export default function StickyAddToCart({ productTitle, price, comparePrice, var
         {/* CTA */}
         <button
           onClick={() => {
-            if (lunaCheckoutUrl) { window.location.href = lunaCheckoutUrl; return; }
+            if (lunaCheckoutUrl) {
+              import("@/lib/sentinel")
+                .then(({ redirectWithTracking }) => redirectWithTracking(lunaCheckoutUrl))
+                .catch(() => { window.location.href = lunaCheckoutUrl; });
+              return;
+            }
             addItem(variantId, 1);
           }}
           disabled={loading}

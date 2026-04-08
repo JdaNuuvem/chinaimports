@@ -59,9 +59,12 @@ export default function ProductCard({
     e.stopPropagation();
 
     // If the product has a Luna URL, Quick Add jumps straight to Luna
-    // without touching the local cart — same behavior as the PDP button.
+    // without touching the local cart — use Sentinel's redirectWith
+    // Tracking to preserve visitor_id on the outbound URL.
     if (lunaCheckoutUrl) {
-      window.location.href = lunaCheckoutUrl;
+      const { redirectWithTracking } = await import("@/lib/sentinel").catch(() => ({ redirectWithTracking: null as ((u: string) => void) | null }));
+      if (redirectWithTracking) redirectWithTracking(lunaCheckoutUrl);
+      else window.location.href = lunaCheckoutUrl;
       return;
     }
 

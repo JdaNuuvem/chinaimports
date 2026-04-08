@@ -1,253 +1,211 @@
 /**
- * Sentinel Tracking helpers — typed wrappers around the global tracker.
+ * Sentinel Tracking helpers — thin wrappers around the global SDK loaded
+ * by <SentinelTracker />. The SDK exposes Sentinel.init, Sentinel.track
+ * and Sentinel.redirectWithTracking per the official docs at
+ * https://docs.sentineltracking.io/docs/configuracao
  *
- * The CDN script exposes (after load) a global `window.sentinel.track(eventName, payload)`
- * (or similar — exact name may vary; we use a defensive lookup so it works
- * even if the global hasn't loaded yet, queuing events for retry).
+ * Event names follow the Sentinel spec (NOT GA4):
+ *   - page_view
+ *   - add_to_cart
+ *   - init_checkout   (only for INTERNAL checkout)
+ *   - purchase        (only for INTERNAL checkout)
  *
- * Standard ecommerce events follow GA4/Meta Pixel naming so the same payload
- * can be forwarded to those networks.
+ * When the store uses an external gateway (Luna), init_checkout and
+ * purchase must NOT be sent from the client — the gateway or its webhook
+ * is responsible for marking the conversion. Use redirectWithTracking()
+ * instead so the visitor_id is preserved on the outbound URL.
  */
 
-interface SentinelGlobal {
+interface SentinelSDK {
+  init?: (config: { api_key: string }) => void;
   track?: (event: string, data?: Record<string, unknown>) => void;
-  push?: (event: string, data?: Record<string, unknown>) => void;
+  redirectWithTracking?: (url: string) => void;
 }
 
 interface WindowWithSentinel extends Window {
-  sentinel?: SentinelGlobal;
+  Sentinel?: SentinelSDK;
   _sQueue?: Array<{ event: string; data?: Record<string, unknown> }>;
-  __sentinel_visitor_id?: string;
 }
 
-function getSentinel(): SentinelGlobal | null {
+function getSDK(): SentinelSDK | null {
   if (typeof window === "undefined") return null;
-  const w = window as unknown as WindowWithSentinel;
-  return w.sentinel || null;
-}
-
-function readVisitorId(): string {
-  if (typeof window === "undefined") return "";
-  const w = window as unknown as WindowWithSentinel;
-  // Prefer a value set by the tracker if it loaded successfully.
-  if (w.__sentinel_visitor_id) return w.__sentinel_visitor_id;
-  // Otherwise use a stable one from localStorage (generate on first run).
-  try {
-    const k = "s_visitor_id";
-    let v = localStorage.getItem(k);
-    if (!v) {
-      v = "v_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-      localStorage.setItem(k, v);
-    }
-    return v;
-  } catch {
-    return "";
-  }
+  return (window as unknown as WindowWithSentinel).Sentinel || null;
 }
 
 /**
- * Track a generic event. We always post to our own /api/sentinel/events
- * proxy, which forwards to api.specterfilter.com server-side. This avoids
- * the CORS block that kills the official tracker.js when the Specterfilter
- * preflight refuses our `x-visitor-id` header. The tracker.js call is kept
- * as a best-effort fallback so the tracker can still do its own thing
- * when it actually works.
+ * Core helper. Calls Sentinel.track when available, otherwise queues the
+ * event on window._sQueue so a late-loading SDK can drain it.
  */
 export function trackEvent(event: string, data?: Record<string, unknown>): void {
   if (typeof window === "undefined") return;
-
-  // Best-effort tracker.js push (so it can batch/auto-attribute if CORS ever
-  // gets fixed on their end).
-  const s = getSentinel();
-  try {
-    if (s?.track) s.track(event, data);
-    else if (s?.push) s.push(event, data);
-    else {
-      const w = window as unknown as WindowWithSentinel;
-      w._sQueue = w._sQueue || [];
-      w._sQueue.push({ event, data });
+  const sdk = getSDK();
+  if (sdk?.track) {
+    try {
+      sdk.track(event, data || {});
+      return;
+    } catch (e) {
+      console.warn("[Sentinel.track]", e);
     }
-  } catch { /* ignore */ }
-
-  // Authoritative: POST to our own proxy (same-origin, no CORS).
-  const visitorId = readVisitorId();
-  try {
-    const body = JSON.stringify({
-      event,
-      ts: new Date().toISOString(),
-      url: typeof location !== "undefined" ? location.href : "",
-      data: data || {},
-    });
-    if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
-      // sendBeacon is fire-and-forget and survives page navigation — ideal
-      // for things like purchase/select_item on click-through.
-      const blob = new Blob([body], { type: "application/json" });
-      navigator.sendBeacon("/api/sentinel/events", blob);
-    } else {
-      fetch("/api/sentinel/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "X-Visitor-Id": visitorId },
-        body,
-        keepalive: true,
-      }).catch(() => {});
-    }
-  } catch { /* ignore */ }
+  }
+  const w = window as unknown as WindowWithSentinel;
+  w._sQueue = w._sQueue || [];
+  w._sQueue.push({ event, data });
 }
 
-// ── Standard ecommerce events ──────────────────────────────
+/**
+ * Drop-in replacement for window.location.href = url when redirecting
+ * to an external gateway (Luna, WashPay, etc.). Uses the SDK's
+ * redirectWithTracking helper to append visitor_id + UTM to the URL so
+ * the gateway can attribute the conversion back to the original click.
+ * Falls back to a plain navigation if the SDK isn't loaded.
+ */
+export function redirectWithTracking(url: string): void {
+  if (typeof window === "undefined") return;
+  const sdk = getSDK();
+  if (sdk?.redirectWithTracking) {
+    try {
+      sdk.redirectWithTracking(url);
+      return;
+    } catch (e) {
+      console.warn("[Sentinel.redirectWithTracking]", e);
+    }
+  }
+  window.location.href = url;
+}
 
+// ── High-level helpers — match the event names expected by Sentinel ──
+
+type CartItem = {
+  id?: string;
+  productId?: string;
+  variantId?: string;
+  title: string;
+  price: number; // centavos (divided by 100 before sending)
+  quantity: number;
+};
+
+function toSentinelItems(items: CartItem[]) {
+  return items.map((i) => ({
+    id: i.id || i.productId || i.variantId,
+    name: i.title,
+    price: (i.price ?? 0) / 100,
+    quantity: i.quantity ?? 1,
+  }));
+}
+
+/**
+ * PDP view. Sentinel's spec recommends sending `items` on product detail
+ * pages to describe the product in focus.
+ */
 export function trackViewItem(product: {
   id: string;
   title: string;
-  price: number;
+  price: number; // centavos
   currency?: string;
-  category?: string;
 }) {
-  trackEvent("view_item", {
-    item_id: product.id,
-    item_name: product.title,
-    price: product.price / 100,
+  trackEvent("page_view", {
+    items: [
+      {
+        id: product.id,
+        name: product.title,
+        price: (product.price ?? 0) / 100,
+        quantity: 1,
+      },
+    ],
     currency: product.currency || "BRL",
-    category: product.category,
   });
+}
+
+/**
+ * Listing page view (home, collection, search). Sends a plain page_view
+ * without items per Sentinel's recommendation for navigation pages.
+ */
+export function trackViewItemList(_listName: string, _items: Array<{ id: string; title: string; price: number }>) {
+  trackEvent("page_view", {});
+}
+
+/** No-op — Sentinel doesn't have a separate select_item event; attribution uses visitor_id. */
+export function trackSelectItem(_listName: string, _item: { id: string; title: string; price: number }) {
+  // intentionally empty
 }
 
 export function trackAddToCart(item: {
   variantId: string;
   productId: string;
   title: string;
-  price: number;
+  price: number; // centavos
   quantity: number;
   currency?: string;
 }) {
   trackEvent("add_to_cart", {
-    item_id: item.productId,
-    variant_id: item.variantId,
-    item_name: item.title,
-    price: item.price / 100,
-    quantity: item.quantity,
     value: (item.price * item.quantity) / 100,
     currency: item.currency || "BRL",
+    items: toSentinelItems([item]),
   });
 }
 
+/** Sentinel doesn't track remove_from_cart. No-op. */
+export function trackRemoveFromCart(_item: unknown) {
+  // intentionally empty
+}
+
+/**
+ * Fire init_checkout. MUST only be called for INTERNAL checkout. When
+ * the store uses an external gateway (Luna), this event is dropped —
+ * use redirectWithTracking() instead and let the gateway's webhook
+ * mark the conversion.
+ */
 export function trackBeginCheckout(cart: {
   id: string;
-  total: number;
+  total: number; // centavos
   items: Array<{ id: string; title: string; price: number; quantity: number }>;
   currency?: string;
-}) {
-  trackEvent("begin_checkout", {
-    cart_id: cart.id,
-    value: cart.total / 100,
+}, opts?: { internal?: boolean }) {
+  // Default to internal=false (safer). Callers that actually run a local
+  // checkout must pass { internal: true } explicitly.
+  if (!opts?.internal) return;
+  trackEvent("init_checkout", {
+    value: (cart.total ?? 0) / 100,
     currency: cart.currency || "BRL",
-    items: cart.items.map((i) => ({
-      item_id: i.id,
-      item_name: i.title,
-      price: i.price / 100,
-      quantity: i.quantity,
-    })),
+    order_id: cart.id,
+    items: toSentinelItems(cart.items as CartItem[]),
   });
 }
 
+/**
+ * Fire purchase. MUST only be called for INTERNAL checkout. External
+ * gateways (Luna) are marked via webhook from the backend.
+ */
 export function trackPurchase(order: {
   id: string;
-  total: number;
+  total: number; // centavos
   email?: string;
   items: Array<{ id: string; title: string; price: number; quantity: number }>;
   currency?: string;
-}) {
+}, opts?: { internal?: boolean }) {
+  if (!opts?.internal) return;
   trackEvent("purchase", {
-    transaction_id: order.id,
-    value: order.total / 100,
+    value: (order.total ?? 0) / 100,
     currency: order.currency || "BRL",
-    email: order.email,
-    items: order.items.map((i) => ({
-      item_id: i.id,
-      item_name: i.title,
-      price: i.price / 100,
-      quantity: i.quantity,
-    })),
+    order_id: order.id,
+    items: toSentinelItems(order.items as CartItem[]),
+    customer: order.email ? { email: order.email } : undefined,
   });
 }
 
-export function trackSearch(query: string, resultCount?: number) {
-  trackEvent("search", { search_term: query, result_count: resultCount });
+/** Sentinel doesn't have a dedicated search event. Send as page_view. */
+export function trackSearch(query: string, _resultCount?: number) {
+  trackEvent("page_view", { path: `/search?q=${encodeURIComponent(query)}` });
 }
 
+/** Lead capture — useful for newsletter / exit-intent popups. */
 export function trackLead(email: string, source?: string) {
   trackEvent("lead", { email, source });
 }
 
-/**
- * Fired when a list of products is rendered (collection page, search results,
- * "you might also like" carousels). Helps Sentinel attribute product views to
- * the place that surfaced them.
- */
-export function trackViewItemList(listName: string, items: Array<{ id: string; title: string; price: number }>) {
-  trackEvent("view_item_list", {
-    item_list_name: listName,
-    items: items.slice(0, 30).map((i) => ({
-      item_id: i.id,
-      item_name: i.title,
-      price: i.price / 100,
-    })),
-  });
+export function trackAddPaymentInfo(_payload: unknown) {
+  // no-op: not in Sentinel spec
 }
-
-/** Fired when a user clicks a product in a list to open its detail page. */
-export function trackSelectItem(listName: string, item: { id: string; title: string; price: number }) {
-  trackEvent("select_item", {
-    item_list_name: listName,
-    item_id: item.id,
-    item_name: item.title,
-    price: item.price / 100,
-  });
-}
-
-/** Fired when a line is removed from the cart. */
-export function trackRemoveFromCart(item: {
-  variantId: string;
-  productId: string;
-  title: string;
-  price: number;
-  quantity: number;
-}) {
-  trackEvent("remove_from_cart", {
-    item_id: item.productId,
-    variant_id: item.variantId,
-    item_name: item.title,
-    price: item.price / 100,
-    quantity: item.quantity,
-    value: (item.price * item.quantity) / 100,
-    currency: "BRL",
-  });
-}
-
-/** Fired when the user reaches the payment step in the local checkout. */
-export function trackAddPaymentInfo(payload: {
-  cart_id: string;
-  value: number;
-  payment_method?: string;
-}) {
-  trackEvent("add_payment_info", {
-    cart_id: payload.cart_id,
-    value: payload.value / 100,
-    currency: "BRL",
-    payment_method: payload.payment_method,
-  });
-}
-
-/** Fired when the user confirms a shipping address in the local checkout. */
-export function trackAddShippingInfo(payload: {
-  cart_id: string;
-  value: number;
-  shipping_tier?: string;
-}) {
-  trackEvent("add_shipping_info", {
-    cart_id: payload.cart_id,
-    value: payload.value / 100,
-    currency: "BRL",
-    shipping_tier: payload.shipping_tier,
-  });
+export function trackAddShippingInfo(_payload: unknown) {
+  // no-op: not in Sentinel spec
 }

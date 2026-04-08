@@ -38,9 +38,10 @@ export default function CheckoutPage() {
   const lunaConfig = (config as unknown as Record<string, unknown>).checkout as { provider?: string; lunaCheckoutUrl?: string } | undefined;
   useEffect(() => {
     if (lunaConfig?.provider === "luna" && lunaConfig.lunaCheckoutUrl && lunaConfig.lunaCheckoutUrl !== "https://sua-loja.lunacheckout.com") {
-      // Build Luna checkout URL with cart items as query params
       const lunaUrl = lunaConfig.lunaCheckoutUrl;
-      window.location.href = lunaUrl;
+      import("@/lib/sentinel")
+        .then(({ redirectWithTracking }) => redirectWithTracking(lunaUrl))
+        .catch(() => { window.location.href = lunaUrl; });
     }
   }, [lunaConfig]);
 

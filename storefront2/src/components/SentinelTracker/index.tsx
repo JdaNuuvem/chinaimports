@@ -6,13 +6,14 @@ interface SentinelTrackerProps {
 }
 
 /**
- * Build the inline Sentinel config IIFE. Exported for unit testing.
- * The returned string preserves UTM params across SPA navigation via
- * localStorage `s_a`, exposes `window.__sentinel_landing`, and sets
- * `window._sCfg = { api_key }` so the tracker script can read it.
+ * Inline script that calls Sentinel.init({api_key}) as soon as the tracker
+ * loads. This is the contract documented at
+ * https://docs.sentineltracking.io/docs/configuracao/implementacao-direta
+ * — the SDK exposes a global `Sentinel` with `init`, `track` and
+ * `redirectWithTracking` helpers after its script runs.
  */
-export function buildSentinelConfigScript(apiKey: string): string {
-  return `(function(){var s=location.search,h=location.href;try{if(!/[?&]utm_/.test(s)){var sa=localStorage.getItem("s_a");if(sa){var a=JSON.parse(sa);if(a&&a.utm_source){var p=new URLSearchParams(s);["utm_source","utm_medium","utm_campaign","utm_content","utm_term","click_id","pixel_id","gclid","fbclid"].forEach(function(k){if(a[k]&&!p.has(k))p.set(k,a[k])});s="?"+p.toString();h=h.split("?")[0]+s}}}}catch(e){}window.__sentinel_landing={search:s,href:h};window._sCfg={api_key:${JSON.stringify(apiKey)}};})()`;
+export function buildSentinelInitScript(apiKey: string): string {
+  return `(function(){function init(){try{if(window.Sentinel&&typeof window.Sentinel.init==='function'){window.Sentinel.init({api_key:${JSON.stringify(apiKey)}});}}catch(e){console.warn('[Sentinel init]',e);}}if(window.Sentinel)init();else{var t=setInterval(function(){if(window.Sentinel){clearInterval(t);init();}},100);setTimeout(function(){clearInterval(t);},10000);}})();`;
 }
 
 export const SENTINEL_TRACKER_SRC = "https://cdn.sentineltracking.io/latest/tracker.js";
@@ -20,52 +21,37 @@ export const SENTINEL_TRACKER_SRC = "https://cdn.sentineltracking.io/latest/trac
 /**
  * Sentinel Tracking — https://docs.sentineltracking.io
  *
- * Loads two scripts:
- *   1. Inline `sentinel-config` (beforeInteractive) — restores UTM params from
- *      previous landing (stored in localStorage `s_a`), exposes
- *      `window.__sentinel_landing` + `window._sCfg = { api_key }` so the tracker
- *      can pick them up. This must run BEFORE the tracker so attribution is
- *      preserved across SPA navigations and across sessions.
- *   2. `sentinel-tracker` (beforeInteractive) — fetches the actual tracker
- *      from the Sentinel CDN. It auto-tracks page views, clicks, form
- *      submissions, etc., and reads its config from `window._sCfg`.
+ * Loads the official SDK from cdn.sentineltracking.io and calls
+ * Sentinel.init({api_key}) once it's ready. The SDK handles:
+ *   - generating / persisting visitor_id in localStorage
+ *   - preserving UTM / click_id / gclid / fbclid / ttclid across navigations
+ *   - auto-sending page_view on first load
+ *   - exposing Sentinel.track(event, data) for explicit events
+ *   - exposing Sentinel.redirectWithTracking(url) to forward visitor_id
+ *     through external checkout URLs (Luna, etc.)
  *
- * Env var: NEXT_PUBLIC_SENTINEL_API_KEY (must start with `sk_`)
+ * Events are sent to the tenant-specific ingest endpoint configured in
+ * the Sentinel dashboard. No manual proxy or config file needed.
  *
  * No-op if `apiKey` is missing.
  */
 export default function SentinelTracker({ apiKey, nonce }: SentinelTrackerProps) {
   if (!apiKey) return null;
 
-  const configScript = buildSentinelConfigScript(apiKey);
-
-  // NOTE: the tracker.js script at cdn.sentineltracking.io posts to
-  // api.specterfilter.com, which rejects the preflight because it doesn't
-  // whitelist the custom `x-visitor-id` header. Every request it makes
-  // floods the console with CORS errors and accomplishes nothing.
-  //
-  // We skip loading it and route events through /api/sentinel/events
-  // (a same-origin Next.js API proxy that forwards to specterfilter
-  // server-side). To re-enable the autonomous tracker, set
-  // NEXT_PUBLIC_SENTINEL_AUTO=1 at build time.
-  const autoTracker = process.env.NEXT_PUBLIC_SENTINEL_AUTO === "1";
-
   return (
     <>
       <Script
-        id="sentinel-config"
-        strategy="beforeInteractive"
+        id="sentinel-tracker"
+        strategy="afterInteractive"
         nonce={nonce}
-        dangerouslySetInnerHTML={{ __html: configScript }}
+        src={SENTINEL_TRACKER_SRC}
       />
-      {autoTracker && (
-        <Script
-          id="sentinel-tracker"
-          strategy="beforeInteractive"
-          nonce={nonce}
-          src={SENTINEL_TRACKER_SRC}
-        />
-      )}
+      <Script
+        id="sentinel-init"
+        strategy="afterInteractive"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: buildSentinelInitScript(apiKey) }}
+      />
     </>
   );
 }

@@ -300,8 +300,12 @@ export default function ProductInfo({ product, onVariantChange }: ProductInfoPro
         aria-disabled={loading || !canBuy}
         onClick={async () => {
           // Luna URL set → always skip cart and go straight to Luna.
+          // Use Sentinel.redirectWithTracking so visitor_id + UTM are
+          // appended to the outbound URL for attribution.
           if (lunaCheckoutUrl) {
-            window.location.href = lunaCheckoutUrl;
+            import("@/lib/sentinel")
+              .then(({ redirectWithTracking }) => redirectWithTracking(lunaCheckoutUrl))
+              .catch(() => { window.location.href = lunaCheckoutUrl; });
             return;
           }
           if (!selectedVariant || !inStock) return;
