@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import { formatMoney, calculateDiscount } from "@/lib/utils";
 import { getThemeConfig } from "@/lib/theme-config";
@@ -80,14 +80,25 @@ export default function ProductInfo({ product, onVariantChange }: ProductInfoPro
     return Math.abs(hash % 20) + 5;
   });
 
-  // Simulated review count
-  let reviewHash = 0;
-  for (let i = 0; i < product.id.length; i++) {
-    reviewHash = ((reviewHash << 3) - reviewHash) + product.id.charCodeAt(i);
-    reviewHash |= 0;
-  }
-  const reviewCount = Math.abs(reviewHash % 80) + 10;
-  const rating = 4.5 + (Math.abs(reviewHash % 5) / 10);
+  // Real review count + average rating, fetched from the backend.
+  // Falls back to 0/0 until the request resolves so the UI never shows
+  // a fake number while loading.
+  const [reviewCount, setReviewCount] = useState<number>(0);
+  const [rating, setRating] = useState<number>(0);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/medusa/store/products/${product.id}/reviews?limit=1`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        setReviewCount(Number(data.total) || 0);
+        setRating(Number(data.averageRating) || 0);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [product.id]);
 
   const selectOption = (optionTitle: string, value: string) => {
     const newSelected = { ...selectedOptions, [optionTitle]: value };
