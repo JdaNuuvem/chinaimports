@@ -5763,7 +5763,7 @@ select::-ms-expand {
 
 @media screen and (min-width: 1280px) {
   .header__action-item {
-    padding: 0 35px;
+    padding: 0 12px;
   }
 
   .header__action-item:last-child {
