@@ -24,7 +24,14 @@ export default async function FeaturedCollection({
     title: string;
     handle: string;
     thumbnail: string | null;
-    variants: Array<{ prices: Array<{ amount: number }>; original_price: number | null }>;
+    luna_checkout_url?: string | null;
+    skip_cart?: boolean;
+    variants: Array<{
+      id?: string;
+      prices: Array<{ amount: number }>;
+      original_price: number | null;
+      inventory_quantity?: number;
+    }>;
   }>).slice(0, productsToShow);
 
   return (
