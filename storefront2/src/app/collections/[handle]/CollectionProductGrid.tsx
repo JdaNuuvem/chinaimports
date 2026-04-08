@@ -140,6 +140,8 @@ export default function CollectionProductGrid({ products }: Props) {
               variantId={product.variants?.[0]?.id}
               inStock={(product.variants?.[0]?.inventory_quantity ?? 0) > 0}
               inventoryQuantity={product.variants?.[0]?.inventory_quantity}
+              lunaCheckoutUrl={(product as Product & { luna_checkout_url?: string | null }).luna_checkout_url}
+              skipCart={(product as Product & { skip_cart?: boolean }).skip_cart}
             />
           ))}
         </div>

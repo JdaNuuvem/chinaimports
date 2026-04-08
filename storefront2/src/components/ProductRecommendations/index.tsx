@@ -30,6 +30,11 @@ export default async function ProductRecommendations({ title = "Você também po
               thumbnail={p.thumbnail}
               price={p.variants?.[0]?.prices?.[0]?.amount ?? 0}
               compareAtPrice={p.variants?.[0]?.original_price}
+              variantId={p.variants?.[0]?.id}
+              inStock={(p.variants?.[0]?.inventory_quantity ?? 0) > 0}
+              inventoryQuantity={p.variants?.[0]?.inventory_quantity}
+              lunaCheckoutUrl={(p as { luna_checkout_url?: string | null }).luna_checkout_url}
+              skipCart={(p as { skip_cart?: boolean }).skip_cart}
             />
           ))}
         </div>

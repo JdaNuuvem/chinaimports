@@ -58,6 +58,11 @@ export default async function FeaturedCollection({
               thumbnail={product.thumbnail}
               price={product.variants?.[0]?.prices?.[0]?.amount ?? 0}
               compareAtPrice={product.variants?.[0]?.original_price}
+              variantId={product.variants?.[0]?.id}
+              inStock={(product.variants?.[0]?.inventory_quantity ?? 0) > 0}
+              inventoryQuantity={product.variants?.[0]?.inventory_quantity}
+              lunaCheckoutUrl={(product as { luna_checkout_url?: string | null }).luna_checkout_url}
+              skipCart={(product as { skip_cart?: boolean }).skip_cart}
             />
           ))}
         </div>

@@ -20,6 +20,10 @@ interface ProductCardProps {
   inStock?: boolean;
   /** Total stock for the displayed variant. Renders "Última peça" badge when ≤ 3. */
   inventoryQuantity?: number;
+  /** Per-product Luna checkout URL. When set, Quick Add bypasses the cart. */
+  lunaCheckoutUrl?: string | null;
+  /** When true, Quick Add adds the item then jumps to /checkout. */
+  skipCart?: boolean;
 }
 
 const LOW_STOCK_THRESHOLD = 3;
@@ -36,6 +40,8 @@ export default function ProductCard({
   variantId,
   inStock = true,
   inventoryQuantity,
+  lunaCheckoutUrl,
+  skipCart,
 }: ProductCardProps) {
   const isLowStock =
     inStock &&
@@ -51,10 +57,23 @@ export default function ProductCard({
   const handleQuickAdd = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // If the product has a Luna URL, Quick Add jumps straight to Luna
+    // without touching the local cart — same behavior as the PDP button.
+    if (lunaCheckoutUrl) {
+      window.location.href = lunaCheckoutUrl;
+      return;
+    }
+
     if (!variantId || !inStock) return;
     await addItem(variantId, 1);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+
+    // skipCart without a Luna URL: open the local checkout directly.
+    if (skipCart) {
+      window.location.href = "/checkout";
+    }
   };
 
   // Fire select_item when the user clicks the card to open the PDP
