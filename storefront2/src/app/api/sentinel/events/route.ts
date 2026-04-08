@@ -3,56 +3,42 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 /**
- * Server-side proxy for Sentinel events.
+ * Proxy client-side Sentinel events to the Express backend, which has
+ * access to SENTINEL_API_KEY via the settings table and will forward
+ * the event to api.specterfilter.com using the existing
+ * forwardToSentinel helper.
  *
- * The Sentinel tracker.js on the client side hits
- * https://api.specterfilter.com/sentinel-bff/api/events, but that endpoint
- * refuses our `x-visitor-id` header in its CORS preflight, so every
- * browser-originated request is blocked. This route accepts the same
- * payloads from our own origin and forwards them to specterfilter from
- * the server, where CORS doesn't apply.
- *
- * The SENTINEL_API_KEY is read server-side via an env var so it never
- * leaves the Node process.
+ * Going through the backend (instead of calling specterfilter directly
+ * from this Next.js route) keeps the secret in one place and bypasses
+ * the Specterfilter CORS block on the browser side.
  */
 export async function POST(request: NextRequest) {
   try {
-    const apiKey = process.env.NEXT_PUBLIC_SENTINEL_API_KEY || process.env.SENTINEL_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json({ ok: false, reason: "no_api_key" }, { status: 200 });
-    }
+    const backendUrl =
+      process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
 
-    const ingestUrl =
-      process.env.SENTINEL_INGEST_URL ||
-      "https://api.specterfilter.com/sentinel-bff/api/events";
-
-    // Forward the client payload plus useful headers for attribution.
     const body = await request.text();
     const visitorId = request.headers.get("x-visitor-id") || "";
     const userAgent = request.headers.get("user-agent") || "";
     const referer = request.headers.get("referer") || "";
 
-    const proxied = await fetch(ingestUrl, {
+    await fetch(`${backendUrl}/store/sentinel/events`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
         "X-Visitor-Id": visitorId,
-        "X-Sentinel-Source": "storefront_proxy",
         "User-Agent": userAgent,
         Referer: referer,
       },
       body,
     }).catch((e) => {
-      console.warn("[SENTINEL PROXY] fetch error", (e as Error).message);
-      return null;
+      console.warn("[SENTINEL PROXY] backend fetch error", (e as Error).message);
     });
 
-    if (!proxied) {
-      return NextResponse.json({ ok: false, reason: "upstream_error" }, { status: 200 });
-    }
-
-    return NextResponse.json({ ok: proxied.ok, status: proxied.status }, { status: 200 });
+    // Always 200 — we don't want a failing Sentinel ingest to break the
+    // storefront UX. navigator.sendBeacon doesn't care about the status
+    // code either.
+    return NextResponse.json({ ok: true }, { status: 200 });
   } catch (e) {
     console.error("[SENTINEL PROXY]", e);
     return NextResponse.json({ ok: false }, { status: 200 });

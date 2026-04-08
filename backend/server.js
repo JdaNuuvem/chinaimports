@@ -2391,6 +2391,37 @@ async function forwardToSentinel(event, payload) {
   }
 }
 
+// Public — storefront proxies client-side Sentinel events here so we can
+// add the API key server-side without exposing it to the browser.
+app.post("/store/sentinel/events", async (req, res) => {
+  try {
+    const { event, data, ts, url: pageUrl } = req.body || {};
+    if (!event) {
+      return res.status(400).json({ error: "Missing event field" });
+    }
+    const visitorId = req.headers["x-visitor-id"] || null;
+    const userAgent = req.headers["user-agent"] || null;
+    const referer = req.headers.referer || pageUrl || null;
+
+    // Fire-and-forget: ack the client immediately so the pageload isn't
+    // blocked on Sentinel latency.
+    forwardToSentinel(event, {
+      source: "storefront_client",
+      ts: ts || new Date().toISOString(),
+      visitor_id: visitorId,
+      user_agent: userAgent,
+      referer,
+      url: pageUrl,
+      ...(data || {}),
+    }).catch(() => {});
+
+    res.json({ received: true });
+  } catch (e) {
+    console.error("[STOREFRONT SENTINEL]", e.message);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
 // ══════════════════════════════════════
 // LUNA CHECKOUT WEBHOOKS
 // ══════════════════════════════════════
