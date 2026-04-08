@@ -11,7 +11,13 @@ export default function MiniCart() {
   return (
     <>
       {cartOpen && <div className="modal__overlay" onClick={() => setCartOpen(false)} />}
-      <div className={`mini-cart ${cartOpen ? "is-open" : ""}`} aria-hidden={!cartOpen}>
+      <div
+        className={`mini-cart ${cartOpen ? "is-open" : ""}`}
+        // `inert` removes the subtree from focus + a11y entirely when
+        // closed. Using aria-hidden breaks focus when a descendant still
+        // had focus at the moment we hid it (React warns).
+        {...(!cartOpen ? ({ inert: "true" } as unknown as Record<string, string>) : {})}
+      >
         <div className="mini-cart__header">
           <h2 className="mini-cart__title heading h4">Carrinho</h2>
           <button onClick={() => setCartOpen(false)} aria-label="Fechar">
