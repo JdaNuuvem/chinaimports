@@ -40,9 +40,14 @@ const DEMO_REVIEWS: Review[] = [
   { id: "r12", author: "Felipe R.", rating: 5, title: "Qualidade incrível", body: "Compra perfeita do início ao fim. Produto é tudo que eu esperava e mais.", date: "2026-03-27" },
 ];
 
+type ReviewSort = "recent" | "high" | "low";
+type ReviewFilter = "all" | "with_photos" | "5" | "4" | "3" | "2" | "1";
+
 export default function ProductReviews({ productId, reviews: propReviews }: ProductReviewsProps) {
   const [reviews, setReviews] = useState<Review[]>(propReviews || DEMO_REVIEWS);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+  const [sort, setSort] = useState<ReviewSort>("recent");
+  const [filter, setFilter] = useState<ReviewFilter>("all");
 
   // Close lightbox on Escape and lock body scroll
   useEffect(() => {
@@ -90,6 +95,26 @@ export default function ProductReviews({ productId, reviews: propReviews }: Prod
     return d.toLocaleDateString("pt-BR");
   };
 
+  // Apply filter + sort
+  const filteredReviews = reviews.filter((r) => {
+    if (filter === "all") return true;
+    if (filter === "with_photos") return parseImages(r.images).length > 0;
+    return r.rating === Number(filter);
+  });
+  const sortedReviews = [...filteredReviews].sort((a, b) => {
+    if (sort === "recent") {
+      const da = new Date(a.date || a.createdAt || 0).getTime();
+      const db = new Date(b.date || b.createdAt || 0).getTime();
+      return db - da;
+    }
+    if (sort === "high") return b.rating - a.rating;
+    if (sort === "low") return a.rating - b.rating;
+    return 0;
+  });
+
+  // Aggregate all photos for the top gallery
+  const allPhotos = reviews.flatMap((r) => parseImages(r.images));
+
   return (
     <div id="product-reviews">
       <style dangerouslySetInnerHTML={{ __html: `
@@ -118,9 +143,77 @@ export default function ProductReviews({ productId, reviews: propReviews }: Prod
         </div>
       </div>
 
+      {/* Photo gallery — all review photos in a horizontal scroll */}
+      {allPhotos.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ fontSize: 14, fontWeight: 700, color: "#1a1c1e", marginBottom: 10 }}>
+            Fotos dos clientes ({allPhotos.length})
+          </p>
+          <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 8, scrollbarWidth: "thin" }}>
+            {allPhotos.map((img, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setLightbox({ images: allPhotos, index: i })}
+                aria-label={`Foto de cliente ${i + 1}`}
+                style={{
+                  width: 110, height: 110, flexShrink: 0,
+                  borderRadius: 10, overflow: "hidden",
+                  border: "1px solid #e5e7eb", padding: 0,
+                  background: "#fff", cursor: "zoom-in",
+                }}
+              >
+                <img src={img} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Filter + sort controls */}
+      {reviews.length > 0 && (
+        <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as ReviewFilter)}
+            style={{
+              padding: "8px 12px", borderRadius: 8,
+              border: "1px solid #e5e7eb", background: "#fff",
+              fontSize: 13, cursor: "pointer",
+            }}
+          >
+            <option value="all">Todas as avaliações</option>
+            <option value="with_photos">Apenas com fotos</option>
+            <option value="5">5 estrelas</option>
+            <option value="4">4 estrelas</option>
+            <option value="3">3 estrelas</option>
+            <option value="2">2 estrelas</option>
+            <option value="1">1 estrela</option>
+          </select>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as ReviewSort)}
+            style={{
+              padding: "8px 12px", borderRadius: 8,
+              border: "1px solid #e5e7eb", background: "#fff",
+              fontSize: 13, cursor: "pointer",
+            }}
+          >
+            <option value="recent">Mais recentes</option>
+            <option value="high">Melhor avaliação</option>
+            <option value="low">Pior avaliação</option>
+          </select>
+          {filter !== "all" && (
+            <span style={{ alignSelf: "center", fontSize: 12, color: "#6b7280" }}>
+              Mostrando {sortedReviews.length} de {reviews.length}
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Review cards — vertical list */}
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {reviews.map((review, idx) => {
+        {sortedReviews.map((review, idx) => {
           const imgs = parseImages(review.images);
           const initial = review.author.charAt(0).toUpperCase();
           return (
