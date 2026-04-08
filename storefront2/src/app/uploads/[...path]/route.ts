@@ -56,20 +56,42 @@ export async function GET(
       return NextResponse.json({ error: "Invalid path" }, { status: 400 });
     }
 
-    if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const contentType = MIME[ext];
+
+    if (fs.existsSync(resolved) && fs.statSync(resolved).isFile()) {
+      const data = fs.readFileSync(resolved);
+      return new NextResponse(new Uint8Array(data), {
+        status: 200,
+        headers: {
+          "Content-Type": contentType,
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
     }
 
-    const contentType = MIME[ext];
-    const data = fs.readFileSync(resolved);
+    // Fallback: forward to the backend Express server, which has its own
+    // /uploads/ tree (e.g. /uploads/products/* from product imports).
+    const backendUrl =
+      process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL ||
+      process.env.MEDUSA_BACKEND_URL ||
+      "http://localhost:9000";
+    try {
+      const proxied = await fetch(`${backendUrl}/uploads/${joined}`);
+      if (proxied.ok) {
+        const buf = Buffer.from(await proxied.arrayBuffer());
+        return new NextResponse(new Uint8Array(buf), {
+          status: 200,
+          headers: {
+            "Content-Type": proxied.headers.get("content-type") || contentType,
+            "Cache-Control": "public, max-age=31536000, immutable",
+          },
+        });
+      }
+    } catch {
+      // fall through to 404
+    }
 
-    return new NextResponse(new Uint8Array(data), {
-      status: 200,
-      headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000, immutable",
-      },
-    });
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   } catch {
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
