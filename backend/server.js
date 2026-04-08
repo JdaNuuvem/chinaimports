@@ -1337,12 +1337,33 @@ app.post("/store/carts/:id", async (req, res) => {
 app.post("/store/carts/:id/line-items", validate(cartLineItemSchema), async (req, res) => {
   try {
     const { variant_id, quantity = 1 } = req.body;
+
+    // Pre-validate the variant + cart exist so we return clean 4xx errors
+    // instead of leaking Prisma FK constraint stack traces.
+    const [variantExists, cartExists] = await Promise.all([
+      prisma.variant.findUnique({ where: { id: variant_id }, select: { id: true } }),
+      prisma.cart.findUnique({ where: { id: req.params.id }, select: { id: true } }),
+    ]);
+    if (!cartExists) {
+      return res.status(404).json({ error: "Cart not found", code: "cart_not_found" });
+    }
+    if (!variantExists) {
+      return res.status(400).json({
+        error: "Produto indisponível",
+        code: "variant_not_found",
+        details: "Esta variante não existe mais. Atualize a página e tente novamente.",
+      });
+    }
+
     const existing = await prisma.cartItem.findUnique({ where: { cartId_variantId: { cartId: req.params.id, variantId: variant_id } } });
     if (existing) { await prisma.cartItem.update({ where: { id: existing.id }, data: { quantity: existing.quantity + quantity } }); }
     else { await prisma.cartItem.create({ data: { cartId: req.params.id, variantId: variant_id, quantity } }); }
     const cart = await prisma.cart.findUnique({ where: { id: req.params.id }, include: cartInclude });
     res.json({ cart: formatCart(cart) });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  } catch (e) {
+    console.error("[CART LINE-ITEMS]", e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.post("/store/carts/:id/line-items/:itemId", async (req, res) => {

@@ -50,6 +50,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     : null;
 
   const displayProduct = product || fallbackProduct;
+  const isFallback = !product && !!fallbackProduct;
 
   if (!displayProduct) {
     return (
@@ -60,6 +61,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </p>
       </div>
     );
+  }
+
+  // Fallback products live in the bundled JSON snapshot — their variant
+  // IDs are not in the live database, so we can't add them to the cart.
+  // Mark every variant as zero-stock so the buy button shows "Indisponível".
+  if (isFallback) {
+    displayProduct.variants = (displayProduct.variants || []).map((v) => ({
+      ...v,
+      inventory_quantity: 0,
+    }));
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://importschinabrasil.com.br";
@@ -79,6 +90,20 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 20px" }}>
         {result.degraded && <DegradedBanner />}
+
+        {isFallback && (
+          <div style={{
+            margin: "16px 0",
+            padding: "12px 16px",
+            background: "#fef3c7",
+            border: "1px solid #fcd34d",
+            borderRadius: 8,
+            color: "#92400e",
+            fontSize: 14,
+          }}>
+            <strong>Produto temporariamente indisponível.</strong> Estamos sincronizando o catálogo. Você ainda pode visualizar as informações abaixo, mas a compra está desabilitada no momento.
+          </div>
+        )}
 
         {/* Breadcrumb */}
         <div style={{ padding: "12px 0" }}>
