@@ -2913,7 +2913,7 @@ app.post("/admin/reset-data", authenticateAdmin, async (req, res) => {
     }
 
     if (all || targets.includes("newsletters")) {
-      const newsletters = await prisma.newsletter.deleteMany({});
+      const newsletters = await prisma.newsletterSubscriber.deleteMany({});
       deleted.newsletters = newsletters.count;
     }
 
