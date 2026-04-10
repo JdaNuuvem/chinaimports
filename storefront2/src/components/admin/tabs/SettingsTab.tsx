@@ -34,6 +34,110 @@ function SecretField({ label, field, helpText, placeholder, value, onChange, isV
   );
 }
 
+function ResetData({ backendUrl, token }: { backendUrl: string; token?: string }) {
+  const [selected, setSelected] = useState<Record<string, boolean>>({
+    orders: false,
+    customers: false,
+    carts: false,
+    reviews: false,
+    newsletters: false,
+    coupons: false,
+    products: false,
+  });
+  const [resetting, setResetting] = useState(false);
+  const [result, setResult] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  const labels: Record<string, string> = {
+    orders: "Pedidos e itens",
+    customers: "Clientes",
+    carts: "Carrinhos",
+    reviews: "Avaliações",
+    newsletters: "Newsletter",
+    coupons: "Cupons",
+    products: "Produtos (inclui variantes e imagens)",
+  };
+
+  const anySelected = Object.values(selected).some(Boolean);
+
+  const handleReset = async () => {
+    const targets = Object.entries(selected).filter(([, v]) => v).map(([k]) => k);
+    if (targets.length === 0) return;
+
+    const names = targets.map((t) => labels[t] || t).join(", ");
+    if (!confirm(`ATENÇÃO: Você vai apagar permanentemente: ${names}.\n\nEssa ação NÃO pode ser desfeita. Continuar?`)) return;
+    if (!confirm("Tem CERTEZA ABSOLUTA? Todos os dados selecionados serão perdidos.")) return;
+
+    setResetting(true);
+    setResult(null);
+    try {
+      const res = await fetch(`${backendUrl}/admin/reset-data`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ targets }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const summary = Object.entries(data.deleted || {}).map(([k, v]) => `${k}: ${v}`).join(", ");
+        setResult({ text: `Dados apagados com sucesso! (${summary})`, type: "success" });
+        setSelected({ orders: false, customers: false, carts: false, reviews: false, newsletters: false, coupons: false, products: false });
+      } else {
+        setResult({ text: data.error || "Erro ao apagar dados", type: "error" });
+      }
+    } catch {
+      setResult({ text: "Erro de conexão com o backend", type: "error" });
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  return (
+    <div>
+      <div style={{ background: "#fef3f2", border: "1px solid #fead9a", borderRadius: 8, padding: 14, marginBottom: 16, fontSize: 12, lineHeight: 1.8 }}>
+        <strong>Cuidado:</strong> Esta ação apaga dados permanentemente do banco de dados. Selecione apenas o que deseja remover. Recomendamos exportar os dados antes de apagar.
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 16 }}>
+        {Object.entries(labels).map(([key, label]) => (
+          <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", border: `1px solid ${selected[key] ? "#dc2626" : "#e5e7eb"}`, borderRadius: 8, cursor: "pointer", background: selected[key] ? "#fef3f2" : "#fff", fontSize: 13 }}>
+            <input
+              type="checkbox"
+              checked={selected[key]}
+              onChange={(e) => setSelected({ ...selected, [key]: e.target.checked })}
+              style={{ accentColor: "#dc2626" }}
+            />
+            {label}
+          </label>
+        ))}
+      </div>
+
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+        <button
+          onClick={() => setSelected({ orders: true, customers: true, carts: true, reviews: true, newsletters: true, coupons: true, products: false })}
+          style={{ padding: "8px 16px", border: "1px solid #c9cccf", borderRadius: 8, background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 600 }}
+        >
+          Selecionar tudo (exceto produtos)
+        </button>
+        <button
+          onClick={handleReset}
+          disabled={!anySelected || resetting}
+          style={{ padding: "10px 24px", background: anySelected ? "#dc2626" : "#e5e7eb", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: anySelected && !resetting ? "pointer" : "not-allowed" }}
+        >
+          {resetting ? "Apagando..." : "Apagar dados selecionados"}
+        </button>
+      </div>
+
+      {result && (
+        <div style={{ marginTop: 12, padding: "10px 16px", borderRadius: 8, fontSize: 13, background: result.type === "success" ? "#f1f8f5" : "#fef3f2", color: result.type === "success" ? "#1a7346" : "#d72c0d", border: `1px solid ${result.type === "success" ? "#aee9d1" : "#fead9a"}` }}>
+          {result.text}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function SettingsTab({ backendUrl, token }: { backendUrl: string; token?: string }) {
   const [keys, setKeys] = useState({
     lunaCheckoutUrl: "",
@@ -212,6 +316,11 @@ export default function SettingsTab({ backendUrl, token }: { backendUrl: string;
       {/* Export Data */}
       <Section title="Exportar Dados" description="Baixe produtos, pedidos ou clientes em formato CSV.">
         <ExportData backendUrl={backendUrl} token={token} />
+      </Section>
+
+      {/* Reset Data */}
+      <Section title="Zerar Dados" description="Apague dados da loja. Esta ação é irreversível.">
+        <ResetData backendUrl={backendUrl} token={token} />
       </Section>
 
       {/* Activity Log */}

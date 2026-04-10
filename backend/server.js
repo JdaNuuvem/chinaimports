@@ -2863,6 +2863,83 @@ app.post("/store/auth/reset-password/confirm", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ══════════════════════════════════════
+// ADMIN — Reset Store Data
+// ══════════════════════════════════════
+app.post("/admin/reset-data", authenticateAdmin, async (req, res) => {
+  try {
+    const { targets } = req.body; // e.g. ["orders", "customers", "carts", "reviews", "all"]
+    if (!targets || !Array.isArray(targets) || targets.length === 0) {
+      return res.status(400).json({ error: "Informe quais dados apagar: orders, customers, carts, reviews, newsletters, coupons, all" });
+    }
+
+    const all = targets.includes("all");
+    const deleted = {};
+
+    // Order matters: delete children before parents
+    if (all || targets.includes("orders")) {
+      const items = await prisma.orderItem.deleteMany({});
+      const orders = await prisma.order.deleteMany({});
+      deleted.orderItems = items.count;
+      deleted.orders = orders.count;
+    }
+
+    if (all || targets.includes("carts")) {
+      const cartItems = await prisma.cartItem.deleteMany({});
+      const carts = await prisma.cart.deleteMany({});
+      deleted.cartItems = cartItems.count;
+      deleted.carts = carts.count;
+    }
+
+    if (all || targets.includes("customers")) {
+      // Orders/carts reference customers — delete those first if not already deleted
+      if (!all && !targets.includes("orders")) {
+        await prisma.orderItem.deleteMany({});
+        await prisma.order.deleteMany({});
+        deleted.orders = "cleared (dependency)";
+      }
+      if (!all && !targets.includes("carts")) {
+        await prisma.cartItem.deleteMany({});
+        await prisma.cart.deleteMany({});
+        deleted.carts = "cleared (dependency)";
+      }
+      const customers = await prisma.customer.deleteMany({});
+      deleted.customers = customers.count;
+    }
+
+    if (all || targets.includes("reviews")) {
+      const reviews = await prisma.review.deleteMany({});
+      deleted.reviews = reviews.count;
+    }
+
+    if (all || targets.includes("newsletters")) {
+      const newsletters = await prisma.newsletter.deleteMany({});
+      deleted.newsletters = newsletters.count;
+    }
+
+    if (all || targets.includes("coupons")) {
+      const coupons = await prisma.coupon.deleteMany({});
+      deleted.coupons = coupons.count;
+    }
+
+    if (all || targets.includes("products")) {
+      // Products have variants, images, orderItems, cartItems, reviews
+      await prisma.orderItem.deleteMany({});
+      await prisma.cartItem.deleteMany({});
+      await prisma.review.deleteMany({});
+      const variants = await prisma.variant.deleteMany({});
+      const images = await prisma.productImage.deleteMany({});
+      const products = await prisma.product.deleteMany({});
+      deleted.variants = variants.count;
+      deleted.images = images.count;
+      deleted.products = products.count;
+    }
+
+    console.log("[ADMIN RESET]", JSON.stringify({ targets, deleted, at: new Date().toISOString() }));
+    res.json({ success: true, deleted });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // HEALTH
 app.get("/health", async (req, res) => {
   try {
