@@ -1885,7 +1885,8 @@ app.post("/admin/orders/:id/auto-advance", authenticateAdmin, async (req, res) =
 // Process auto-advance for all orders (call periodically or via cron)
 app.post("/admin/orders/process-auto-advance", authenticateAdmin, async (req, res) => {
   try {
-    const orders = await prisma.order.findMany({ where: { status: { not: "delivered" } } });
+    // Only auto-advance confirmed/completed orders — never abandoned/cancelled/pending
+    const orders = await prisma.order.findMany({ where: { status: { in: ["confirmed", "completed", "processing", "shipped", "in_transit", "out_for_delivery"] } } });
     let advanced = 0;
 
     for (const order of orders) {
@@ -1960,19 +1961,29 @@ app.put("/admin/customers/:id/tags", authenticateAdmin, async (req, res) => {
 // ══════════════════════════════════════
 app.get("/admin/stats", authenticateAdmin, async (req, res) => {
   try {
-    const [totalProducts, totalOrders, totalCustomers, totalRevenue, recentOrders, topProducts, abandonedCarts] = await Promise.all([
+    // Only count confirmed/completed orders as real revenue
+    const realOrderFilter = { status: { in: ["confirmed", "completed"] } };
+
+    const [totalProducts, totalAllOrders, totalConfirmedOrders, totalCustomers, totalRevenue, recentOrders, topProducts, abandonedCarts] = await Promise.all([
       prisma.product.count(),
       prisma.order.count(),
+      prisma.order.count({ where: realOrderFilter }),
       prisma.customer.count(),
-      prisma.order.aggregate({ _sum: { total: true } }),
+      prisma.order.aggregate({ where: realOrderFilter, _sum: { total: true } }),
       prisma.order.findMany({ take: 10, orderBy: { createdAt: "desc" }, include: { items: true } }),
-      prisma.orderItem.groupBy({ by: ["title"], _sum: { quantity: true, total: true }, orderBy: { _sum: { quantity: "desc" } }, take: 10 }),
+      prisma.orderItem.groupBy({
+        by: ["title"],
+        where: { order: { is: realOrderFilter } },
+        _sum: { quantity: true, total: true },
+        orderBy: { _sum: { quantity: "desc" } },
+        take: 10,
+      }),
       prisma.cart.count({ where: { updatedAt: { lt: new Date(Date.now() - 3600000) } } }), // carts older than 1h
     ]);
 
-    // Orders by day (last 30 days)
+    // Orders by day (last 30 days) — only confirmed/completed
     const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000);
-    const ordersByDay = await prisma.order.findMany({ where: { createdAt: { gte: thirtyDaysAgo } }, select: { createdAt: true, total: true } });
+    const ordersByDay = await prisma.order.findMany({ where: { createdAt: { gte: thirtyDaysAgo }, ...realOrderFilter }, select: { createdAt: true, total: true } });
 
     const dailyStats = {};
     ordersByDay.forEach((o) => {
@@ -1984,10 +1995,11 @@ app.get("/admin/stats", authenticateAdmin, async (req, res) => {
 
     res.json({
       totalProducts,
-      totalOrders,
+      totalOrders: totalConfirmedOrders,
+      totalAllOrders,
       totalCustomers,
       totalRevenue: totalRevenue._sum.total || 0,
-      averageOrderValue: totalOrders > 0 ? Math.round((totalRevenue._sum.total || 0) / totalOrders) : 0,
+      averageOrderValue: totalConfirmedOrders > 0 ? Math.round((totalRevenue._sum.total || 0) / totalConfirmedOrders) : 0,
       abandonedCarts,
       recentOrders: recentOrders.map((o) => ({ id: o.id, displayId: o.displayId, total: o.total, status: o.status, createdAt: o.createdAt, itemCount: o.items.length })),
       topProducts: topProducts.map((t) => ({ title: t.title, soldCount: t._sum.quantity, revenue: t._sum.total })),

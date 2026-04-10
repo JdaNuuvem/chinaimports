@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Section, PageHeader, KpiCard, StatusBadge, type StatusVariant } from "./shared";
 
 interface DashboardStats {
-  totalProducts: number; totalOrders: number; totalCustomers: number;
+  totalProducts: number; totalOrders: number; totalAllOrders: number; totalCustomers: number;
   totalRevenue: number; averageOrderValue: number; abandonedCarts: number;
   recentOrders: Array<{ id: string; displayId: number; total: number; status: string; createdAt: string; itemCount: number }>;
   topProducts: Array<{ title: string; soldCount: number; revenue: number }>;
@@ -52,8 +52,8 @@ export default function DashboardTab({ backendUrl, token }: { backendUrl: string
 
       {/* KPI Cards — primary row */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 14, marginBottom: 16 }}>
-        <KpiCard label="Receita total" value={formatBRL(stats.totalRevenue)} subLabel="acumulado" />
-        <KpiCard label="Pedidos" value={stats.totalOrders} subLabel="total" />
+        <KpiCard label="Receita confirmada" value={formatBRL(stats.totalRevenue)} subLabel="apenas pedidos confirmados" />
+        <KpiCard label="Pedidos confirmados" value={stats.totalOrders} subLabel={`de ${stats.totalAllOrders || stats.totalOrders} total`} />
         <KpiCard label="Ticket médio" value={formatBRL(stats.averageOrderValue)} subLabel="por pedido" />
         <KpiCard label="Clientes" value={stats.totalCustomers} subLabel="cadastrados" />
       </div>
