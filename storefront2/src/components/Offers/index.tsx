@@ -5,6 +5,7 @@ interface Offer {
   title: string;
   description?: string;
   link?: string;
+  image?: string;
   backgroundColor?: string;
   textColor?: string;
 }
@@ -19,16 +20,72 @@ const DEFAULT_OFFERS: Offer[] = [
 ];
 
 export default function Offers({ offers = DEFAULT_OFFERS }: OffersProps) {
+  if (!offers || offers.length === 0) return null;
   return (
     <section className="section">
       <div className="container">
         <div style={{ display: "grid", gridTemplateColumns: `repeat(${offers.length}, 1fr)`, gap: "15px" }}>
-          {offers.map((offer) => (
-            <Link key={offer.id} href={offer.link || "#"} style={{ display: "block", padding: "25px 30px", borderRadius: "10px", background: offer.backgroundColor, color: offer.textColor, textDecoration: "none", textAlign: "center", transition: "transform 0.2s" }}>
-              <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "5px" }}>{offer.title}</h3>
-              {offer.description && <p style={{ fontSize: "14px", opacity: 0.9 }}>{offer.description}</p>}
-            </Link>
-          ))}
+          {offers.map((offer) => {
+            const hasImage = !!offer.image;
+            return (
+              <Link
+                key={offer.id}
+                href={offer.link || "#"}
+                style={{
+                  position: "relative",
+                  display: "block",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  background: offer.backgroundColor,
+                  color: offer.textColor,
+                  textDecoration: "none",
+                  textAlign: "center",
+                  transition: "transform 0.2s",
+                  minHeight: hasImage ? 220 : undefined,
+                }}
+              >
+                {hasImage && (
+                  <img
+                    src={offer.image}
+                    alt={offer.title}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      zIndex: 0,
+                    }}
+                  />
+                )}
+                {hasImage && (
+                  // Overlay sutil para garantir leitura do texto sobre a imagem.
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      background: "linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.55))",
+                      zIndex: 1,
+                    }}
+                  />
+                )}
+                <div
+                  style={{
+                    position: "relative",
+                    zIndex: 2,
+                    padding: "25px 30px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    minHeight: hasImage ? 220 : undefined,
+                  }}
+                >
+                  <h3 style={{ fontSize: "20px", fontWeight: 700, marginBottom: "5px" }}>{offer.title}</h3>
+                  {offer.description && <p style={{ fontSize: "14px", opacity: 0.9 }}>{offer.description}</p>}
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

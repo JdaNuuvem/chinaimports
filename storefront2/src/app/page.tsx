@@ -1,8 +1,12 @@
-import { getThemeConfig } from "@/lib/theme-config";
+import { readThemeConfigFromDisk } from "@/lib/theme-config.server";
 import DynamicSection from "@/components/DynamicSection";
 
+// Sempre ler o config do disco a cada request para refletir
+// alterações feitas no painel admin imediatamente.
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
-  const config = getThemeConfig();
+  const config = readThemeConfigFromDisk();
 
   return (
     <>

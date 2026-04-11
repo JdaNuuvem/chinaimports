@@ -29,6 +29,7 @@ import SentinelTracker from "@/components/SentinelTracker";
 import { getPublicConfig } from "@/lib/public-config";
 import { readThemeConfigFromDisk, ensureConfigFile } from "@/lib/theme-config.server";
 import { ThemeConfigProvider } from "@/context/ThemeConfigContext";
+import { setRuntimeConfig } from "@/lib/theme-config";
 import themeConfig from "@/data/theme-config.json";
 
 // Force the root layout to re-render on every request so Header/Footer
@@ -62,6 +63,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const publicConfig = await getPublicConfig();
   ensureConfigFile();
   const liveThemeConfig = readThemeConfigFromDisk();
+  // Sincroniza o runtimeConfig ANTES de renderizar a árvore filha,
+  // para que páginas (server components no slot {children}) vejam o
+  // config atualizado em vez do JSON estático bundlado.
+  setRuntimeConfig(liveThemeConfig);
 
   return (
     <html lang="pt-BR">

@@ -45,23 +45,29 @@ const DEFAULT_SLIDES: Slide[] = [
   },
 ];
 
-export default function Slideshow({ slides = DEFAULT_SLIDES, autoPlay = true, cycleSpeed = 5000 }: SlideshowProps) {
+export default function Slideshow({ slides, autoPlay = true, cycleSpeed = 5000 }: SlideshowProps) {
+  // Quando o admin não configurou nenhum slide, NÃO renderizar
+  // os placeholders — caso contrário o usuário "remove tudo" no
+  // editor mas continua vendo banners fantasmas na home.
+  const effectiveSlides = slides && slides.length > 0 ? slides : [];
   const [current, setCurrent] = useState(0);
 
   const next = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % slides.length);
-  }, [slides.length]);
+    setCurrent((prev) => (prev + 1) % Math.max(effectiveSlides.length, 1));
+  }, [effectiveSlides.length]);
 
   useEffect(() => {
-    if (!autoPlay || slides.length <= 1) return;
+    if (!autoPlay || effectiveSlides.length <= 1) return;
     const timer = setInterval(next, cycleSpeed);
     return () => clearInterval(timer);
-  }, [autoPlay, cycleSpeed, next, slides.length]);
+  }, [autoPlay, cycleSpeed, next, effectiveSlides.length]);
+
+  if (effectiveSlides.length === 0) return null;
 
   return (
     <section className="slideshow-section" data-section-type="slideshow" style={{ margin: 0, padding: 0 }}>
       <div className="slideshow slideshow--preserve-ratio slideshow--edge2edge">
-        {slides.map((slide, index) => (
+        {effectiveSlides.map((slide, index) => (
           <div
             key={slide.id}
             className={`slideshow__slide ${index === current ? "is-selected" : ""}`}
@@ -97,9 +103,9 @@ export default function Slideshow({ slides = DEFAULT_SLIDES, autoPlay = true, cy
         ))}
 
         {/* Dots */}
-        {slides.length > 1 && (
+        {effectiveSlides.length > 1 && (
           <div className="slideshow__dots" style={{ display: "flex", justifyContent: "center", gap: "8px", padding: "15px 0" }}>
-            {slides.map((_, index) => (
+            {effectiveSlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrent(index)}
