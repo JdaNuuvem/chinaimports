@@ -167,8 +167,11 @@ function ImageHeightFields({
                 title={`${p.desktop}px desktop / ${p.mobile}px mobile`}
               >
                 {p.label}
-                <span style={{ display: "block", fontSize: 10, fontWeight: 400, opacity: 0.75 }}>
-                  {p.desktop}×{p.mobile}
+                <span style={{ display: "block", fontSize: 9, fontWeight: 400, opacity: 0.75, lineHeight: 1.4 }}>
+                  Desktop: {p.desktop}px
+                </span>
+                <span style={{ display: "block", fontSize: 9, fontWeight: 400, opacity: 0.75, lineHeight: 1.4 }}>
+                  Mobile: {p.mobile}px
                 </span>
               </button>
             );
@@ -192,7 +195,7 @@ function ImageHeightFields({
         </div>
         {isCustom && (
           <p style={{ fontSize: 10, color: "#8c9196", margin: "6px 0 0" }}>
-            Valores personalizados ({effectiveDesktop}×{effectiveMobile})
+            Valores personalizados (Desktop: {effectiveDesktop}px / Mobile: {effectiveMobile}px)
           </p>
         )}
       </div>
