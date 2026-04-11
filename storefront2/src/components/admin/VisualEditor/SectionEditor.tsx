@@ -95,6 +95,13 @@ function NumberField({ label, value, min, max, onChange, placeholder, helpText }
 // resizing. Keeps the three case blocks (slideshow, mosaic, offers) consistent
 // in behaviour and copy so the admin doesn't have three subtly different UIs
 // for the same feature.
+interface ImageHeightPreset {
+  key: string;
+  label: string;
+  desktop: number;
+  mobile: number;
+}
+
 function ImageHeightFields({
   desktopValue,
   mobileValue,
@@ -102,6 +109,7 @@ function ImageHeightFields({
   onMobileChange,
   label,
   defaults,
+  presets,
 }: {
   desktopValue?: number;
   mobileValue?: number;
@@ -109,10 +117,86 @@ function ImageHeightFields({
   onMobileChange: (v: number | undefined) => void;
   label: string;
   defaults: { desktop: number; mobile: number };
+  presets: ImageHeightPreset[];
 }) {
+  // Um preset está "ativo" se os dois valores atuais batem exatamente com os
+  // do preset. Quando o desktop está vazio, consideramos o default; quando o
+  // mobile está vazio, consideramos o mesmo que o desktop (mesma lógica do
+  // componente renderer).
+  const effectiveDesktop = desktopValue ?? defaults.desktop;
+  const effectiveMobile = mobileValue ?? effectiveDesktop;
+
+  const applyPreset = (p: ImageHeightPreset) => {
+    onDesktopChange(p.desktop);
+    onMobileChange(p.mobile);
+  };
+
+  const resetToDefault = () => {
+    onDesktopChange(undefined);
+    onMobileChange(undefined);
+  };
+
+  const isCustom = !presets.some((p) => p.desktop === effectiveDesktop && p.mobile === effectiveMobile);
+
   return (
     <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px dashed #e1e3e5" }}>
       <p style={{ fontSize: 12, fontWeight: 600, color: "#202223", marginBottom: 8 }}>{label}</p>
+
+      <div style={{ marginBottom: 12 }}>
+        <p style={{ fontSize: 11, color: "#6d7175", margin: "0 0 6px" }}>Predefinições rápidas</p>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {presets.map((p) => {
+            const active = !isCustom && p.desktop === effectiveDesktop && p.mobile === effectiveMobile;
+            return (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => applyPreset(p)}
+                style={{
+                  padding: "6px 12px",
+                  fontSize: 12,
+                  border: active ? "2px solid #008060" : "1px solid #c9cccf",
+                  background: active ? "#f0fdf4" : "#fff",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontWeight: active ? 700 : 500,
+                  color: active ? "#008060" : "#202223",
+                  lineHeight: 1.2,
+                  whiteSpace: "nowrap",
+                }}
+                title={`${p.desktop}px desktop / ${p.mobile}px mobile`}
+              >
+                {p.label}
+                <span style={{ display: "block", fontSize: 10, fontWeight: 400, opacity: 0.75 }}>
+                  {p.desktop}×{p.mobile}
+                </span>
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={resetToDefault}
+            style={{
+              padding: "6px 10px",
+              fontSize: 11,
+              border: "1px solid #c9cccf",
+              background: "#fff",
+              borderRadius: 6,
+              cursor: "pointer",
+              color: "#6d7175",
+            }}
+            title="Limpa os valores e volta ao padrão do tema"
+          >
+            ✕ Limpar
+          </button>
+        </div>
+        {isCustom && (
+          <p style={{ fontSize: 10, color: "#8c9196", margin: "6px 0 0" }}>
+            Valores personalizados ({effectiveDesktop}×{effectiveMobile})
+          </p>
+        )}
+      </div>
+
       <NumberField
         label="Altura no desktop (px)"
         value={desktopValue}
@@ -133,6 +217,27 @@ function ImageHeightFields({
     </div>
   );
 }
+
+// Presets por tipo de seção. Valores escolhidos para cobrir os casos mais
+// comuns sem sobrepor o NumberField de customização.
+const SLIDESHOW_HEIGHT_PRESETS: ImageHeightPreset[] = [
+  { key: "compact", label: "Compacto", desktop: 300, mobile: 200 },
+  { key: "medium", label: "Médio", desktop: 500, mobile: 300 },
+  { key: "large", label: "Grande", desktop: 700, mobile: 420 },
+  { key: "hero", label: "Hero", desktop: 900, mobile: 520 },
+];
+
+const MOSAIC_HEIGHT_PRESETS: ImageHeightPreset[] = [
+  { key: "compact", label: "Compacto", desktop: 180, mobile: 140 },
+  { key: "medium", label: "Médio", desktop: 280, mobile: 200 },
+  { key: "large", label: "Grande", desktop: 400, mobile: 260 },
+];
+
+const OFFERS_HEIGHT_PRESETS: ImageHeightPreset[] = [
+  { key: "compact", label: "Compacto", desktop: 140, mobile: 120 },
+  { key: "medium", label: "Médio", desktop: 220, mobile: 180 },
+  { key: "large", label: "Grande", desktop: 320, mobile: 240 },
+];
 
 export default function SectionEditor({ section, index, config, onSave, onUpdateSettings, onClose, token, saving }: Props) {
   const s = section.settings;
@@ -228,6 +333,7 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
               onDesktopChange={(v) => set("imageHeight", v)}
               onMobileChange={(v) => set("imageHeightMobile", v)}
               defaults={{ desktop: 500, mobile: 300 }}
+              presets={SLIDESHOW_HEIGHT_PRESETS}
             />
           </>
         )}
@@ -296,6 +402,7 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
               onDesktopChange={(v) => set("imageHeight", v)}
               onMobileChange={(v) => set("imageHeightMobile", v)}
               defaults={{ desktop: 280, mobile: 200 }}
+              presets={MOSAIC_HEIGHT_PRESETS}
             />
           </>
         )}
@@ -321,6 +428,7 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
               onDesktopChange={(v) => set("imageHeight", v)}
               onMobileChange={(v) => set("imageHeightMobile", v)}
               defaults={{ desktop: 220, mobile: 180 }}
+              presets={OFFERS_HEIGHT_PRESETS}
             />
           </>
         )}
