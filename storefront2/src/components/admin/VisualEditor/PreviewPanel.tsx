@@ -177,11 +177,17 @@ export default function PreviewPanel({
         // Use the first slide that has an imageUrl (mobile-first when on
         // mobile preview). Falls back to the legacy colored block when no
         // images are configured yet.
-        const slides = (s.slides as Array<{ imageUrl?: string; mobileImageUrl?: string; title?: string; subtitle?: string }>) || [];
+        const slides = (s.slides as Array<{ imageUrl?: string; mobileImageUrl?: string; title?: string; subtitle?: string; imageOnly?: boolean }>) || [];
         const firstSlide = slides[0] || null;
         const slideImg = isMobile
           ? firstSlide?.mobileImageUrl || firstSlide?.imageUrl || null
           : firstSlide?.imageUrl || firstSlide?.mobileImageUrl || null;
+        // Respeita o checkbox "Apenas imagem (sem texto sobreposto)" do
+        // SectionEditor. Quando ativo, o preview não renderiza nenhum
+        // overlay de texto — nem título, nem subtítulo, nem o fallback
+        // "Slideshow (N slides)". Se ainda não há imagem configurada,
+        // mostramos um placeholder discreto para o card não colapsar.
+        const hideTextOverlay = !!firstSlide?.imageOnly;
 
         return (
           <div
@@ -203,15 +209,21 @@ export default function PreviewPanel({
             }}
             {...hoverBorder}
           >
-            {firstSlide?.title ? (
+            {!hideTextOverlay && firstSlide?.title && (
               <div style={{ fontSize: isMobile ? 11 : 13, fontWeight: 700 }}>{firstSlide.title}</div>
-            ) : (
+            )}
+            {!hideTextOverlay && !firstSlide?.title && (
               <div style={{ fontSize: isMobile ? 10 : 12, fontWeight: 700, opacity: 0.85 }}>
                 Slideshow ({slides.length} {slides.length === 1 ? "slide" : "slides"})
               </div>
             )}
-            {firstSlide?.subtitle && (
+            {!hideTextOverlay && firstSlide?.subtitle && (
               <div style={{ fontSize: isMobile ? 8 : 9, marginTop: 3, opacity: 0.9 }}>{firstSlide.subtitle}</div>
+            )}
+            {hideTextOverlay && !slideImg && (
+              <div style={{ fontSize: isMobile ? 9 : 10, fontWeight: 600, opacity: 0.6 }}>
+                Slide sem imagem
+              </div>
             )}
           </div>
         );
