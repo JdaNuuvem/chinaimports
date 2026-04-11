@@ -14,9 +14,27 @@ interface CollectionCard {
 interface CollectionListProps {
   title?: string;
   collections?: CollectionCard[];
+  /** Number of grid columns on desktop. Mobile is clamped to ceil(columns/2). */
+  columns?: number;
+  /**
+   * Visual style of each category tile:
+   * - "contained": fixed-height card with image covering it and a gradient
+   *   overlay for the title (the historical default)
+   * - "image-fit": the tile flows at the image's natural aspect ratio with
+   *   no wrapper chrome, so the picture itself dictates the block size
+   */
+  blockStyle?: "contained" | "image-fit";
+  /** When false, the category name is never rendered — only the image. */
+  showTitles?: boolean;
 }
 
-export default function CollectionList({ title = "Nossas Coleções", collections: propCollections }: CollectionListProps) {
+export default function CollectionList({
+  title = "Nossas Coleções",
+  collections: propCollections,
+  columns = 3,
+  blockStyle = "contained",
+  showTitles = true,
+}: CollectionListProps) {
   const [collections, setCollections] = useState<CollectionCard[]>(propCollections || []);
   const [loading, setLoading] = useState(!propCollections?.length);
 
@@ -43,6 +61,26 @@ export default function CollectionList({ title = "Nossas Coleções", collection
       .finally(() => setLoading(false));
   }, [propCollections]);
 
+  // Clamp columns to a sane range so a buggy settings value can't break the grid.
+  const safeColumns = Math.max(1, Math.min(6, Math.floor(columns || 3)));
+
+  // Responsive columns via pure CSS Grid — we use auto-fit with a minimum
+  // column width derived from the desktop column count so the grid naturally
+  // collapses on narrow viewports without needing a media query.
+  const minColWidth = blockStyle === "image-fit" ? 160 : 220;
+  const gridStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, ${minColWidth}px), 1fr))`,
+    // Hard cap at the configured number of columns via an extra wrapper width
+    // fallback: when there's room for more than `safeColumns`, CSS grid would
+    // still only fill up to the intrinsic width. To enforce the cap on wide
+    // viewports we rely on maxWidth below.
+    gap: blockStyle === "image-fit" ? "12px" : "20px",
+    maxWidth: `${safeColumns * (minColWidth + 20)}px`,
+    marginLeft: "auto",
+    marginRight: "auto",
+  };
+
   if (loading) {
     return (
       <section className="section" data-section-type="collection-list">
@@ -52,9 +90,17 @@ export default function CollectionList({ title = "Nossas Coleções", collection
               <h2 className="section__title heading h3">{title}</h2>
             </header>
           )}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
-            {[1, 2, 3].map((i) => (
-              <div key={i} style={{ height: 220, borderRadius: 12, background: "#f0f0f0", animation: "pulse 1.5s infinite" }} />
+          <div style={gridStyle}>
+            {Array.from({ length: safeColumns }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  height: blockStyle === "image-fit" ? 180 : 220,
+                  borderRadius: blockStyle === "image-fit" ? 0 : 12,
+                  background: "#f0f0f0",
+                  animation: "pulse 1.5s infinite",
+                }}
+              />
             ))}
           </div>
         </div>
@@ -72,20 +118,121 @@ export default function CollectionList({ title = "Nossas Coleções", collection
             <h2 className="section__title heading h3">{title}</h2>
           </header>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px" }}>
-          {collections.map((col) => (
-            <Link key={col.id} href={`/collections/${col.handle}`} style={{ display: "block", position: "relative", overflow: "hidden", borderRadius: "12px", height: "220px", textDecoration: "none", color: "#fff" }}>
-              {col.image ? (
-                <img src={col.image} alt={col.title} style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", top: 0, left: 0, transition: "transform 0.3s" }} />
-              ) : (
-                <div style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0, background: `hsl(${col.title.charCodeAt(0) * 7 % 360}, 50%, 40%)` }} />
-              )}
-              <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "25px", background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)" }}>
-                <h3 style={{ fontSize: "22px", fontWeight: 700, margin: 0 }}>{col.title}</h3>
-                {col.productCount != null && <p style={{ fontSize: "13px", opacity: 0.8, marginTop: "4px" }}>{col.productCount} produtos</p>}
-              </div>
-            </Link>
-          ))}
+        <div style={gridStyle}>
+          {collections.map((col) => {
+            if (blockStyle === "image-fit") {
+              // Picture flows at its natural aspect ratio. No card chrome, no
+              // fixed height, no gradient overlay. If `showTitles` is on, a
+              // small caption sits below the image in normal document flow.
+              return (
+                <Link
+                  key={col.id}
+                  href={`/collections/${col.handle}`}
+                  style={{
+                    display: "block",
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
+                >
+                  {col.image ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={col.image}
+                      alt={col.title}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "auto",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: "100%",
+                        aspectRatio: "1 / 1",
+                        background: `hsl(${(col.title.charCodeAt(0) * 7) % 360}, 50%, 40%)`,
+                      }}
+                    />
+                  )}
+                  {showTitles && (
+                    <div style={{ padding: "10px 4px 0", textAlign: "center" }}>
+                      <h3 style={{ fontSize: "15px", fontWeight: 700, margin: 0 }}>{col.title}</h3>
+                      {col.productCount != null && (
+                        <p style={{ fontSize: "12px", opacity: 0.7, marginTop: "2px" }}>
+                          {col.productCount} produtos
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </Link>
+              );
+            }
+
+            // "contained" — historical fixed-height card with absolute image
+            // fill and gradient overlay caption.
+            return (
+              <Link
+                key={col.id}
+                href={`/collections/${col.handle}`}
+                style={{
+                  display: "block",
+                  position: "relative",
+                  overflow: "hidden",
+                  borderRadius: "12px",
+                  height: "220px",
+                  textDecoration: "none",
+                  color: "#fff",
+                }}
+              >
+                {col.image ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={col.image}
+                    alt={col.title}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      transition: "transform 0.3s",
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      background: `hsl(${(col.title.charCodeAt(0) * 7) % 360}, 50%, 40%)`,
+                    }}
+                  />
+                )}
+                {showTitles && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      padding: "25px",
+                      background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)",
+                    }}
+                  >
+                    <h3 style={{ fontSize: "22px", fontWeight: 700, margin: 0 }}>{col.title}</h3>
+                    {col.productCount != null && (
+                      <p style={{ fontSize: "13px", opacity: 0.8, marginTop: "4px" }}>
+                        {col.productCount} produtos
+                      </p>
+                    )}
+                  </div>
+                )}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

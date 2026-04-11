@@ -129,7 +129,12 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
     case "collection-list":
       return (
         <div style={{ padding: "40px 0" }}>
-          <CollectionList title={s.title as string} />
+          <CollectionList
+            title={s.title as string}
+            columns={(s.columns as number) || 3}
+            blockStyle={(s.blockStyle as "contained" | "image-fit") || "contained"}
+            showTitles={(s.showTitles as boolean | undefined) ?? true}
+          />
         </div>
       );
 

@@ -421,7 +421,23 @@ export default function PreviewPanel({
         );
       }
 
-      case "collection-list":
+      case "collection-list": {
+        // Respeita os settings configurados no SectionEditor:
+        //   - `columns`: número de colunas (2-6), clampado para a range válida
+        //   - `blockStyle`: "contained" (card com altura fixa) ou "image-fit"
+        //     (tile flui no aspect ratio natural da imagem)
+        //   - `showTitles`: se o nome da categoria é renderizado no tile
+        // O preview continua com rótulos mockados porque não tem acesso direto
+        // aos dados reais de coleções aqui — a ideia é mostrar o layout, não
+        // o catálogo. A aba "Coleções" é quem edita as coleções reais.
+        const rawColumns = Number(s.columns) || 3;
+        const safeColumns = Math.max(2, Math.min(6, Math.floor(rawColumns)));
+        const blockStyle = ((s.blockStyle as string) || "contained") === "image-fit" ? "image-fit" : "contained";
+        const showTitles = (s.showTitles as boolean | undefined) ?? true;
+        const mobileCols = Math.max(2, Math.ceil(safeColumns / 2));
+        const effectiveCols = isMobile ? mobileCols : safeColumns;
+        const mockCategories = ["Masc", "Fem", "Inf", "Calç", "Acess", "Outlet"].slice(0, effectiveCols * 2);
+
         return (
           <div
             key={section.id}
@@ -435,27 +451,33 @@ export default function PreviewPanel({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)",
-                gap: 4,
+                gridTemplateColumns: `repeat(${effectiveCols}, 1fr)`,
+                gap: blockStyle === "image-fit" ? 3 : 4,
               }}
             >
-              {["Masc", "Fem", "Inf", "Calç", "Acess", "Outlet"].map((c) => (
+              {mockCategories.map((c) => (
                 <div
                   key={c}
                   style={{
                     background: "#f0f0f0",
-                    borderRadius: 4,
-                    padding: "8px 0",
+                    borderRadius: blockStyle === "image-fit" ? 0 : 4,
+                    padding: blockStyle === "image-fit" ? "0" : "8px 0",
+                    aspectRatio: blockStyle === "image-fit" ? "1" : undefined,
                     textAlign: "center",
                     fontSize: 7,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#6d7175",
                   }}
                 >
-                  {c}
+                  {showTitles ? c : ""}
                 </div>
               ))}
             </div>
           </div>
         );
+      }
 
       case "video":
         return (

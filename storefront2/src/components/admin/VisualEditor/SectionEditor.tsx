@@ -252,8 +252,37 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
         {/* ──── COLLECTION LIST ──── */}
         {section.type === "collection-list" && (
           <>
-            <Field label="Título" value={(s.title as string) || ""} onChange={(v) => set("title", v)} />
-            <p style={{ fontSize: 12, color: "#6d7175", marginBottom: 8 }}>As coleções são gerenciadas na aba Coleções.</p>
+            <Field label="Título da seção" value={(s.title as string) || ""} onChange={(v) => set("title", v)} />
+            <p style={{ fontSize: 12, color: "#6d7175", marginBottom: 8 }}>As coleções em si (nome, imagem) são gerenciadas na aba Coleções.</p>
+            <SelectField
+              label="Colunas do grid"
+              value={String(s.columns || 3)}
+              options={[
+                { value: "2", label: "2 colunas" },
+                { value: "3", label: "3 colunas" },
+                { value: "4", label: "4 colunas" },
+                { value: "5", label: "5 colunas" },
+                { value: "6", label: "6 colunas" },
+              ]}
+              onChange={(v) => set("columns", Number(v))}
+            />
+            <SelectField
+              label="Estilo do bloco"
+              value={(s.blockStyle as string) || "contained"}
+              options={[
+                { value: "contained", label: "Bloco com foto dentro (altura fixa)" },
+                { value: "image-fit", label: "Tamanho da própria foto" },
+              ]}
+              onChange={(v) => set("blockStyle", v)}
+            />
+            <CheckboxField
+              label="Mostrar nome da categoria sobre a imagem"
+              checked={(s.showTitles as boolean | undefined) ?? true}
+              onChange={(v) => set("showTitles", v)}
+            />
+            <p style={{ fontSize: 11, color: "#8c9196", marginTop: -6, marginBottom: 8, lineHeight: 1.5 }}>
+              Quando desativado, apenas a imagem aparece no bloco. O link para a coleção continua funcionando ao clicar.
+            </p>
           </>
         )}
 
