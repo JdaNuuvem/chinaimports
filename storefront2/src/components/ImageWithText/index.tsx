@@ -31,17 +31,20 @@ export default function ImageWithText({
 }: ImageWithTextProps) {
   const uid = useId().replace(/:/g, "-");
   const sizedClass = `image-with-text-img-${uid}`;
+  const containerClass = `iwt-container-${uid}`;
+  const imageWrapClass = `iwt-image-wrap-${uid}`;
+  const textWrapClass = `iwt-text-wrap-${uid}`;
   const desktopH = imageHeight ?? DEFAULT_IMAGE_HEIGHT_DESKTOP;
   const mobileH = imageHeightMobile ?? desktopH;
 
   const imageEl = (
-    <div style={{ width: `${imageWidth}%`, flexShrink: 0 }}>
+    <div className={imageWrapClass} style={{ width: `${imageWidth}%`, flexShrink: 0 }}>
       <img src={image} alt={title || ""} className={sizedClass} style={{ width: "100%", height: "auto", borderRadius: "8px", display: "block", objectFit: "cover" }} />
     </div>
   );
 
   const textEl = (
-    <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+    <div className={textWrapClass} style={{ flex: 1, display: "flex", alignItems: "center" }}>
       <div style={{ padding: "30px" }}>
         {title && <h2 className="heading h3" style={{ marginBottom: "15px" }}>{title}</h2>}
         {content && <div style={{ lineHeight: 1.7, marginBottom: "20px", color: "#666" }} dangerouslySetInnerHTML={{ __html: content }} />}
@@ -58,10 +61,26 @@ export default function ImageWithText({
         .${sizedClass} { max-height: ${desktopH}px; }
         @media (max-width: 640px) {
           .${sizedClass} { max-height: ${mobileH}px; }
+          .${containerClass} {
+            flex-direction: column !important;
+            align-items: center !important;
+          }
+          .${imageWrapClass} {
+            width: 100% !important;
+          }
+          .${textWrapClass} {
+            text-align: center;
+          }
+          .${textWrapClass} .heading {
+            text-align: center;
+          }
+          .${textWrapClass} .button {
+            display: inline-block;
+          }
         }
       `}</style>
       <div className="container">
-        <div style={{ display: "flex", gap: "30px", alignItems: "center", flexWrap: "wrap" }}>
+        <div className={containerClass} style={{ display: "flex", gap: "30px", alignItems: "center", flexWrap: "wrap" }}>
           {imagePosition === "left" ? <>{imageEl}{textEl}</> : <>{textEl}{imageEl}</>}
         </div>
       </div>
