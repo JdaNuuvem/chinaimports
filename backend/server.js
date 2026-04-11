@@ -2147,10 +2147,16 @@ app.get("/admin/abandoned-carts", authenticateAdmin, async (req, res) => {
 // (rotated from admin panel) so user can paste into Sentinel dashboard.
 app.post("/webhooks/sentinel/:secret", async (req, res) => {
   try {
+    // Integration gate — match the admin UI's `isSentinelActive` definition
+    // (storefront2/src/components/admin/tabs/IntegrationsTab.tsx) which
+    // requires BOTH SENTINEL_API_KEY and SENTINEL_WEBHOOK_SECRET. Clearing
+    // either key in the admin disables the integration and we must reject
+    // incoming webhooks (no attribution writes to Order tags).
+    const apiKey = await getSetting("SENTINEL_API_KEY");
     const expected = await getSetting("SENTINEL_WEBHOOK_SECRET");
-    if (!expected) {
-      console.warn("[SENTINEL WEBHOOK] SENTINEL_WEBHOOK_SECRET not configured");
-      return res.status(503).json({ error: "Webhook not configured" });
+    if (!apiKey || !expected) {
+      console.warn("[SENTINEL WEBHOOK] rejected: integration disabled (api_key or webhook_secret missing)");
+      return res.status(503).json({ error: "Sentinel integration is disabled" });
     }
     if (req.params.secret !== expected) {
       console.warn("[SENTINEL WEBHOOK] Invalid secret attempted");
@@ -2530,6 +2536,18 @@ app.get("/webhooks/luna/ping", async (req, res) => {
 
 app.post("/webhooks/luna", async (req, res) => {
   try {
+    // Integration gate — match the admin UI's `isLunaActive` definition
+    // (storefront2/src/components/admin/tabs/IntegrationsTab.tsx). When the
+    // admin clears LUNA_CHECKOUT_URL the integration is considered disabled
+    // and we must NOT process incoming webhooks: no Order rows, no inventory
+    // changes, no Sentinel bridge calls. Return 503 so Luna's retry/visibility
+    // semantics treat it as "endpoint unavailable" rather than a 4xx bug.
+    const LUNA_CHECKOUT_URL = await getSetting("LUNA_CHECKOUT_URL");
+    if (!LUNA_CHECKOUT_URL) {
+      console.warn("[LUNA WEBHOOK] rejected: integration disabled (LUNA_CHECKOUT_URL not set)");
+      return res.status(503).json({ error: "Luna integration is disabled" });
+    }
+
     // Optional webhook signature validation. The secret can come from the
     // admin Settings page (preferred) or fall back to the LUNA_WEBHOOK_SECRET
     // env var. When empty, signatures are not enforced (dev / Luna doesn't

@@ -14,9 +14,10 @@ interface VisualEditorProps {
   onSave: (updates: Partial<ThemeConfig>) => Promise<void>;
   saving: boolean;
   token: string;
+  backendUrl: string;
 }
 
-export default function VisualEditor({ config, onSave, saving, token }: VisualEditorProps) {
+export default function VisualEditor({ config, onSave, saving, token, backendUrl }: VisualEditorProps) {
   const [previewPage, setPreviewPage] = useState<PreviewPage>("home");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "mobile">("desktop");
   const [selectedSectionIndex, setSelectedSectionIndex] = useState<number | null>(null);
@@ -193,6 +194,7 @@ export default function VisualEditor({ config, onSave, saving, token }: VisualEd
           previewDevice={previewDevice}
           selectedIndex={selectedSectionIndex}
           onSelectSection={handleSelectSection}
+          backendUrl={backendUrl}
         />
       </div>
     </div>

@@ -527,7 +527,7 @@ export default function ThemeAdminPage() {
         )}
 
         {activeTab === "visual-editor" && config && (
-          <NewVisualEditor config={config} onSave={saveConfig} saving={saving} token={token} />
+          <NewVisualEditor config={config} onSave={saveConfig} saving={saving} token={token} backendUrl={backendUrl} />
         )}
 
         {activeTab === "colors" && (
