@@ -423,20 +423,43 @@ export default function PreviewPanel({
 
       case "collection-list": {
         // Respeita os settings configurados no SectionEditor:
-        //   - `columns`: número de colunas (2-6), clampado para a range válida
+        //   - `columns`: número de colunas (2-6)
+        //   - `rows`: limite de linhas (0 = sem limite, 1-5 = cap em columns*rows)
         //   - `blockStyle`: "contained" (card com altura fixa) ou "image-fit"
         //     (tile flui no aspect ratio natural da imagem)
         //   - `showTitles`: se o nome da categoria é renderizado no tile
+        //   - `enableHoverAnimation`: se o tile sobe/faz zoom ao passar o mouse
         // O preview continua com rótulos mockados porque não tem acesso direto
         // aos dados reais de coleções aqui — a ideia é mostrar o layout, não
         // o catálogo. A aba "Coleções" é quem edita as coleções reais.
         const rawColumns = Number(s.columns) || 3;
         const safeColumns = Math.max(2, Math.min(6, Math.floor(rawColumns)));
+        const rawRows = Number(s.rows) || 0;
+        const safeRows = Math.max(0, Math.min(10, Math.floor(rawRows)));
         const blockStyle = ((s.blockStyle as string) || "contained") === "image-fit" ? "image-fit" : "contained";
         const showTitles = (s.showTitles as boolean | undefined) ?? true;
+        const enableHoverAnimation = (s.enableHoverAnimation as boolean | undefined) ?? true;
         const mobileCols = Math.max(2, Math.ceil(safeColumns / 2));
         const effectiveCols = isMobile ? mobileCols : safeColumns;
-        const mockCategories = ["Masc", "Fem", "Inf", "Calç", "Acess", "Outlet"].slice(0, effectiveCols * 2);
+        // Mock pool grande o suficiente pra cobrir 6×5 = 30 tiles.
+        const mockPool = [
+          "Masc", "Fem", "Inf", "Calç", "Acess", "Outlet",
+          "Esporte", "Fitness", "Tech", "Casa", "Decor", "Beleza",
+          "Pets", "Infantil", "Bebê", "Camping", "Viagem", "Livros",
+          "Games", "Auto", "Ferramentas", "Jardim", "Móveis", "Cozinha",
+          "Música", "Arte", "Moda", "Luxo", "Outdoor", "Saúde",
+        ];
+        // Quantos tiles exibir: se rows>0, respeita cap; senão mostra
+        // `effectiveCols * 2` (duas linhas por default pra dar sensação de grid).
+        const defaultTileCount = effectiveCols * 2;
+        const capByRows = safeRows > 0 ? safeColumns * safeRows : Infinity;
+        const tileCount = Math.min(
+          safeRows > 0 ? Math.min(capByRows, mockPool.length) : defaultTileCount,
+          mockPool.length
+        );
+        const mockCategories = mockPool.slice(0, tileCount);
+        // Unique class pra hover do preview (não conflita com a live store).
+        const previewHoverClass = "collection-tile-preview-hover";
 
         return (
           <div
@@ -445,6 +468,17 @@ export default function PreviewPanel({
             style={{ ...sectionStyle(index), padding: "8px" }}
             {...hoverBorder}
           >
+            {enableHoverAnimation && (
+              <style>{`
+                .${previewHoverClass} {
+                  transition: transform 0.25s ease, box-shadow 0.25s ease;
+                }
+                .${previewHoverClass}:hover {
+                  transform: translateY(-2px);
+                  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+                }
+              `}</style>
+            )}
             <div style={{ fontSize: 10, fontWeight: 700, marginBottom: 4 }}>
               {(s.title as string) || "Categorias"}
             </div>
@@ -455,9 +489,10 @@ export default function PreviewPanel({
                 gap: blockStyle === "image-fit" ? 3 : 4,
               }}
             >
-              {mockCategories.map((c) => (
+              {mockCategories.map((c, i) => (
                 <div
-                  key={c}
+                  key={`${c}-${i}`}
+                  className={enableHoverAnimation ? previewHoverClass : undefined}
                   style={{
                     background: "#f0f0f0",
                     borderRadius: blockStyle === "image-fit" ? 0 : 4,

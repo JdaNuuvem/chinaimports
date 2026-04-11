@@ -17,6 +17,12 @@ interface CollectionListProps {
   /** Number of grid columns on desktop. Mobile is clamped to ceil(columns/2). */
   columns?: number;
   /**
+   * Maximum number of rows to show. The total number of visible tiles is
+   * capped at `columns * rows`. Use `0` (default) to show every collection
+   * without a cap.
+   */
+  rows?: number;
+  /**
    * Visual style of each category tile:
    * - "contained": fixed-height card with image covering it and a gradient
    *   overlay for the title (the historical default)
@@ -26,14 +32,23 @@ interface CollectionListProps {
   blockStyle?: "contained" | "image-fit";
   /** When false, the category name is never rendered — only the image. */
   showTitles?: boolean;
+  /**
+   * When true, hovering a tile lifts it 3px, applies a soft drop shadow and
+   * zooms the image by ~8%. Rendered via an inline <style> tag because this
+   * component is consumed both on the public storefront and inside the admin
+   * preview iframe/card — we want the hover rule to live with the component.
+   */
+  enableHoverAnimation?: boolean;
 }
 
 export default function CollectionList({
   title = "Nossas Coleções",
   collections: propCollections,
   columns = 3,
+  rows = 0,
   blockStyle = "contained",
   showTitles = true,
+  enableHoverAnimation = true,
 }: CollectionListProps) {
   const [collections, setCollections] = useState<CollectionCard[]>(propCollections || []);
   const [loading, setLoading] = useState(!propCollections?.length);
@@ -63,6 +78,15 @@ export default function CollectionList({
 
   // Clamp columns to a sane range so a buggy settings value can't break the grid.
   const safeColumns = Math.max(1, Math.min(6, Math.floor(columns || 3)));
+  // rows === 0 means "no cap"; any positive value caps visible tiles at
+  // columns * rows. Clamp to a sane range so absurd values don't break layout.
+  const safeRows = Math.max(0, Math.min(10, Math.floor(rows || 0)));
+  const maxVisible = safeRows > 0 ? safeColumns * safeRows : Infinity;
+
+  // Hover animation — injected once per render via a <style> tag keyed by a
+  // stable class name. We use a unique class so we don't collide with any
+  // global CSS or with the admin preview's own hover rule.
+  const hoverClass = "collection-card-live-hover";
 
   // Responsive columns via pure CSS Grid — we use auto-fit with a minimum
   // column width derived from the desktop column count so the grid naturally
@@ -110,8 +134,32 @@ export default function CollectionList({
 
   if (!collections.length) return null;
 
+  // Apply the rows cap. `Infinity` means "no slice" — we still call .slice
+  // because Array.prototype.slice handles Infinity correctly and it keeps
+  // the downstream map straightforward.
+  const visibleCollections =
+    maxVisible === Infinity ? collections : collections.slice(0, maxVisible);
+
   return (
     <section className="section" data-section-type="collection-list">
+      {enableHoverAnimation && (
+        <style>{`
+          .${hoverClass} {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            will-change: transform;
+          }
+          .${hoverClass}:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+          }
+          .${hoverClass} img {
+            transition: transform 0.5s ease;
+          }
+          .${hoverClass}:hover img {
+            transform: scale(1.06);
+          }
+        `}</style>
+      )}
       <div className="container">
         {title && (
           <header className="section__header">
@@ -119,7 +167,7 @@ export default function CollectionList({
           </header>
         )}
         <div style={gridStyle}>
-          {collections.map((col) => {
+          {visibleCollections.map((col) => {
             if (blockStyle === "image-fit") {
               // Picture flows at its natural aspect ratio. No card chrome, no
               // fixed height, no gradient overlay. If `showTitles` is on, a
@@ -128,10 +176,12 @@ export default function CollectionList({
                 <Link
                   key={col.id}
                   href={`/collections/${col.handle}`}
+                  className={enableHoverAnimation ? hoverClass : undefined}
                   style={{
                     display: "block",
                     textDecoration: "none",
                     color: "inherit",
+                    overflow: "hidden",
                   }}
                 >
                   {col.image ? (
@@ -174,6 +224,7 @@ export default function CollectionList({
               <Link
                 key={col.id}
                 href={`/collections/${col.handle}`}
+                className={enableHoverAnimation ? hoverClass : undefined}
                 style={{
                   display: "block",
                   position: "relative",

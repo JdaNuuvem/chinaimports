@@ -267,6 +267,22 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
               onChange={(v) => set("columns", Number(v))}
             />
             <SelectField
+              label="Linhas do grid"
+              value={String(s.rows ?? 0)}
+              options={[
+                { value: "0", label: "Sem limite (mostrar todas)" },
+                { value: "1", label: "1 linha" },
+                { value: "2", label: "2 linhas" },
+                { value: "3", label: "3 linhas" },
+                { value: "4", label: "4 linhas" },
+                { value: "5", label: "5 linhas" },
+              ]}
+              onChange={(v) => set("rows", Number(v))}
+            />
+            <p style={{ fontSize: 11, color: "#8c9196", marginTop: -6, marginBottom: 12, lineHeight: 1.5 }}>
+              Define o limite máximo de categorias visíveis (colunas × linhas). &quot;Sem limite&quot; exibe todas as coleções cadastradas.
+            </p>
+            <SelectField
               label="Estilo do bloco"
               value={(s.blockStyle as string) || "contained"}
               options={[
@@ -282,6 +298,14 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
             />
             <p style={{ fontSize: 11, color: "#8c9196", marginTop: -6, marginBottom: 8, lineHeight: 1.5 }}>
               Quando desativado, apenas a imagem aparece no bloco. O link para a coleção continua funcionando ao clicar.
+            </p>
+            <CheckboxField
+              label="Animação ao passar o mouse"
+              checked={(s.enableHoverAnimation as boolean | undefined) ?? true}
+              onChange={(v) => set("enableHoverAnimation", v)}
+            />
+            <p style={{ fontSize: 11, color: "#8c9196", marginTop: -6, marginBottom: 8, lineHeight: 1.5 }}>
+              Ao passar o mouse, o bloco sobe levemente e a imagem dá um zoom suave.
             </p>
           </>
         )}
