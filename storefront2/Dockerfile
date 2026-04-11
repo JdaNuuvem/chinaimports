@@ -14,10 +14,27 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Public backend URL — must be set to the externally reachable backend URL
-# In Coolify: set as build argument (e.g. https://api.yourdomain.com)
+# Public backend URL — MUST be passed as `--build-arg` at docker build time.
+# Next.js inlines `process.env.NEXT_PUBLIC_*` into client bundles during
+# `next build`; changing this value at container runtime has ZERO effect on
+# the already-compiled JS shipped to the browser.
+#
+# In Coolify: mark the variable as "Available at Buildtime" so it's forwarded
+# to `docker build --build-arg ...`. Missing this checkbox (or rebuilding with
+# stale cache) produces a bundle that silently falls back to `localhost:9000`,
+# which Chromium then blocks with a Private Network Access error from any
+# HTTPS origin. We hit that exact bug in production on 2026-04-11 — hence the
+# hard failure below, so we never ship a broken bundle again.
+#
+# Local docker builds must pass the arg explicitly, e.g.:
+#   docker build --build-arg NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://localhost:9000 .
+# For day-to-day local dev, use `npm run dev` (no Docker) instead.
 ARG NEXT_PUBLIC_MEDUSA_BACKEND_URL
-ENV NEXT_PUBLIC_MEDUSA_BACKEND_URL=${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-http://localhost:9000}
+RUN test -n "$NEXT_PUBLIC_MEDUSA_BACKEND_URL" \
+    || (echo "FATAL: NEXT_PUBLIC_MEDUSA_BACKEND_URL build-arg is required." \
+        && echo "See comment above this RUN in storefront2/Dockerfile." \
+        && exit 1)
+ENV NEXT_PUBLIC_MEDUSA_BACKEND_URL=${NEXT_PUBLIC_MEDUSA_BACKEND_URL}
 
 RUN npm run build
 
