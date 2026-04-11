@@ -40,7 +40,15 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
         textColor: (s.textColor as string) || "#ffffff",
         imageOnly: slide.imageOnly,
       }));
-      return <Slideshow slides={slides} autoPlay={s.autoplay as boolean} cycleSpeed={s.autoplayInterval as number} />;
+      return (
+        <Slideshow
+          slides={slides}
+          autoPlay={s.autoplay as boolean}
+          cycleSpeed={s.autoplayInterval as number}
+          imageHeight={s.imageHeight as number | undefined}
+          imageHeightMobile={s.imageHeightMobile as number | undefined}
+        />
+      );
     }
 
     case "text-with-icons": {
@@ -74,7 +82,11 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
       }));
       return (
         <div style={{ padding: "40px 0" }}>
-          <Mosaic items={items} />
+          <Mosaic
+            items={items}
+            imageHeight={s.imageHeight as number | undefined}
+            imageHeightMobile={s.imageHeightMobile as number | undefined}
+          />
         </div>
       );
     }
@@ -109,7 +121,13 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
         backgroundColor: item.backgroundColor || "#1e2d7d",
         textColor: item.textColor || "#fff",
       }));
-      return <Offers offers={offers} />;
+      return (
+        <Offers
+          offers={offers}
+          imageHeight={s.imageHeight as number | undefined}
+          imageHeightMobile={s.imageHeightMobile as number | undefined}
+        />
+      );
     }
 
     case "image-with-text":

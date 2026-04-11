@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useId } from "react";
 
 interface MosaicItem {
   id: string;
@@ -16,6 +17,10 @@ interface MosaicItem {
 interface MosaicProps {
   items?: MosaicItem[];
   sectionSize?: "small" | "medium" | "large";
+  /** Height in pixels for each mosaic card on desktop viewports. */
+  imageHeight?: number;
+  /** Height in pixels for each mosaic card on mobile viewports (<=640px). */
+  imageHeightMobile?: number;
 }
 
 const DEFAULT_ITEMS: MosaicItem[] = [
@@ -24,16 +29,35 @@ const DEFAULT_ITEMS: MosaicItem[] = [
   { id: "3", image: "https://placehold.co/800x520/333/fff?text=Outlet", title: "Outlet", buttonText: "Ver ofertas", link: "/collections/outlet", textColor: "#fff" },
 ];
 
-export default function Mosaic({ items = DEFAULT_ITEMS, sectionSize = "medium" }: MosaicProps) {
+const DEFAULT_IMAGE_HEIGHT_DESKTOP = 280;
+const DEFAULT_IMAGE_HEIGHT_MOBILE = 200;
+
+export default function Mosaic({
+  items = DEFAULT_ITEMS,
+  sectionSize = "medium",
+  imageHeight,
+  imageHeightMobile,
+}: MosaicProps) {
+  const uid = useId().replace(/:/g, "-");
+  const sizedClass = `mosaic-card-${uid}`;
+  const desktopH = imageHeight ?? DEFAULT_IMAGE_HEIGHT_DESKTOP;
+  const mobileH = imageHeightMobile ?? desktopH;
+
   return (
     <section className="section" data-section-type="mosaic">
+      <style>{`
+        .${sizedClass} { height: ${desktopH}px; }
+        @media (max-width: 640px) {
+          .${sizedClass} { height: ${mobileH}px; }
+        }
+      `}</style>
       <div className="container">
         <div className={`mosaic mosaic--${sectionSize}`} style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(items.length, 3)}, 1fr)`, gap: "10px" }}>
           {items.map((item) => (
             <div key={item.id} className="mosaic__item">
               <Link
                 href={item.link || "#"}
-                className="promo-block promo-block--middle-center"
+                className={`promo-block promo-block--middle-center ${sizedClass}`}
                 style={{
                   display: "block",
                   position: "relative",

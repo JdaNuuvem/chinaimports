@@ -70,6 +70,70 @@ function SelectField({ label, value, options, onChange }: { label: string; value
   );
 }
 
+function NumberField({ label, value, min, max, onChange, placeholder, helpText }: { label: string; value?: number; min?: number; max?: number; onChange: (v: number | undefined) => void; placeholder?: string; helpText?: string }) {
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <label style={{ display: "block", fontSize: 12, fontWeight: 600, marginBottom: 4, color: "#202223" }}>{label}</label>
+      <input
+        type="number"
+        value={value ?? ""}
+        placeholder={placeholder}
+        min={min}
+        max={max}
+        onChange={(e) => {
+          const raw = e.target.value;
+          onChange(raw === "" ? undefined : Number(raw));
+        }}
+        style={{ width: "100%", padding: "8px 10px", border: "1px solid #c9cccf", borderRadius: 6, fontSize: 13, boxSizing: "border-box" }}
+      />
+      {helpText && <p style={{ fontSize: 11, color: "#8c9196", marginTop: 2 }}>{helpText}</p>}
+    </div>
+  );
+}
+
+// Helper block rendered at the end of sections that support per-device image
+// resizing. Keeps the three case blocks (slideshow, mosaic, offers) consistent
+// in behaviour and copy so the admin doesn't have three subtly different UIs
+// for the same feature.
+function ImageHeightFields({
+  desktopValue,
+  mobileValue,
+  onDesktopChange,
+  onMobileChange,
+  label,
+  defaults,
+}: {
+  desktopValue?: number;
+  mobileValue?: number;
+  onDesktopChange: (v: number | undefined) => void;
+  onMobileChange: (v: number | undefined) => void;
+  label: string;
+  defaults: { desktop: number; mobile: number };
+}) {
+  return (
+    <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px dashed #e1e3e5" }}>
+      <p style={{ fontSize: 12, fontWeight: 600, color: "#202223", marginBottom: 8 }}>{label}</p>
+      <NumberField
+        label="Altura no desktop (px)"
+        value={desktopValue}
+        min={40}
+        max={1200}
+        placeholder={`Padrão: ${defaults.desktop}`}
+        onChange={onDesktopChange}
+      />
+      <NumberField
+        label="Altura no mobile (px)"
+        value={mobileValue}
+        min={40}
+        max={1200}
+        placeholder={`Padrão: ${defaults.mobile}`}
+        onChange={onMobileChange}
+        helpText="Deixe vazio para usar o mesmo valor do desktop."
+      />
+    </div>
+  );
+}
+
 export default function SectionEditor({ section, index, config, onSave, onUpdateSettings, onClose, token, saving }: Props) {
   const s = section.settings;
   const set = (key: string, value: unknown) => onUpdateSettings({ [key]: value });
@@ -157,6 +221,14 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
             <button onClick={() => set("slides", [...((s.slides as unknown[]) || []), { imageUrl: "", mobileImageUrl: "", title: "", subtitle: "", buttonLink: "", imageOnly: false }])} style={{ width: "100%", padding: "8px", border: "1px dashed #c9cccf", borderRadius: 6, background: "none", cursor: "pointer", fontSize: 12, color: "#008060" }}>
               + Adicionar slide
             </button>
+            <ImageHeightFields
+              label="Tamanho da imagem do banner"
+              desktopValue={s.imageHeight as number | undefined}
+              mobileValue={s.imageHeightMobile as number | undefined}
+              onDesktopChange={(v) => set("imageHeight", v)}
+              onMobileChange={(v) => set("imageHeightMobile", v)}
+              defaults={{ desktop: 500, mobile: 300 }}
+            />
           </>
         )}
 
@@ -217,6 +289,14 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
             <button onClick={() => set("items", [...(s.items as unknown[] || []), { title: "Novo", image: "", link: "/" }])} style={{ width: "100%", padding: "8px", border: "1px dashed #c9cccf", borderRadius: 6, background: "none", cursor: "pointer", fontSize: 12, color: "#008060" }}>
               + Adicionar bloco
             </button>
+            <ImageHeightFields
+              label="Tamanho dos blocos do mosaico"
+              desktopValue={s.imageHeight as number | undefined}
+              mobileValue={s.imageHeightMobile as number | undefined}
+              onDesktopChange={(v) => set("imageHeight", v)}
+              onMobileChange={(v) => set("imageHeightMobile", v)}
+              defaults={{ desktop: 280, mobile: 200 }}
+            />
           </>
         )}
 
@@ -234,6 +314,14 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
             <button onClick={() => set("items", [...(s.items as unknown[] || []), { title: "Nova oferta", subtitle: "", image: "", link: "/" }])} style={{ width: "100%", padding: "8px", border: "1px dashed #c9cccf", borderRadius: 6, background: "none", cursor: "pointer", fontSize: 12, color: "#008060" }}>
               + Adicionar oferta
             </button>
+            <ImageHeightFields
+              label="Tamanho dos blocos de oferta"
+              desktopValue={s.imageHeight as number | undefined}
+              mobileValue={s.imageHeightMobile as number | undefined}
+              onDesktopChange={(v) => set("imageHeight", v)}
+              onMobileChange={(v) => set("imageHeightMobile", v)}
+              defaults={{ desktop: 220, mobile: 180 }}
+            />
           </>
         )}
 

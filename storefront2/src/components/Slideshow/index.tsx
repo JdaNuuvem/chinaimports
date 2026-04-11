@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useId } from "react";
 import Link from "next/link";
 
 interface Slide {
@@ -20,7 +20,17 @@ interface SlideshowProps {
   slides?: Slide[];
   autoPlay?: boolean;
   cycleSpeed?: number;
+  /** Max-height in pixels for the slide image on desktop viewports. */
+  imageHeight?: number;
+  /**
+   * Max-height in pixels for the slide image on mobile viewports
+   * (viewport <= 640px). When omitted, falls back to `imageHeight`.
+   */
+  imageHeightMobile?: number;
 }
+
+const DEFAULT_IMAGE_HEIGHT_DESKTOP = 500;
+const DEFAULT_IMAGE_HEIGHT_MOBILE = 300;
 
 const DEFAULT_SLIDES: Slide[] = [
   {
@@ -45,12 +55,25 @@ const DEFAULT_SLIDES: Slide[] = [
   },
 ];
 
-export default function Slideshow({ slides, autoPlay = true, cycleSpeed = 5000 }: SlideshowProps) {
+export default function Slideshow({
+  slides,
+  autoPlay = true,
+  cycleSpeed = 5000,
+  imageHeight,
+  imageHeightMobile,
+}: SlideshowProps) {
   // Quando o admin não configurou nenhum slide, NÃO renderizar
   // os placeholders — caso contrário o usuário "remove tudo" no
   // editor mas continua vendo banners fantasmas na home.
   const effectiveSlides = slides && slides.length > 0 ? slides : [];
   const [current, setCurrent] = useState(0);
+
+  // Per-instance class name so two slideshows on the same page can have
+  // independent heights without CSS collision. useId is SSR-safe.
+  const uid = useId().replace(/:/g, "-");
+  const sizedClass = `slideshow-img-${uid}`;
+  const desktopH = imageHeight ?? DEFAULT_IMAGE_HEIGHT_DESKTOP;
+  const mobileH = imageHeightMobile ?? desktopH;
 
   const next = useCallback(() => {
     setCurrent((prev) => (prev + 1) % Math.max(effectiveSlides.length, 1));
@@ -66,6 +89,12 @@ export default function Slideshow({ slides, autoPlay = true, cycleSpeed = 5000 }
 
   return (
     <section className="slideshow-section" data-section-type="slideshow" style={{ margin: 0, padding: 0 }}>
+      <style>{`
+        .${sizedClass} { max-height: ${desktopH}px; }
+        @media (max-width: 640px) {
+          .${sizedClass} { max-height: ${mobileH}px; }
+        }
+      `}</style>
       <div className="slideshow slideshow--preserve-ratio slideshow--edge2edge">
         {effectiveSlides.map((slide, index) => (
           <div
@@ -83,8 +112,8 @@ export default function Slideshow({ slides, autoPlay = true, cycleSpeed = 5000 }
                     <img
                       src={slide.image}
                       alt={slide.title || "Slide"}
-                      className="slideshow__image"
-                      style={{ width: "100%", display: "block", objectFit: "cover", maxHeight: "500px" }}
+                      className={`slideshow__image ${sizedClass}`}
+                      style={{ width: "100%", display: "block", objectFit: "cover" }}
                     />
                   </picture>
                 );
