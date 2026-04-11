@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { HamburgerIcon, SearchIcon, CartIcon, UserIcon } from "@/components/Icons";
 import MobileMenu from "@/components/MobileMenu";
@@ -17,8 +17,21 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const { itemCount, cartOpen, setCartOpen } = useCart();
 
+  // Responsive logo sizing — desktop via inline style, mobile via @media.
+  // useId() gives us a stable class name unique per Header instance.
+  const uid = useId().replace(/:/g, "-");
+  const logoClass = `header-logo-img-${uid}`;
+  const desktopLogoH = identity.logoHeight || 40;
+  const mobileLogoH = identity.logoHeightMobile || desktopLogoH;
+
   return (
     <>
+      <style>{`
+        .${logoClass} { height: ${desktopLogoH}px; }
+        @media (max-width: 640px) {
+          .${logoClass} { height: ${mobileLogoH}px; }
+        }
+      `}</style>
       <header className="header header--inline" role="banner">
         <div className="container">
           <div className="header__inner">
@@ -40,7 +53,7 @@ export default function Header() {
             <div className="header__logo">
               <Link href="/" className="header__logo-link">
                 {identity.logoUrl ? (
-                  <img src={identity.logoUrl} alt={identity.storeName} style={{ height: identity.logoHeight || 40, width: "auto" }} />
+                  <img src={identity.logoUrl} alt={identity.storeName} className={logoClass} style={{ width: "auto" }} />
                 ) : (
                   <span className="header__logo-text" style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "2px" }}>
                     {identity.logoText}

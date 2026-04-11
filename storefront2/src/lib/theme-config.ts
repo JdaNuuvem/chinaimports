@@ -8,8 +8,10 @@ export interface ThemeConfig {
     logoUrl: string | null;
     logoText: string;
     faviconUrl: string | null;
-    /** Header logo height in pixels. Defaults to 40. */
+    /** Header logo height in pixels (desktop). Defaults to 40. */
     logoHeight?: number;
+    /** Header logo height in pixels on mobile viewports (<=640px). Falls back to logoHeight when omitted. */
+    logoHeightMobile?: number;
   };
 
   colors: {

@@ -239,6 +239,30 @@ const OFFERS_HEIGHT_PRESETS: ImageHeightPreset[] = [
   { key: "large", label: "Grande", desktop: 320, mobile: 240 },
 ];
 
+const IMAGE_WITH_TEXT_HEIGHT_PRESETS: ImageHeightPreset[] = [
+  { key: "compact", label: "Compacto", desktop: 300, mobile: 200 },
+  { key: "medium", label: "Médio", desktop: 450, mobile: 280 },
+  { key: "large", label: "Grande", desktop: 600, mobile: 380 },
+];
+
+const BRAND_SHOWCASE_HEIGHT_PRESETS: ImageHeightPreset[] = [
+  { key: "compact", label: "Compacto", desktop: 40, mobile: 32 },
+  { key: "medium", label: "Médio", desktop: 60, mobile: 48 },
+  { key: "large", label: "Grande", desktop: 90, mobile: 70 },
+];
+
+const LOGO_LIST_HEIGHT_PRESETS: ImageHeightPreset[] = [
+  { key: "compact", label: "Compacto", desktop: 50, mobile: 36 },
+  { key: "medium", label: "Médio", desktop: 70, mobile: 52 },
+  { key: "large", label: "Grande", desktop: 100, mobile: 72 },
+];
+
+const TEXT_WITH_ICONS_SIZE_PRESETS: ImageHeightPreset[] = [
+  { key: "compact", label: "Compacto", desktop: 24, mobile: 20 },
+  { key: "medium", label: "Médio", desktop: 36, mobile: 28 },
+  { key: "large", label: "Grande", desktop: 56, mobile: 44 },
+];
+
 export default function SectionEditor({ section, index, config, onSave, onUpdateSettings, onClose, token, saving }: Props) {
   const s = section.settings;
   const set = (key: string, value: unknown) => onUpdateSettings({ [key]: value });
@@ -375,6 +399,15 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
             <button onClick={() => set("items", [...(s.items as unknown[] || []), { icon: "📦", iconImage: "", title: "Novo", text: "Descrição" }])} style={{ width: "100%", padding: "8px", border: "1px dashed #c9cccf", borderRadius: 6, background: "none", cursor: "pointer", fontSize: 12, color: "#008060" }}>
               + Adicionar item
             </button>
+            <ImageHeightFields
+              label="Tamanho do ícone-imagem"
+              desktopValue={s.imageHeight as number | undefined}
+              mobileValue={s.imageHeightMobile as number | undefined}
+              onDesktopChange={(v) => set("imageHeight", v)}
+              onMobileChange={(v) => set("imageHeightMobile", v)}
+              defaults={{ desktop: 36, mobile: 28 }}
+              presets={TEXT_WITH_ICONS_SIZE_PRESETS}
+            />
           </>
         )}
 
@@ -442,6 +475,15 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
             <SelectField label="Posição da imagem" value={(s.imagePosition as string) || "left"} options={[{ value: "left", label: "Esquerda" }, { value: "right", label: "Direita" }]} onChange={(v) => set("imagePosition", v)} />
             <Field label="Texto do botão" value={(s.buttonText as string) || ""} onChange={(v) => set("buttonText", v)} />
             <Field label="Link do botão" value={(s.buttonUrl as string) || ""} onChange={(v) => set("buttonUrl", v)} />
+            <ImageHeightFields
+              label="Tamanho da imagem"
+              desktopValue={s.imageHeight as number | undefined}
+              mobileValue={s.imageHeightMobile as number | undefined}
+              onDesktopChange={(v) => set("imageHeight", v)}
+              onMobileChange={(v) => set("imageHeightMobile", v)}
+              defaults={{ desktop: 450, mobile: 280 }}
+              presets={IMAGE_WITH_TEXT_HEIGHT_PRESETS}
+            />
           </>
         )}
 
@@ -529,6 +571,15 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
             <Field label="Título" value={(s.title as string) || ""} onChange={(v) => set("title", v)} />
             <Field label="Texto" value={(s.text as string) || ""} onChange={(v) => set("text", v)} multiline />
             <ImageUpload label="Imagem" value={(s.image as string) || ""} onChange={(v) => set("image", v)} token={token} />
+            <ImageHeightFields
+              label="Tamanho dos logos"
+              desktopValue={s.imageHeight as number | undefined}
+              mobileValue={s.imageHeightMobile as number | undefined}
+              onDesktopChange={(v) => set("imageHeight", v)}
+              onMobileChange={(v) => set("imageHeightMobile", v)}
+              defaults={{ desktop: 60, mobile: 48 }}
+              presets={BRAND_SHOWCASE_HEIGHT_PRESETS}
+            />
           </>
         )}
 
@@ -563,6 +614,15 @@ export default function SectionEditor({ section, index, config, onSave, onUpdate
             <button onClick={() => set("logos", [...(s.logos as unknown[] || []), { name: "", image: "", url: "" }])} style={{ width: "100%", padding: "6px", border: "1px dashed #c9cccf", borderRadius: 6, background: "none", cursor: "pointer", fontSize: 12, color: "#008060" }}>
               + Adicionar logo
             </button>
+            <ImageHeightFields
+              label="Tamanho dos logos"
+              desktopValue={s.imageHeight as number | undefined}
+              mobileValue={s.imageHeightMobile as number | undefined}
+              onDesktopChange={(v) => set("imageHeight", v)}
+              onMobileChange={(v) => set("imageHeightMobile", v)}
+              defaults={{ desktop: 70, mobile: 52 }}
+              presets={LOGO_LIST_HEIGHT_PRESETS}
+            />
           </>
         )}
       </div>

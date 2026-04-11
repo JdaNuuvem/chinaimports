@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 interface TextWithIconItem {
   /** Emoji or short text used when no `iconImage` is provided. */
   icon: string;
@@ -9,6 +11,10 @@ interface TextWithIconItem {
 
 interface TextWithIconsProps {
   items?: TextWithIconItem[];
+  /** Size in pixels (width and height) for the icon image on desktop. */
+  imageHeight?: number;
+  /** Size in pixels (width and height) for the icon image on mobile (<=640px). */
+  imageHeightMobile?: number;
 }
 
 const DEFAULT_ITEMS: TextWithIconItem[] = [
@@ -18,9 +24,27 @@ const DEFAULT_ITEMS: TextWithIconItem[] = [
   { icon: "💳", title: "Parcele em 6x", content: "Sem juros" },
 ];
 
-export default function TextWithIcons({ items = DEFAULT_ITEMS }: TextWithIconsProps) {
+const DEFAULT_IMAGE_HEIGHT_DESKTOP = 36;
+const DEFAULT_IMAGE_HEIGHT_MOBILE = 28;
+
+export default function TextWithIcons({
+  items = DEFAULT_ITEMS,
+  imageHeight,
+  imageHeightMobile,
+}: TextWithIconsProps) {
+  const uid = useId().replace(/:/g, "-");
+  const sizedClass = `text-with-icons-icon-${uid}`;
+  const desktopH = imageHeight ?? DEFAULT_IMAGE_HEIGHT_DESKTOP;
+  const mobileH = imageHeightMobile ?? desktopH;
+
   return (
     <section className="section section--tight" data-section-type="text-with-icons" style={{ borderTop: "1px solid var(--border-color, #e0e0e0)", borderBottom: "1px solid var(--border-color, #e0e0e0)", padding: "20px 0" }}>
+      <style>{`
+        .${sizedClass} { width: ${desktopH}px; height: ${desktopH}px; }
+        @media (max-width: 640px) {
+          .${sizedClass} { width: ${mobileH}px; height: ${mobileH}px; }
+        }
+      `}</style>
       <div className="container">
         <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: "20px" }}>
           {items.map((item, i) => (
@@ -29,7 +53,8 @@ export default function TextWithIcons({ items = DEFAULT_ITEMS }: TextWithIconsPr
                 <img
                   src={item.iconImage}
                   alt={item.title}
-                  style={{ width: 36, height: 36, objectFit: "contain", flexShrink: 0 }}
+                  className={sizedClass}
+                  style={{ objectFit: "contain", flexShrink: 0 }}
                 />
               ) : (
                 <span style={{ fontSize: "28px" }}>{item.icon}</span>

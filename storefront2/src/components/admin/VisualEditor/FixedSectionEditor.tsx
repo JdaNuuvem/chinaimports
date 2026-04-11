@@ -127,6 +127,23 @@ export default function FixedSectionEditor({ sectionId, config, onSave, onClose,
             <Field label="Nome da loja" value={config.identity.storeName} onChange={(v) => onSave({ identity: { ...config.identity, storeName: v } })} />
             <Field label="Texto do logo" value={config.identity.logoText} onChange={(v) => onSave({ identity: { ...config.identity, logoText: v } })} />
             <ImageUpload label="Imagem do logo" value={config.identity.logoUrl || ""} onChange={(v) => onSave({ identity: { ...config.identity, logoUrl: v || null } })} token={token} previewSize={50} />
+            <NumberField
+              label="Altura do logo - desktop (px)"
+              value={config.identity.logoHeight ?? 40}
+              min={16}
+              max={200}
+              onChange={(v) => onSave({ identity: { ...config.identity, logoHeight: v } })}
+            />
+            <NumberField
+              label="Altura do logo - mobile (px)"
+              value={config.identity.logoHeightMobile ?? config.identity.logoHeight ?? 40}
+              min={16}
+              max={200}
+              onChange={(v) => onSave({ identity: { ...config.identity, logoHeightMobile: v } })}
+            />
+            <p style={{ fontSize: 11, color: "#8c9196", marginTop: -6, marginBottom: 12, lineHeight: 1.5 }}>
+              A altura controla o tamanho do logo no cabeçalho. Deixe o mobile igual ao desktop se quiser um tamanho só.
+            </p>
             <ColorField label="Fundo do header" value={config.colors.headerBg} onChange={(v) => onSave({ colors: { ...config.colors, headerBg: v } })} />
             <ColorField label="Texto do header" value={config.colors.headerText} onChange={(v) => onSave({ colors: { ...config.colors, headerText: v } })} />
           </>

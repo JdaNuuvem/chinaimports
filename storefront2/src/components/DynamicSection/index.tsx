@@ -63,7 +63,13 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
         title: item.title || "",
         content: item.text,
       }));
-      return <TextWithIcons items={items} />;
+      return (
+        <TextWithIcons
+          items={items}
+          imageHeight={s.imageHeight as number | undefined}
+          imageHeightMobile={s.imageHeightMobile as number | undefined}
+        />
+      );
     }
 
     case "mosaic": {
@@ -140,6 +146,8 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
             buttonLink={(s.buttonUrl as string) || (s.buttonLink as string)}
             image={(s.image as string) || (s.imageUrl as string)}
             imagePosition={(s.imagePosition as "left" | "right") || "left"}
+            imageHeight={s.imageHeight as number | undefined}
+            imageHeightMobile={s.imageHeightMobile as number | undefined}
           />
         </div>
       );
@@ -175,7 +183,12 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
         // Renderiza só o título quando não há logos
         return (
           <div style={{ padding: "40px 0" }}>
-            <LogoList title={s.title as string} logos={[]} />
+            <LogoList
+              title={s.title as string}
+              logos={[]}
+              imageHeight={s.imageHeight as number | undefined}
+              imageHeightMobile={s.imageHeightMobile as number | undefined}
+            />
           </div>
         );
       }
@@ -189,7 +202,12 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
         }));
       return (
         <div style={{ padding: "40px 0" }}>
-          <LogoList title={s.title as string} logos={logos} />
+          <LogoList
+            title={s.title as string}
+            logos={logos}
+            imageHeight={s.imageHeight as number | undefined}
+            imageHeightMobile={s.imageHeightMobile as number | undefined}
+          />
         </div>
       );
     }
@@ -217,7 +235,14 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
           ? [{ name: (s.text as string) || (s.title as string) || "", logoUrl: singleImage }]
           : [];
       if (brands.length === 0) return null;
-      return <BrandShowcase title={s.title as string} brands={brands} />;
+      return (
+        <BrandShowcase
+          title={s.title as string}
+          brands={brands}
+          imageHeight={s.imageHeight as number | undefined}
+          imageHeightMobile={s.imageHeightMobile as number | undefined}
+        />
+      );
     }
 
     case "rich-text":

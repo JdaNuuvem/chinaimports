@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useId } from "react";
 
 interface LogoItem {
   id: string;
@@ -10,6 +11,10 @@ interface LogoItem {
 interface LogoListProps {
   title?: string;
   logos?: LogoItem[];
+  /** Max-height in pixels for each logo on desktop viewports. */
+  imageHeight?: number;
+  /** Max-height in pixels for each logo on mobile viewports (<=640px). */
+  imageHeightMobile?: number;
 }
 
 const DEFAULT_LOGOS: LogoItem[] = [
@@ -20,9 +25,31 @@ const DEFAULT_LOGOS: LogoItem[] = [
   { id: "5", image: "https://placehold.co/140x70/f5f5f5/999?text=Brand+5", alt: "Brand 5" },
 ];
 
-export default function LogoList({ title = "Parceiros", logos = DEFAULT_LOGOS }: LogoListProps) {
+const DEFAULT_IMAGE_HEIGHT_DESKTOP = 70;
+const DEFAULT_IMAGE_HEIGHT_MOBILE = 52;
+
+export default function LogoList({
+  title = "Parceiros",
+  logos = DEFAULT_LOGOS,
+  imageHeight,
+  imageHeightMobile,
+}: LogoListProps) {
+  const uid = useId().replace(/:/g, "-");
+  const sizedClass = `logo-list-item-${uid}`;
+  const desktopH = imageHeight ?? DEFAULT_IMAGE_HEIGHT_DESKTOP;
+  const mobileH = imageHeightMobile ?? desktopH;
+  // Width scales proportionally to height to keep logo aspect ratio balanced.
+  const desktopW = Math.round(desktopH * 2);
+  const mobileW = Math.round(mobileH * 2);
+
   return (
     <section className="section" data-section-type="logo-list">
+      <style>{`
+        .${sizedClass} { max-width: ${desktopW}px; max-height: ${desktopH}px; }
+        @media (max-width: 640px) {
+          .${sizedClass} { max-width: ${mobileW}px; max-height: ${mobileH}px; }
+        }
+      `}</style>
       <div className="container">
         {title && (
           <header className="section__header" style={{ justifyContent: "center" }}>
@@ -33,9 +60,9 @@ export default function LogoList({ title = "Parceiros", logos = DEFAULT_LOGOS }:
           {logos.map((logo) => (
             <div key={logo.id}>
               {logo.link ? (
-                <Link href={logo.link}><img src={logo.image} alt={logo.alt || ""} style={{ maxWidth: "140px", maxHeight: "70px", objectFit: "contain", filter: "grayscale(100%)", opacity: 0.6, transition: "all 0.3s" }} /></Link>
+                <Link href={logo.link}><img src={logo.image} alt={logo.alt || ""} className={sizedClass} style={{ objectFit: "contain", filter: "grayscale(100%)", opacity: 0.6, transition: "all 0.3s" }} /></Link>
               ) : (
-                <img src={logo.image} alt={logo.alt || ""} style={{ maxWidth: "140px", maxHeight: "70px", objectFit: "contain", filter: "grayscale(100%)", opacity: 0.6, transition: "all 0.3s" }} />
+                <img src={logo.image} alt={logo.alt || ""} className={sizedClass} style={{ objectFit: "contain", filter: "grayscale(100%)", opacity: 0.6, transition: "all 0.3s" }} />
               )}
             </div>
           ))}
