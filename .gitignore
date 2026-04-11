@@ -50,6 +50,8 @@ test-results/
 # Prisma local DB
 backend/prisma/dev.db
 backend/prisma/dev.db-journal
+backend/prisma/prisma/dev.db
+backend/prisma/prisma/dev.db-journal
 backend/prisma/migrations/dev_*
 
 # Uploads (mantém estrutura, não conteúdo)
