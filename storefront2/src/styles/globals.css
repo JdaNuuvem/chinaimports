@@ -147,8 +147,15 @@ a:hover {
   align-items: center;
 }
 
+/* Inherit color + strip underline on BOTH the element itself (when rendered
+   as an <a> because linkUrl is set in the theme config) and any nested <a>
+   descendants (when rendered as a <p> with inline links). Without the first
+   rule, the admin's configured text color would only apply to the <section>
+   and the <a> would fall back to the browser's user-agent link color. */
 .announcement-bar__content {
   margin: 0;
+  color: inherit;
+  text-decoration: none;
 }
 
 .announcement-bar__content a {
