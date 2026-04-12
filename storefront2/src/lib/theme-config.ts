@@ -72,6 +72,8 @@ export interface ThemeConfig {
     text: string;
     linkUrl: string | null;
     linkText: string | null;
+    /** Where the bar sits relative to the header. Defaults to "above". */
+    position?: "above" | "below";
   };
 
   header: {

@@ -95,8 +95,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ErrorTrackingInit />
             <WebVitalsReporter />
             <SkipToContent />
-            <AnnouncementBar />
+            {liveThemeConfig.announcementBar?.position !== "below" && <AnnouncementBar />}
             <Header />
+            {liveThemeConfig.announcementBar?.position === "below" && <AnnouncementBar />}
             <main id="main" role="main">
               {children}
             </main>

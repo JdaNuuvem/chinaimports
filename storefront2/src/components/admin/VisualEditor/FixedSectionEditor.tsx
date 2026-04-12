@@ -116,6 +116,15 @@ export default function FixedSectionEditor({ sectionId, config, onSave, onClose,
             <CheckboxField label="Barra ativada" checked={config.announcementBar.enabled} onChange={(v) => onSave({ announcementBar: { ...config.announcementBar, enabled: v } })} />
             <Field label="Texto do anúncio" value={config.announcementBar.text} onChange={(v) => onSave({ announcementBar: { ...config.announcementBar, text: v } })} helpText="Ex: FRETE GRÁTIS acima de R$ 299" />
             <Field label="Link" value={config.announcementBar.linkUrl || ""} onChange={(v) => onSave({ announcementBar: { ...config.announcementBar, linkUrl: v || null } })} />
+            <SelectField
+              label="Posição da barra"
+              value={config.announcementBar.position || "above"}
+              options={[
+                { value: "above", label: "Acima do cabeçalho (padrão)" },
+                { value: "below", label: "Abaixo do cabeçalho" },
+              ]}
+              onChange={(v) => onSave({ announcementBar: { ...config.announcementBar, position: v as "above" | "below" } })}
+            />
             <ColorField label="Cor de fundo" value={config.colors.announcementBarBg} onChange={(v) => onSave({ colors: { ...config.colors, announcementBarBg: v } })} />
             <ColorField label="Cor do texto" value={config.colors.announcementBarText} onChange={(v) => onSave({ colors: { ...config.colors, announcementBarText: v } })} />
           </>

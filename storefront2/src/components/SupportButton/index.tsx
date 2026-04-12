@@ -13,7 +13,13 @@ export default function SupportButton({ whatsappNumber = "5511999999999", whatsa
 
   return (
     <>
-      <div style={{ position: "fixed", bottom: "20px", right: "20px", zIndex: 900 }}>
+      <style>{`
+        .support-btn-wrap { position: fixed; bottom: 20px; right: 20px; z-index: 900; }
+        @media (max-width: 768px) {
+          .support-btn-wrap { bottom: 80px; }
+        }
+      `}</style>
+      <div className="support-btn-wrap">
         {open && (
           <div style={{ position: "absolute", bottom: "70px", right: 0, width: "300px", background: "#fff", borderRadius: "12px", boxShadow: "0 4px 20px rgba(0,0,0,0.15)", overflow: "hidden" }}>
             <div style={{ background: "#25D366", color: "#fff", padding: "15px 20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
