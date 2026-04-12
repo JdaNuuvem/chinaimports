@@ -120,6 +120,9 @@ export interface ThemeConfig {
     textColor: string;
   };
 
+  /** When false, hides the WhatsApp floating support button. Defaults to true. */
+  showWhatsappButton?: boolean;
+
   seo: {
     titleTemplate: string;
     defaultDescription: string;

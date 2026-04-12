@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { CloseIcon, WhatsAppIcon } from "@/components/Icons";
+import { getThemeConfig } from "@/lib/theme-config";
 
 interface SupportButtonProps {
   whatsappNumber?: string;
@@ -8,7 +9,10 @@ interface SupportButtonProps {
 }
 
 export default function SupportButton({ whatsappNumber = "5511999999999", whatsappMessage = "Olá! Preciso de ajuda com a Imports China Brasil" }: SupportButtonProps) {
+  const config = getThemeConfig();
   const [open, setOpen] = useState(false);
+
+  if (config.showWhatsappButton === false) return null;
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (

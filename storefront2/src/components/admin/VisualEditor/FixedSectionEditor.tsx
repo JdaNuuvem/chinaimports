@@ -174,6 +174,7 @@ export default function FixedSectionEditor({ sectionId, config, onSave, onClose,
           <>
             <Field label="Copyright" value={config.footer.copyrightText} onChange={(v) => onSave({ footer: { ...config.footer, copyrightText: v } })} />
             <CheckboxField label="Mostrar newsletter no footer" checked={config.footer.showNewsletter} onChange={(v) => onSave({ footer: { ...config.footer, showNewsletter: v } })} />
+            <CheckboxField label="Mostrar botão do WhatsApp (suporte)" checked={config.showWhatsappButton ?? true} onChange={(v) => onSave({ showWhatsappButton: v })} />
             <ColorField label="Fundo" value={config.colors.footerBg} onChange={(v) => onSave({ colors: { ...config.colors, footerBg: v } })} />
             <ColorField label="Texto" value={config.colors.footerBodyText} onChange={(v) => onSave({ colors: { ...config.colors, footerBodyText: v } })} />
             <ColorField label="Títulos" value={config.colors.footerHeadingText} onChange={(v) => onSave({ colors: { ...config.colors, footerHeadingText: v } })} />
