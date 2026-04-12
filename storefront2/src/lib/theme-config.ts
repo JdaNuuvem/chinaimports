@@ -102,6 +102,8 @@ export interface ThemeConfig {
     showReviewsBadge: boolean;
     /** When false, hides the shipping calculator on the product page. Defaults to true. */
     showShippingCalculator?: boolean;
+    /** Horizontal alignment of the "Ver detalhes" CTA button on product cards. Defaults to "left". */
+    ctaAlignment?: "left" | "center" | "right";
   };
 
   cart: {

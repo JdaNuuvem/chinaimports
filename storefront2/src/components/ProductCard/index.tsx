@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { formatMoney, calculateDiscount } from "@/lib/utils";
 import { useCart } from "@/context/CartContext";
+import { getThemeConfig } from "@/lib/theme-config";
 
 interface ProductCardProps {
   id: string;
@@ -50,6 +51,8 @@ export default function ProductCard({
     inventoryQuantity <= LOW_STOCK_THRESHOLD;
   const hasDiscount = compareAtPrice && compareAtPrice > price;
   const discount = hasDiscount ? calculateDiscount(compareAtPrice!, price) : 0;
+  const config = getThemeConfig();
+  const ctaAlign = config.product.ctaAlignment || "left";
   const { addItem, loading } = useCart();
   const [hovered, setHovered] = useState(false);
   const [added, setAdded] = useState(false);
@@ -208,22 +211,23 @@ export default function ProductCard({
             Economize {formatMoney(compareAtPrice! - price)}
           </div>
         )}
-        {/* VER DETALHES CTA — like reference */}
-        <Link
-          href={`/product/${handle}`}
-          className="product-card__cta cta-pulse"
-          style={{
-            marginTop: 12,
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            padding: "10px 14px", borderRadius: 8,
-            background: "#22c55e", color: "#fff",
-            fontSize: 12, fontWeight: 700, letterSpacing: 0.8,
-            textTransform: "uppercase", textDecoration: "none",
-            transition: "background 0.2s",
-          }}
-        >
-          Ver detalhes
-        </Link>
+        {/* VER DETALHES CTA — alignment controlled by config.product.ctaAlignment */}
+        <div style={{ textAlign: ctaAlign, marginTop: 12 }}>
+          <Link
+            href={`/product/${handle}`}
+            className="product-card__cta cta-pulse"
+            style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              padding: "10px 14px", borderRadius: 8,
+              background: "#22c55e", color: "#fff",
+              fontSize: 12, fontWeight: 700, letterSpacing: 0.8,
+              textTransform: "uppercase", textDecoration: "none",
+              transition: "background 0.2s",
+            }}
+          >
+            Ver detalhes
+          </Link>
+        </div>
       </div>
     </div>
   );

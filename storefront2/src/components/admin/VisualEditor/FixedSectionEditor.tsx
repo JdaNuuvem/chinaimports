@@ -203,6 +203,16 @@ export default function FixedSectionEditor({ sectionId, config, onSave, onClose,
             <CheckboxField label="Mostrar vendedor/coleção" checked={config.product.showVendor} onChange={(v) => onSave({ product: { ...config.product, showVendor: v } })} />
             <CheckboxField label="Mostrar desconto" checked={config.product.showDiscount} onChange={(v) => onSave({ product: { ...config.product, showDiscount: v } })} />
             <CheckboxField label="Mostrar calculadora de frete e prazo" checked={config.product.showShippingCalculator ?? true} onChange={(v) => onSave({ product: { ...config.product, showShippingCalculator: v } })} />
+            <SelectField
+              label="Alinhamento do botão 'Ver detalhes'"
+              value={config.product.ctaAlignment || "left"}
+              options={[
+                { value: "left", label: "Esquerda" },
+                { value: "center", label: "Centralizado" },
+                { value: "right", label: "Direita" },
+              ]}
+              onChange={(v) => onSave({ product: { ...config.product, ctaAlignment: v as "left" | "center" | "right" } })}
+            />
             <SelectField label="Formato do desconto" value={config.product.discountMode} options={[
               { value: "percentage", label: "Porcentagem (20% OFF)" },
               { value: "saving", label: "Economia (- R$ 49,75)" },
