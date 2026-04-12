@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { getThemeConfig } from "@/lib/theme-config";
 
 const FIRST_NAMES = ["João", "Maria", "Pedro", "Ana", "Carlos", "Juliana", "Rafael", "Fernanda", "Lucas", "Camila", "Bruno", "Larissa", "Diego", "Patrícia", "Thiago", "Beatriz"];
 const CITIES = ["São Paulo", "Rio de Janeiro", "Belo Horizonte", "Curitiba", "Porto Alegre", "Salvador", "Fortaleza", "Recife", "Brasília", "Florianópolis", "Goiânia", "Manaus"];
@@ -12,12 +13,27 @@ function random<T>(arr: T[]): T {
 type ProductLite = { title: string; handle: string };
 
 export default function SocialProof() {
+  const config = getThemeConfig();
+  const sp = config.socialProof;
+
+  // Disabled via admin
+  if (sp?.enabled === false) return null;
+
+  const displayDuration = (sp?.displayDuration ?? 5) * 1000;
+  const intervalMin = (sp?.intervalMin ?? 20) * 1000;
+  const intervalMax = (sp?.intervalMax ?? 40) * 1000;
+  // Parse handles filter — stored as newline-separated string
+  const allowedHandles = (sp?.productHandles || "")
+    .split("\n")
+    .map((h) => h.trim())
+    .filter(Boolean);
+
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
   const [data, setData] = useState({ name: "", city: "", product: "", handle: "", minutes: 0 });
   const productsRef = useRef<ProductLite[]>([]);
 
-  // Don't render on admin/checkout. On product page, render at top to avoid blocking sticky buy button.
+  // Don't render on admin/checkout.
   const hidden = !pathname || pathname.startsWith("/admin") || pathname.startsWith("/checkout");
   const isProductPage = !!pathname?.startsWith("/produto");
 
@@ -29,14 +45,21 @@ export default function SocialProof() {
       .then((r) => (r.ok ? r.json() : null))
       .then((json) => {
         if (cancelled || !json?.products) return;
-        productsRef.current = json.products
+        let prods: ProductLite[] = json.products
           .filter((p: { title?: string; handle?: string }) => p.title && p.handle)
           .map((p: { title: string; handle: string }) => ({ title: p.title, handle: p.handle }));
+        // Filter by allowed handles if configured
+        if (allowedHandles.length > 0) {
+          const allowedSet = new Set(allowedHandles);
+          prods = prods.filter((p) => allowedSet.has(p.handle));
+        }
+        productsRef.current = prods;
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hidden]);
 
   const showNotification = useCallback(() => {
@@ -50,20 +73,21 @@ export default function SocialProof() {
       minutes: Math.floor(Math.random() * 15) + 1,
     });
     setVisible(true);
-    setTimeout(() => setVisible(false), 5000);
-  }, []);
+    setTimeout(() => setVisible(false), displayDuration);
+  }, [displayDuration]);
 
   useEffect(() => {
     if (hidden) return;
-    const firstTimeout = setTimeout(showNotification, 8000 + Math.random() * 7000);
+    const firstDelay = intervalMin + Math.random() * (intervalMax - intervalMin) / 2;
+    const firstTimeout = setTimeout(showNotification, firstDelay);
     const interval = setInterval(() => {
       if (Math.random() > 0.3) showNotification();
-    }, 20000 + Math.random() * 20000);
+    }, intervalMin + Math.random() * (intervalMax - intervalMin));
     return () => {
       clearTimeout(firstTimeout);
       clearInterval(interval);
     };
-  }, [showNotification, hidden]);
+  }, [showNotification, hidden, intervalMin, intervalMax]);
 
   if (hidden || !visible) return null;
 
@@ -112,15 +136,15 @@ export default function SocialProof() {
           top: 90px;
         }
         .social-proof-toast__icon {
-          width: 40px;
-          height: 40px;
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
           background: var(--accent-color, #00badb);
           color: #fff;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
+          font-size: 16px;
           flex-shrink: 0;
         }
         .social-proof-toast__body {
@@ -159,27 +183,33 @@ export default function SocialProof() {
         }
         @media (max-width: 640px) {
           .social-proof-toast {
-            left: 10px;
-            right: 10px;
-            bottom: 80px;
-            max-width: calc(100vw - 20px);
-            padding: 10px 28px 10px 12px;
-            gap: 10px;
+            left: 8px;
+            right: 8px;
+            bottom: 70px;
+            max-width: none;
+            width: auto;
+            padding: 10px 28px 10px 10px;
+            gap: 8px;
+            border-radius: 10px;
+            font-size: 12px;
           }
           .social-proof-toast--top {
-            top: 70px;
+            top: 60px;
             bottom: auto;
           }
           .social-proof-toast__icon {
-            width: 34px;
-            height: 34px;
-            font-size: 16px;
+            width: 30px;
+            height: 30px;
+            font-size: 14px;
           }
           .social-proof-toast__line1 {
-            font-size: 12px;
+            font-size: 11px;
           }
           .social-proof-toast__product {
-            font-size: 11px;
+            font-size: 10px;
+          }
+          .social-proof-toast__time {
+            font-size: 10px;
           }
         }
       `}</style>

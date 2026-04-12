@@ -22,6 +22,7 @@ const SECTION_META: Record<string, { label: string; icon: string }> = {
 const FIXED_SECTIONS: Array<{ id: string; label: string; icon: string; pages: PreviewPage[] }> = [
   { id: "announcement", label: "Barra de anúncio", icon: "📢", pages: ["home", "product", "collection"] },
   { id: "header", label: "Cabeçalho", icon: "🏪", pages: ["home", "product", "collection"] },
+  { id: "social-proof", label: "Pop-up de compras", icon: "🛒", pages: ["home", "product", "collection"] },
   { id: "newsletter", label: "Newsletter", icon: "📬", pages: ["home"] },
   { id: "footer", label: "Rodapé", icon: "📎", pages: ["home", "product", "collection"] },
 ];
@@ -76,7 +77,7 @@ export default function SectionList({ sections, previewPage, selectedIndex, sele
   const [contextMenu, setContextMenu] = useState<{ index: number; x: number; y: number } | null>(null);
 
   const topFixed = FIXED_SECTIONS.filter((s) => ["announcement", "header"].includes(s.id) && s.pages.includes(previewPage));
-  const bottomFixed = FIXED_SECTIONS.filter((s) => ["newsletter", "footer"].includes(s.id) && s.pages.includes(previewPage));
+  const bottomFixed = FIXED_SECTIONS.filter((s) => ["social-proof", "newsletter", "footer"].includes(s.id) && s.pages.includes(previewPage));
 
   const renderFixedItem = (item: { id: string; label: string; icon: string }) => {
     const isSelected = selectedFixedId === item.id;

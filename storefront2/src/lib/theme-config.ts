@@ -125,6 +125,23 @@ export interface ThemeConfig {
   /** When false, hides the WhatsApp floating support button. Defaults to true. */
   showWhatsappButton?: boolean;
 
+  /** Social proof "X bought Y" popup settings. */
+  socialProof?: {
+    enabled?: boolean;
+    /** How long the popup stays visible (seconds). Default 5. */
+    displayDuration?: number;
+    /** Min seconds between popups. Default 20. */
+    intervalMin?: number;
+    /** Max seconds between popups. Default 40. */
+    intervalMax?: number;
+    /**
+     * When non-empty, only products whose handle is in this list will be
+     * shown. When empty/missing, any product from the catalog can appear.
+     * Stored as newline-separated string in the admin for ease of editing.
+     */
+    productHandles?: string;
+  };
+
   seo: {
     titleTemplate: string;
     defaultDescription: string;

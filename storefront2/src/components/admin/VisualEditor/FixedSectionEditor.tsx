@@ -81,6 +81,7 @@ const SECTION_LABELS: Record<string, { label: string; icon: string }> = {
   // Shared
   "announcement": { label: "Barra de Anúncio", icon: "📢" },
   "header": { label: "Cabeçalho e Logo", icon: "🏪" },
+  "social-proof": { label: "Pop-up de compras", icon: "🛒" },
   "newsletter": { label: "Newsletter", icon: "📬" },
   "footer": { label: "Rodapé", icon: "📎" },
   // Product
@@ -168,6 +169,45 @@ export default function FixedSectionEditor({ sectionId, config, onSave, onClose,
             <ColorField label="Cor do texto" value={config.newsletter.textColor} onChange={(v) => onSave({ newsletter: { ...config.newsletter, textColor: v } })} />
           </>
         )}
+
+        {/* ──── SOCIAL PROOF ──── */}
+        {sectionId === "social-proof" && (() => {
+          const sp = config.socialProof || {};
+          const updateSP = (patch: Record<string, unknown>) => onSave({ socialProof: { ...sp, ...patch } });
+          return (
+            <>
+              <CheckboxField label="Pop-up ativado" checked={sp.enabled ?? true} onChange={(v) => updateSP({ enabled: v })} />
+              <NumberField
+                label="Tempo de exibição (segundos)"
+                value={sp.displayDuration ?? 5}
+                min={2}
+                max={30}
+                onChange={(v) => updateSP({ displayDuration: v })}
+              />
+              <NumberField
+                label="Intervalo mínimo entre pop-ups (segundos)"
+                value={sp.intervalMin ?? 20}
+                min={5}
+                max={300}
+                onChange={(v) => updateSP({ intervalMin: v })}
+              />
+              <NumberField
+                label="Intervalo máximo entre pop-ups (segundos)"
+                value={sp.intervalMax ?? 40}
+                min={10}
+                max={600}
+                onChange={(v) => updateSP({ intervalMax: v })}
+              />
+              <Field
+                label="Produtos permitidos (handles, um por linha)"
+                value={sp.productHandles || ""}
+                onChange={(v) => updateSP({ productHandles: v })}
+                multiline
+                helpText="Deixe vazio para mostrar qualquer produto do catálogo. Use o slug da URL do produto (ex: caixa-de-som-boombox)."
+              />
+            </>
+          );
+        })()}
 
         {/* ──── FOOTER ──── */}
         {sectionId === "footer" && (
