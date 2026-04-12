@@ -201,6 +201,7 @@ export default function FixedSectionEditor({ sectionId, config, onSave, onClose,
             <p style={{ fontSize: 13, color: "#6d7175", marginBottom: 12 }}>Configure como o preço e informações são exibidos.</p>
             <CheckboxField label="Mostrar vendedor/coleção" checked={config.product.showVendor} onChange={(v) => onSave({ product: { ...config.product, showVendor: v } })} />
             <CheckboxField label="Mostrar desconto" checked={config.product.showDiscount} onChange={(v) => onSave({ product: { ...config.product, showDiscount: v } })} />
+            <CheckboxField label="Mostrar calculadora de frete e prazo" checked={config.product.showShippingCalculator ?? true} onChange={(v) => onSave({ product: { ...config.product, showShippingCalculator: v } })} />
             <SelectField label="Formato do desconto" value={config.product.discountMode} options={[
               { value: "percentage", label: "Porcentagem (20% OFF)" },
               { value: "saving", label: "Economia (- R$ 49,75)" },

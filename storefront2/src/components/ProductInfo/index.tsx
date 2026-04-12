@@ -236,8 +236,8 @@ export default function ProductInfo({ product, onVariantChange }: ProductInfoPro
         )}
       </div>
 
-      {/* Shipping estimate */}
-      <ShippingEstimate />
+      {/* Shipping estimate — controlled by product.showShippingCalculator */}
+      {(config.product.showShippingCalculator ?? true) && <ShippingEstimate />}
 
       {/* Description */}
       <div className="pi-fade-in pi-fade-5" style={{ marginBottom: 20, fontSize: 15, lineHeight: 1.7, color: "#374151" }}>

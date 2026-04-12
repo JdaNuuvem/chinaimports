@@ -100,6 +100,8 @@ export interface ThemeConfig {
     showInventoryQuantity: boolean;
     lowInventoryThreshold: number;
     showReviewsBadge: boolean;
+    /** When false, hides the shipping calculator on the product page. Defaults to true. */
+    showShippingCalculator?: boolean;
   };
 
   cart: {
