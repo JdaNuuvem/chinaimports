@@ -13,30 +13,35 @@ export default function BackToTop() {
   if (!visible) return null;
 
   return (
-    <button
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      aria-label="Voltar ao topo"
-      style={{
-        position: "fixed",
-        bottom: 80,
-        right: 20,
-        width: 44,
-        height: 44,
-        borderRadius: "50%",
-        background: "var(--accent-color, #00badb)",
-        color: "#fff",
-        border: "none",
-        cursor: "pointer",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
-        zIndex: 999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: 18,
-        transition: "opacity 0.3s",
-      }}
-    >
-      ↑
-    </button>
+    <>
+      <style>{`
+        .back-to-top-btn { position: fixed; bottom: 80px; right: 20px; z-index: 999; }
+        @media (max-width: 768px) {
+          .back-to-top-btn { bottom: 148px; }
+        }
+      `}</style>
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        aria-label="Voltar ao topo"
+        className="back-to-top-btn"
+        style={{
+          width: 44,
+          height: 44,
+          borderRadius: "50%",
+          background: "var(--accent-color, #00badb)",
+          color: "#fff",
+          border: "none",
+          cursor: "pointer",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 18,
+          transition: "opacity 0.3s",
+        }}
+      >
+        ↑
+      </button>
+    </>
   );
 }
