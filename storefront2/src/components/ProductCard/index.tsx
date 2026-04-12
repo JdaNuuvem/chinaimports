@@ -175,11 +175,11 @@ export default function ProductCard({
         )}
       </Link>
 
-      <div className="product-item__info" style={{ padding: "12px 14px", display: "flex", flexDirection: "column", flex: 1 }}>
+      <div className="product-item__info" style={{ padding: "8px 10px 10px", display: "flex", flexDirection: "column", flex: 1 }}>
         {vendor && (
           <p className="product-item__vendor" style={{
             fontSize: 11, fontWeight: 500, color: "#9ca3af",
-            textTransform: "uppercase", letterSpacing: 0.6, margin: "0 0 4px 0",
+            textTransform: "uppercase", letterSpacing: 0.6, margin: "0 0 3px 0",
           }}>
             {vendor}
           </p>
@@ -187,40 +187,59 @@ export default function ProductCard({
         <Link href={`/product/${handle}`} className="product-item__title" style={{ textDecoration: "none" }}>
           <span style={{
             display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
-            overflow: "hidden", fontSize: 14, fontWeight: 600,
+            overflow: "hidden", fontSize: 13, fontWeight: 600,
             lineHeight: 1.35, color: "#1a1c1e", minHeight: "2.7em",
           }}>
             {title}
           </span>
         </Link>
-        <div className="product-item__price-list" style={{ marginTop: 8, display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+
+        {/* Star rating */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4, margin: "4px 0" }}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <svg
+              key={star}
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill={star <= 4 ? "var(--star-color, #f59e0b)" : "none"}
+              stroke="var(--star-color, #f59e0b)"
+              strokeWidth="2"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          ))}
+          <span style={{ fontSize: 11, color: "#9ca3af", marginLeft: 2 }}>4.0</span>
+        </div>
+
+        <div className="product-item__price-list" style={{ marginTop: 4, display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
           {hasDiscount && (
             <span style={{ textDecoration: "line-through", color: "#9ca3af", fontSize: 12 }}>
               {formatMoney(compareAtPrice!)}
             </span>
           )}
           <span style={{
-            fontSize: 17, fontWeight: 800,
+            fontSize: 16, fontWeight: 800,
             color: hasDiscount ? "#16a34a" : "#1a1c1e",
           }}>
             {formatMoney(price)}
           </span>
         </div>
         {hasDiscount && (
-          <div style={{ marginTop: 4, fontSize: 11, fontWeight: 700, color: "#dc2626" }}>
+          <div style={{ marginTop: 3, fontSize: 11, fontWeight: 700, color: "#dc2626" }}>
             Economize {formatMoney(compareAtPrice! - price)}
           </div>
         )}
         {/* VER DETALHES CTA — alignment controlled by config.product.ctaAlignment */}
-        <div style={{ textAlign: ctaAlign, marginTop: 12 }}>
+        <div style={{ textAlign: ctaAlign, marginTop: 8 }}>
           <Link
             href={`/product/${handle}`}
             className="product-card__cta cta-pulse"
             style={{
               display: "inline-flex", alignItems: "center", justifyContent: "center",
-              padding: "10px 14px", borderRadius: 8,
+              padding: "8px 12px", borderRadius: 8,
               background: "#22c55e", color: "#fff",
-              fontSize: 12, fontWeight: 700, letterSpacing: 0.8,
+              fontSize: 11, fontWeight: 700, letterSpacing: 0.8,
               textTransform: "uppercase", textDecoration: "none",
               transition: "background 0.2s",
             }}
