@@ -10,10 +10,17 @@ interface BreadcrumbProps {
   items: BreadcrumbItem[];
 }
 
+const MAX_BREADCRUMB_CHARS = 45;
+
+function truncateLabel(label: string): string {
+  if (label.length <= MAX_BREADCRUMB_CHARS) return label;
+  return label.slice(0, MAX_BREADCRUMB_CHARS).trimEnd() + "…";
+}
+
 export default function Breadcrumb({ items }: BreadcrumbProps) {
   return (
     <nav aria-label="Caminho" className="breadcrumb">
-      <ol className="breadcrumb__list" role="list">
+      <ol className="breadcrumb__list" role="list" style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 2 }}>
         <li className="breadcrumb__item">
           <Link href="/" className="breadcrumb__link link">Início</Link>
           <ArrowRightIcon className="w-3 h-3 inline-block mx-1" />
@@ -22,11 +29,11 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
           <li key={index} className="breadcrumb__item">
             {item.href && index < items.length - 1 ? (
               <>
-                <Link href={item.href} className="breadcrumb__link link">{item.label}</Link>
+                <Link href={item.href} className="breadcrumb__link link" title={item.label}>{truncateLabel(item.label)}</Link>
                 <ArrowRightIcon className="w-3 h-3 inline-block mx-1" />
               </>
             ) : (
-              <span className="breadcrumb__link" aria-current="page">{item.label}</span>
+              <span className="breadcrumb__link" aria-current="page" title={item.label}>{truncateLabel(item.label)}</span>
             )}
           </li>
         ))}
