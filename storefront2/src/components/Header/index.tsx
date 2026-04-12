@@ -1,5 +1,5 @@
 "use client";
-import { useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { HamburgerIcon, SearchIcon, CartIcon, UserIcon } from "@/components/Icons";
 import MobileMenu from "@/components/MobileMenu";
@@ -17,6 +17,27 @@ export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const { itemCount, cartOpen, setCartOpen } = useCart();
 
+  // ── Auto-hide header on scroll down, show on scroll up ──
+  const [headerHidden, setHeaderHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
+  const onScroll = useCallback(() => {
+    const y = window.scrollY;
+    // Only hide after scrolling past 100px so the header is visible at
+    // the very top. Show immediately when scrolling up.
+    if (y > 100 && y > lastScrollY.current) {
+      setHeaderHidden(true);
+    } else {
+      setHeaderHidden(false);
+    }
+    lastScrollY.current = y;
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [onScroll]);
+
   // Responsive logo sizing — desktop via inline style, mobile via @media.
   // useId() gives us a stable class name unique per Header instance.
   const uid = useId().replace(/:/g, "-");
@@ -31,8 +52,10 @@ export default function Header() {
         @media (max-width: 640px) {
           .${logoClass} { height: ${mobileLogoH}px; }
         }
+        .header { transition: transform 0.3s ease; }
+        .header--hidden { transform: translateY(-100%); }
       `}</style>
-      <header className="header header--inline" role="banner">
+      <header className={`header header--inline${headerHidden ? " header--hidden" : ""}`} role="banner">
         <div className="container">
           <div className="header__inner">
             {/* Mobile Nav Toggle */}
