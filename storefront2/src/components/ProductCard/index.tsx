@@ -139,8 +139,8 @@ export default function ProductCard({
         </div>
       )}
 
-      <Link href={`/product/${handle}`} onClick={trackClick} className="product-item__image-wrapper" style={{ position: "relative", display: "block", overflow: "hidden", background: "#f3f4f6" }}>
-        <div className="aspect-ratio aspect-ratio--square" style={{ aspectRatio: "1/1", position: "relative" }}>
+      <Link href={`/product/${handle}`} onClick={trackClick} className="product-item__image-wrapper" style={{ position: "relative", display: "block", overflow: "hidden", background: "#f3f4f6", width: "100%", margin: 0, padding: 0, borderRadius: 0 }}>
+        <div className="aspect-ratio aspect-ratio--square" style={{ aspectRatio: "1/1", position: "relative", width: "100%" }}>
           <Image
             src={thumbnail || "https://placehold.co/400x400/f5f5f5/999?text=Sem+Imagem"}
             alt={title}
