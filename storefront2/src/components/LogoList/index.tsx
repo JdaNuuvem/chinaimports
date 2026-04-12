@@ -38,16 +38,12 @@ export default function LogoList({
   const sizedClass = `logo-list-item-${uid}`;
   const desktopH = imageHeight ?? DEFAULT_IMAGE_HEIGHT_DESKTOP;
   const mobileH = imageHeightMobile ?? desktopH;
-  // Width scales proportionally to height to keep logo aspect ratio balanced.
-  const desktopW = Math.round(desktopH * 2);
-  const mobileW = Math.round(mobileH * 2);
-
   return (
     <section className="section" data-section-type="logo-list">
       <style>{`
-        .${sizedClass} { max-width: ${desktopW}px; max-height: ${desktopH}px; }
+        .${sizedClass} { max-height: ${desktopH}px; max-width: 100%; }
         @media (max-width: 640px) {
-          .${sizedClass} { max-width: ${mobileW}px; max-height: ${mobileH}px; }
+          .${sizedClass} { max-height: ${mobileH}px; }
         }
       `}</style>
       <div className="container">

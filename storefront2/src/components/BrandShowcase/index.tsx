@@ -29,19 +29,18 @@ export default function BrandShowcase({
   const sizedClass = `brand-showcase-logo-${uid}`;
   const desktopH = imageHeight ?? DEFAULT_IMAGE_HEIGHT_DESKTOP;
   const mobileH = imageHeightMobile ?? desktopH;
-  // max-width scales proportionally with the height so the logos stay
-  // balanced when the user bumps the height.
-  const desktopW = Math.round(desktopH * 2.3);
-  const mobileW = Math.round(mobileH * 2.3);
+  // max-width capped at 100% so the image never overflows its container
+  // but otherwise unconstrained — the natural aspect ratio is preserved
+  // via object-fit: contain.
 
   if (brands.length === 0) return null;
 
   return (
     <div className="section">
       <style>{`
-        .${sizedClass} { max-height: ${desktopH}px; max-width: ${desktopW}px; }
+        .${sizedClass} { max-height: ${desktopH}px; max-width: 100%; }
         @media (max-width: 640px) {
-          .${sizedClass} { max-height: ${mobileH}px; max-width: ${mobileW}px; }
+          .${sizedClass} { max-height: ${mobileH}px; }
         }
       `}</style>
       <div className="container">

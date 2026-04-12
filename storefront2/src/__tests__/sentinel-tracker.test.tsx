@@ -1,44 +1,44 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
-import SentinelTracker, { buildSentinelConfigScript, SENTINEL_TRACKER_SRC } from "@/components/SentinelTracker";
+import SentinelTracker, { buildSentinelInitScript, SENTINEL_TRACKER_SRC } from "@/components/SentinelTracker";
 
-describe("buildSentinelConfigScript", () => {
+describe("buildSentinelInitScript", () => {
   it("embeds api key as JSON string", () => {
-    const script = buildSentinelConfigScript("sk_test_123");
+    const script = buildSentinelInitScript("sk_test_123");
     expect(script).toContain('"sk_test_123"');
     expect(script).toContain("_sCfg");
     expect(script).toContain("api_key:");
   });
 
   it("escapes quotes in api key", () => {
-    const script = buildSentinelConfigScript('sk_w"ird');
+    const script = buildSentinelInitScript('sk_w"ird');
     // JSON.stringify converts " to \"
     expect(script).toContain('sk_w\\"ird');
   });
 
   it("references all required globals", () => {
-    const script = buildSentinelConfigScript("sk_x");
+    const script = buildSentinelInitScript("sk_x");
     expect(script).toContain("__sentinel_landing");
     expect(script).toContain("_sCfg");
     expect(script).toContain("localStorage.getItem(\"s_a\")");
   });
 
   it("includes all UTM param names", () => {
-    const script = buildSentinelConfigScript("sk_x");
+    const script = buildSentinelInitScript("sk_x");
     ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "gclid", "fbclid", "click_id", "pixel_id"].forEach((p) => {
       expect(script).toContain(p);
     });
   });
 
   it("is wrapped in IIFE", () => {
-    const script = buildSentinelConfigScript("sk_x");
+    const script = buildSentinelInitScript("sk_x");
     expect(script).toMatch(/^\(function\(\)\{/);
     expect(script).toMatch(/\}\)\(\)$/);
   });
 
   it("skips UTM restoration when URL already has utm_*", () => {
     // Test the regex logic inline
-    const script = buildSentinelConfigScript("sk_x");
+    const script = buildSentinelInitScript("sk_x");
     expect(script).toContain("!/[?&]utm_/.test(s)");
   });
 });

@@ -733,54 +733,59 @@ export default function PreviewPanel({
 
         {/* Page preview */}
         <div style={{ padding: isMobile ? 8 : 12, maxHeight: 560, overflowY: "auto" }}>
-          {/* Announcement */}
-          <div
-            style={{
-              background: config.colors.announcementBarBg,
-              color: config.colors.announcementBarText,
-              padding: "4px",
-              textAlign: "center",
-              fontSize: 8,
-              borderRadius: "4px 4px 0 0",
-            }}
-          >
-            {config.announcementBar.text.slice(0, 40)}
-          </div>
-
-          {/* Header — render the uploaded logo image when configured, falling
-              back to the text logo. logoHeight is honored if set. */}
-          <div
-            style={{
-              background: config.colors.headerBg,
-              color: config.colors.headerText,
-              padding: "6px 10px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            {config.identity.logoUrl ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={config.identity.logoUrl}
-                alt={config.identity.logoText || config.identity.storeName || "logo"}
+          {/* Announcement + Header — respects config.announcementBar.position
+              ("above" = announcement first, "below" = header first) */}
+          {(() => {
+            const announcementEl = (
+              <div
                 style={{
-                  height: Math.max(10, Math.min((config.identity.logoHeight || 40) / 3, 24)),
-                  width: "auto",
-                  objectFit: "contain",
+                  background: config.colors.announcementBarBg,
+                  color: config.colors.announcementBarText,
+                  padding: "4px",
+                  textAlign: "center",
+                  fontSize: 8,
                 }}
-              />
-            ) : (
-              <span style={{ fontWeight: 900, fontSize: 9, letterSpacing: 1 }}>
-                {config.identity.logoText}
-              </span>
-            )}
-            <div style={{ display: "flex", gap: 6, fontSize: 7 }}>
-              {config.header.navLinks.slice(0, isMobile ? 2 : 4).map((l) => (
-                <span key={l.href}>{l.title}</span>
-              ))}
-            </div>
-          </div>
+              >
+                {config.announcementBar.text.slice(0, 40)}
+              </div>
+            );
+            const headerEl = (
+              <div
+                style={{
+                  background: config.colors.headerBg,
+                  color: config.colors.headerText,
+                  padding: "6px 10px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                {config.identity.logoUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={config.identity.logoUrl}
+                    alt={config.identity.logoText || config.identity.storeName || "logo"}
+                    style={{
+                      height: Math.max(10, Math.min((config.identity.logoHeight || 40) / 3, 24)),
+                      width: "auto",
+                      objectFit: "contain",
+                    }}
+                  />
+                ) : (
+                  <span style={{ fontWeight: 900, fontSize: 9, letterSpacing: 1 }}>
+                    {config.identity.logoText}
+                  </span>
+                )}
+                <div style={{ display: "flex", gap: 6, fontSize: 7 }}>
+                  {config.header.navLinks.slice(0, isMobile ? 2 : 4).map((l) => (
+                    <span key={l.href}>{l.title}</span>
+                  ))}
+                </div>
+              </div>
+            );
+            const isBelow = config.announcementBar?.position === "below";
+            return isBelow ? <>{headerEl}{announcementEl}</> : <>{announcementEl}{headerEl}</>;
+          })()}
 
           {/* Dynamic sections (home only) */}
           {previewPage === "home" && sections.map((section, index) => renderSectionPreview(section, index))}
