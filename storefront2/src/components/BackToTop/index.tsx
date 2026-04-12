@@ -15,7 +15,7 @@ export default function BackToTop() {
   return (
     <>
       <style>{`
-        .back-to-top-btn { position: fixed; bottom: 80px; right: 20px; z-index: 999; }
+        .back-to-top-btn { position: fixed; bottom: 148px; right: 20px; z-index: 999; }
         @media (max-width: 768px) {
           .back-to-top-btn { bottom: 148px; }
         }

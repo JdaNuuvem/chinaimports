@@ -120,13 +120,14 @@ export default function SocialProof() {
           left: 20px;
           z-index: 9998;
           background: #fff;
-          border-radius: 12px;
+          border-radius: 10px;
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-          padding: 12px 32px 12px 16px;
+          padding: 10px 12px;
           display: flex;
           align-items: center;
-          gap: 12px;
-          max-width: 340px;
+          gap: 10px;
+          width: max-content;
+          max-width: 300px;
           animation: slideInLeft 0.4s ease;
           border: 1px solid #e1e3e5;
           cursor: pointer;
@@ -170,25 +171,24 @@ export default function SocialProof() {
           margin-top: 2px;
         }
         .social-proof-toast__close {
-          position: absolute;
-          top: 4px;
-          right: 8px;
+          flex-shrink: 0;
           background: none;
           border: none;
           cursor: pointer;
           color: #8c9196;
-          font-size: 16px;
+          font-size: 18px;
           line-height: 1;
-          padding: 4px;
+          padding: 0 0 0 4px;
+          align-self: flex-start;
         }
         @media (max-width: 640px) {
           .social-proof-toast {
             left: 8px;
-            right: 8px;
+            right: auto;
             bottom: 70px;
-            max-width: none;
-            width: auto;
-            padding: 10px 28px 10px 10px;
+            max-width: calc(100vw - 16px);
+            width: max-content;
+            padding: 8px 10px;
             gap: 8px;
             border-radius: 10px;
             font-size: 12px;

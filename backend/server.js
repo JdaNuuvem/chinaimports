@@ -1738,9 +1738,18 @@ app.put("/admin/products/:id", authenticateAdmin, async (req, res) => {
 
 app.delete("/admin/products/:id", authenticateAdmin, async (req, res) => {
   try {
-    const prod = await prisma.product.findUnique({ where: { id: req.params.id }, select: { handle: true } }).catch(() => null);
+    const prod = await prisma.product.findUnique({
+      where: { id: req.params.id },
+      select: { handle: true, variants: { select: { id: true } } },
+    }).catch(() => null);
+    if (!prod) return res.status(404).json({ error: "Produto não encontrado" });
+    const variantIds = prod.variants.map((v) => v.id);
+    if (variantIds.length > 0) {
+      await prisma.cartItem.deleteMany({ where: { variantId: { in: variantIds } } });
+      await prisma.orderItem.updateMany({ where: { variantId: { in: variantIds } }, data: { variantId: null } });
+    }
     await prisma.product.delete({ where: { id: req.params.id } });
-    notifyStorefrontRevalidate({ type: "product", handle: prod?.handle });
+    notifyStorefrontRevalidate({ type: "product", handle: prod.handle });
     res.json({ success: true });
   }
   catch (e) { res.status(500).json({ error: e.message }); }
