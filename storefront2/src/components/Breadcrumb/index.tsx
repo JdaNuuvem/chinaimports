@@ -10,7 +10,7 @@ interface BreadcrumbProps {
   items: BreadcrumbItem[];
 }
 
-const MAX_BREADCRUMB_CHARS = 45;
+const MAX_BREADCRUMB_CHARS = 25;
 
 function truncateLabel(label: string): string {
   if (label.length <= MAX_BREADCRUMB_CHARS) return label;
