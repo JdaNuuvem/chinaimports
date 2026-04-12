@@ -114,7 +114,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
         {/* Responsive CSS */}
         <style dangerouslySetInnerHTML={{ __html: `
-          .pdp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+          .pdp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; overflow: hidden; }
+          .pdp-grid > * { min-width: 0; overflow: hidden; }
           @media (max-width: 768px) { .pdp-grid { grid-template-columns: 1fr; gap: 20px; } }
         `}} />
 
