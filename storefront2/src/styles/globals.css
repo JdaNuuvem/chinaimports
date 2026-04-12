@@ -2,6 +2,11 @@
 @import './custom.css';
 @import './animations.css';
 
+/* Utility: hide on mobile */
+@media (max-width: 768px) {
+  .hidden-mobile { display: none !important; }
+}
+
 /* Reset and base styles */
 html {
   scroll-behavior: smooth;

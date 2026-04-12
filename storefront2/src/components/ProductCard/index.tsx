@@ -151,12 +151,12 @@ export default function ProductCard({
           />
         </div>
 
-        {/* Quick Add button on hover */}
+        {/* Quick Add button on hover — hidden on mobile */}
         {variantId && inStock && hovered && (
           <button
             onClick={handleQuickAdd}
             disabled={loading}
-            className="scale-in"
+            className="scale-in hidden-mobile"
             style={{
               position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)",
               background: added ? "#16a34a" : "var(--primary-button-background, #1e2d7d)",

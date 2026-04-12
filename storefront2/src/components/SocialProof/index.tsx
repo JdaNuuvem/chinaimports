@@ -181,35 +181,9 @@ export default function SocialProof() {
           padding: 0 0 0 4px;
           align-self: flex-start;
         }
-        @media (max-width: 640px) {
+        @media (max-width: 768px) {
           .social-proof-toast {
-            left: 8px;
-            right: auto;
-            bottom: 70px;
-            max-width: calc(100vw - 16px);
-            width: max-content;
-            padding: 8px 10px;
-            gap: 8px;
-            border-radius: 10px;
-            font-size: 12px;
-          }
-          .social-proof-toast--top {
-            top: 60px;
-            bottom: auto;
-          }
-          .social-proof-toast__icon {
-            width: 30px;
-            height: 30px;
-            font-size: 14px;
-          }
-          .social-proof-toast__line1 {
-            font-size: 11px;
-          }
-          .social-proof-toast__product {
-            font-size: 10px;
-          }
-          .social-proof-toast__time {
-            font-size: 10px;
+            display: none !important;
           }
         }
       `}</style>
