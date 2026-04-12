@@ -87,7 +87,7 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
         buttonText: "Ver coleção",
       }));
       return (
-        <div style={{ padding: "40px 0" }}>
+        <div style={{ padding: 0 }}>
           <Mosaic
             items={items}
             imageHeight={s.imageHeight as number | undefined}
@@ -99,7 +99,7 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
 
     case "featured-collection":
       return (
-        <div style={{ padding: "40px 0" }}>
+        <div style={{ padding: 0 }}>
           <FeaturedCollection
             title={s.title as string}
             collectionHandle={s.collectionHandle as string}
@@ -138,7 +138,7 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
 
     case "image-with-text":
       return (
-        <div style={{ padding: "40px 0" }}>
+        <div style={{ padding: 0 }}>
           <ImageWithText
             title={s.title as string}
             content={(s.text as string) || (s.content as string)}
@@ -154,7 +154,7 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
 
     case "collection-list":
       return (
-        <div style={{ padding: "40px 0" }}>
+        <div style={{ padding: 0 }}>
           <CollectionList
             title={s.title as string}
             columns={(s.columns as number) || 3}
@@ -182,7 +182,7 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
       if (!configLogos?.length) {
         // Renderiza só o título quando não há logos
         return (
-          <div style={{ padding: "40px 0" }}>
+          <div style={{ padding: 0 }}>
             <LogoList
               title={s.title as string}
               logos={[]}
@@ -201,7 +201,7 @@ export default function DynamicSection({ section }: DynamicSectionProps) {
           link: logo.url,
         }));
       return (
-        <div style={{ padding: "40px 0" }}>
+        <div style={{ padding: 0 }}>
           <LogoList
             title={s.title as string}
             logos={logos}
