@@ -94,6 +94,9 @@ export default function Offers({
                     }}
                   />
                 )}
+                <div style={{ position: "absolute", top: 4, left: 0, right: 0, textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.7)", fontStyle: "italic", zIndex: 3, pointerEvents: "none" }}>
+                  Recomendado: 600 x 220px
+                </div>
                 <div
                   className={hasImage ? `${sizedClass}__inner` : undefined}
                   style={{

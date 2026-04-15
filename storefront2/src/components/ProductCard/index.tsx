@@ -149,6 +149,9 @@ export default function ProductCard({
             className="product-item__primary-image"
             style={{ objectFit: "cover", opacity: inStock ? 1 : 0.5 }}
           />
+          <div style={{ position: "absolute", bottom: 2, left: 0, right: 0, textAlign: "center", fontSize: 9, color: "rgba(0,0,0,0.35)", fontStyle: "italic", zIndex: 1, pointerEvents: "none" }}>
+            Recomendado: 800 x 800px (quadrada)
+          </div>
         </div>
 
         {/* Quick Add button on hover — hidden on mobile */}

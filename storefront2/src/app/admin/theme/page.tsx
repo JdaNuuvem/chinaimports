@@ -3,7 +3,7 @@
 import React, { useState, useEffect, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import "@/styles/admin.css";
-import { LayoutDashboard, ClipboardList, Settings, Monitor, Store, Palette, Type, Navigation, PanelBottom, Megaphone, Home, Package, ShoppingCart, Mail, Search, Globe, Tags, FolderOpen, Star, Download } from "lucide-react";
+import { LayoutDashboard, ClipboardList, Settings, Monitor, Store, Palette, Type, Navigation, PanelBottom, Megaphone, Home, Package, ShoppingCart, Mail, Search, Globe, Tags, FolderOpen, Star, Download, Scissors } from "lucide-react";
 import type { ThemeConfig } from "@/lib/theme-config";
 import ImageUpload from "@/components/ImageUpload";
 import SectionEditor from "@/components/admin/VisualEditor/SectionEditor";
@@ -27,6 +27,7 @@ import SentinelTab from "@/components/admin/tabs/SentinelTab";
 import IntegrationsTab from "@/components/admin/tabs/IntegrationsTab";
 import TransactionsTab from "@/components/admin/tabs/TransactionsTab";
 import NotificationsTab from "@/components/admin/tabs/NotificationsTab";
+import BackgroundRemovalTab from "@/components/admin/tabs/BackgroundRemovalTab";
 import { NavBadge } from "@/components/admin/tabs/shared";
 
 // Shared helper components
@@ -41,7 +42,7 @@ import {
   SaveButton,
 } from "@/components/admin/tabs/shared";
 
-type Tab = "identity" | "colors" | "typography" | "header" | "footer" | "announcement" | "home" | "product" | "cart" | "newsletter" | "seo" | "reviews" | "import-products" | "i18n" | "products-list" | "collections-list" | "dashboard" | "orders-list" | "visual-editor" | "settings" | "sentinel" | "integrations" | "transactions" | "notifications" | "popups";
+type Tab = "identity" | "colors" | "typography" | "header" | "footer" | "announcement" | "home" | "product" | "cart" | "newsletter" | "seo" | "reviews" | "import-products" | "i18n" | "products-list" | "collections-list" | "dashboard" | "orders-list" | "visual-editor" | "settings" | "sentinel" | "integrations" | "transactions" | "notifications" | "popups" | "bg-removal";
 
 interface TabGroup {
   label: string;
@@ -109,6 +110,7 @@ const TAB_GROUPS: TabGroup[] = [
     tabs: [
       { id: "reviews", label: "Avaliações", icon: <Star {...IC} />, desc: "Importar e gerenciar" },
       { id: "import-products", label: "Importar Produtos", icon: <Download {...IC} />, desc: "Shopee e Mercado Livre" },
+      { id: "bg-removal", label: "Remover Fundo", icon: <Scissors {...IC} />, desc: "Remover fundo de imagens", badge: { label: "NEW", variant: "info" } },
     ],
   },
 ];
@@ -847,6 +849,10 @@ export default function ThemeAdminPage() {
 
         {activeTab === "import-products" && (
           <ProductImporter backendUrl={backendUrl} token={token} />
+        )}
+
+        {activeTab === "bg-removal" && (
+          <BackgroundRemovalTab />
         )}
 
         {activeTab === "i18n" && (

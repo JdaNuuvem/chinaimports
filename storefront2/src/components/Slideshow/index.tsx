@@ -117,15 +117,23 @@ export default function Slideshow({
                     />
                   </picture>
                 );
+                const sizeHint = (
+                  <div style={{ textAlign: "center", padding: "4px 0", fontSize: 11, color: "#b0b0b0", fontStyle: "italic", background: "#fafafa" }}>
+                    Tamanho recomendado — Desktop: 1800 x 600px · Mobile: 750 x 1100px
+                  </div>
+                );
                 // If a link is set, the entire banner is clickable.
                 if (slide.link) {
                   return (
-                    <Link href={slide.link} aria-label={slide.title || "Banner"} style={{ display: "block" }}>
-                      {imageEl}
-                    </Link>
+                    <>
+                      <Link href={slide.link} aria-label={slide.title || "Banner"} style={{ display: "block" }}>
+                        {imageEl}
+                      </Link>
+                      {sizeHint}
+                    </>
                   );
                 }
-                return imageEl;
+                return <>{imageEl}{sizeHint}</>;
               })()}
             </div>
           </div>

@@ -79,6 +79,9 @@ export default function BrandShowcase({
             );
           })}
         </div>
+        <div style={{ textAlign: "center", padding: "6px 0 0", fontSize: 11, color: "#b0b0b0", fontStyle: "italic" }}>
+          Tamanho recomendado por logo: 120 x 60px (PNG transparente)
+        </div>
       </div>
     </div>
   );

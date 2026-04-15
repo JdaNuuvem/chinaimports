@@ -50,12 +50,15 @@ export default function TextWithIcons({
           {items.map((item, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "10px 0" }}>
               {item.iconImage ? (
-                <img
-                  src={item.iconImage}
-                  alt={item.title}
-                  className={sizedClass}
-                  style={{ objectFit: "contain", flexShrink: 0 }}
-                />
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0 }}>
+                  <img
+                    src={item.iconImage}
+                    alt={item.title}
+                    className={sizedClass}
+                    style={{ objectFit: "contain" }}
+                  />
+                  <span style={{ fontSize: 8, color: "#b0b0b0", fontStyle: "italic" }}>36x36px</span>
+                </div>
               ) : (
                 <span style={{ fontSize: "28px" }}>{item.icon}</span>
               )}

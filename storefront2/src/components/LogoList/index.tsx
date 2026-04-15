@@ -63,6 +63,9 @@ export default function LogoList({
             </div>
           ))}
         </div>
+        <div style={{ textAlign: "center", padding: "6px 0 0", fontSize: 11, color: "#b0b0b0", fontStyle: "italic" }}>
+          Tamanho recomendado por logo: 140 x 70px (PNG transparente)
+        </div>
       </div>
     </section>
   );

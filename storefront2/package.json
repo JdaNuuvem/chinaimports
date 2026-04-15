@@ -15,6 +15,7 @@
     "test:e2e:install": "npm install -D @playwright/test && npx playwright install chromium"
   },
   "dependencies": {
+    "@imgly/background-removal": "^1.7.0",
     "lucide-react": "^1.7.0",
     "next": "16.2.1",
     "react": "19.2.4",

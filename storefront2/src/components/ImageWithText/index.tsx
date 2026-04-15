@@ -40,6 +40,9 @@ export default function ImageWithText({
   const imageEl = (
     <div className={imageWrapClass} style={{ width: `${imageWidth}%`, flexShrink: 0 }}>
       <img src={image} alt={title || ""} className={sizedClass} style={{ width: "100%", height: "auto", borderRadius: "8px", display: "block", objectFit: "cover" }} />
+      <div style={{ textAlign: "center", padding: "4px 0", fontSize: 11, color: "#b0b0b0", fontStyle: "italic" }}>
+        Recomendado: 600 x 400px
+      </div>
     </div>
   );
 

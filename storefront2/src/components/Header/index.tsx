@@ -76,7 +76,12 @@ export default function Header() {
             <div className="header__logo">
               <Link href="/" className="header__logo-link">
                 {identity.logoUrl ? (
-                  <img src={identity.logoUrl} alt={identity.storeName} className={logoClass} style={{ width: "auto" }} />
+                  <>
+                    <img src={identity.logoUrl} alt={identity.storeName} className={logoClass} style={{ width: "auto" }} />
+                    <div style={{ fontSize: 9, color: "#b0b0b0", fontStyle: "italic", textAlign: "center", marginTop: 1 }}>
+                      Logo: 200 x 40px (PNG transparente)
+                    </div>
+                  </>
                 ) : (
                   <span className="header__logo-text" style={{ fontSize: "24px", fontWeight: 700, letterSpacing: "2px" }}>
                     {identity.logoText}

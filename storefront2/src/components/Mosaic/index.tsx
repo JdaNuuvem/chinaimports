@@ -76,6 +76,9 @@ export default function Mosaic({
                     />
                   </div>
                 )}
+                <div style={{ position: "absolute", bottom: 4, left: 0, right: 0, textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.7)", fontStyle: "italic", zIndex: 3, pointerEvents: "none" }}>
+                  Recomendado: 800 x 520px
+                </div>
                 <div className="promo-block__inner" style={{
                   position: "absolute",
                   top: 0, left: 0, right: 0, bottom: 0,

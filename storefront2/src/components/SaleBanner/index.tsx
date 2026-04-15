@@ -65,6 +65,11 @@ export default function SaleBanner({
       >
         {ctaText} →
       </a>
+      {backgroundImage && (
+        <div style={{ marginTop: 8, fontSize: 11, color: "rgba(255,255,255,0.5)", fontStyle: "italic" }}>
+          Imagem de fundo recomendada: 1400 x 400px
+        </div>
+      )}
     </div>
   );
 }

@@ -20,13 +20,18 @@ export default function BlogPage() {
           {posts.map((post) => (
             <article key={post.slug} style={{ display: "flex", gap: 20, borderBottom: "1px solid var(--border-color)", paddingBottom: 30 }}>
               {post.image && (
-                <Link href={`/blog/${post.slug}`} style={{ flexShrink: 0 }}>
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    style={{ width: 200, height: 140, objectFit: "cover", borderRadius: 8 }}
-                  />
-                </Link>
+                <div style={{ flexShrink: 0 }}>
+                  <Link href={`/blog/${post.slug}`}>
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      style={{ width: 200, height: 140, objectFit: "cover", borderRadius: 8 }}
+                    />
+                  </Link>
+                  <div style={{ textAlign: "center", fontSize: 10, color: "#b0b0b0", fontStyle: "italic", marginTop: 2 }}>
+                    Recomendado: 400 x 280px
+                  </div>
+                </div>
               )}
               <div>
                 <Link href={`/blog/${post.slug}`} style={{ textDecoration: "none", color: "var(--heading-color)" }}>

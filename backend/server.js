@@ -654,8 +654,11 @@ app.post("/admin/scrape-product", authenticateAdmin, async (req, res) => {
     if (url.includes("mercadolivre.com.br")) {
       const html = await fetchPage(url);
 
-      // Title
-      const titleMatch = html.match(/<h1[^>]*class="ui-pdp-title"[^>]*>([^<]+)</);
+      // Title — try multiple selectors since ML changes layout frequently
+      const titleMatch = html.match(/<h1[^>]*class="ui-pdp-title"[^>]*>([^<]+)/)
+        || html.match(/<h1[^>]*>([^<]{10,})<\/h1>/)
+        || html.match(/"name":\s*"([^"]{10,})"/)
+        || html.match(/<title>([^|<]+)/);
       const title = titleMatch ? titleMatch[1].trim() : null;
 
       // Price — extract from meta or structured data
@@ -827,7 +830,8 @@ app.post("/admin/scrape-product", authenticateAdmin, async (req, res) => {
     }
 
     if (!product || !product.title) {
-      return res.status(400).json({ error: "Não foi possível extrair dados do produto." });
+      console.error("[scrape-product] Falha ao extrair dados. URL:", url, "| product:", JSON.stringify(product));
+      return res.status(400).json({ error: "Não foi possível extrair dados do produto. Verifique se a URL é válida e acessível." });
     }
 
     res.json({ product });

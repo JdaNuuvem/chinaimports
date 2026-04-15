@@ -204,6 +204,9 @@ export default function CollectionList({
                       }}
                     />
                   )}
+                  <div style={{ textAlign: "center", fontSize: 10, color: "#b0b0b0", fontStyle: "italic", padding: "2px 0" }}>
+                    Recomendado: 400 x 400px
+                  </div>
                   {showTitles && (
                     <div style={{ padding: "10px 4px 0", textAlign: "center" }}>
                       <h3 style={{ fontSize: "15px", fontWeight: 700, margin: 0 }}>{col.title}</h3>
@@ -262,6 +265,9 @@ export default function CollectionList({
                     }}
                   />
                 )}
+                <div style={{ position: "absolute", top: 4, left: 0, right: 0, textAlign: "center", fontSize: 10, color: "rgba(255,255,255,0.7)", fontStyle: "italic", zIndex: 2, pointerEvents: "none" }}>
+                  Recomendado: 400 x 220px
+                </div>
                 {showTitles && (
                   <div
                     style={{
