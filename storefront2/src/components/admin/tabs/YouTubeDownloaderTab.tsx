@@ -5,7 +5,7 @@ import { PageHeader } from "./shared";
 
 interface DownloadOption {
   label: string;
-  formatId: string;
+  itag: number;
   quality: string;
   type: "video" | "audio";
   ext: string;
@@ -110,7 +110,7 @@ export default function YouTubeDownloaderTab() {
   const handleDownload = (dl: DownloadOption) => {
     if (!video) return;
     const safeName = `${video.author}_${video.title}`.substring(0, 80).replace(/[^a-zA-Z0-9_\- ]/g, "_");
-    const proxyUrl = `/api/youtube-proxy?url=${encodeURIComponent(url.trim())}&format=${encodeURIComponent(dl.formatId)}&filename=${encodeURIComponent(safeName)}&type=${dl.type}`;
+    const proxyUrl = `/api/youtube-proxy?url=${encodeURIComponent(url.trim())}&itag=${dl.itag}&filename=${encodeURIComponent(safeName)}&type=${dl.type}`;
 
     // Use <a href> pointing to the server URL (not blob).
     // The server sends Content-Disposition: attachment which triggers a real download.

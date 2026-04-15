@@ -1,83 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
-import { spawn } from "child_process";
+import ytdl from "@distube/ytdl-core";
 
 /**
- * Streams a YouTube video/audio download through yt-dlp.
- * The file is piped directly to the response (no temp file on disk).
+ * Streams a YouTube video/audio download via ytdl-core.
+ * Pure Node.js — no yt-dlp binary needed.
  */
 export async function GET(req: NextRequest) {
   const url = req.nextUrl.searchParams.get("url");
-  const formatId = req.nextUrl.searchParams.get("format") || "best";
+  const itag = req.nextUrl.searchParams.get("itag");
   const filename = req.nextUrl.searchParams.get("filename") || "youtube-video";
   const type = req.nextUrl.searchParams.get("type") || "video";
 
-  if (!url) {
-    return NextResponse.json({ error: "URL é obrigatória" }, { status: 400 });
+  if (!url || !itag) {
+    return NextResponse.json(
+      { error: "url e itag são obrigatórios" },
+      { status: 400 }
+    );
   }
 
-  if (!/(?:youtube\.com|youtu\.be)/i.test(url)) {
+  let videoId: string;
+  try {
+    videoId = ytdl.getVideoID(url);
+  } catch {
     return NextResponse.json({ error: "URL inválida" }, { status: 400 });
   }
 
   const ext = type === "audio" ? "mp3" : "mp4";
   const safeFilename = filename.replace(/[^a-zA-Z0-9_\-. ]/g, "_");
-
-  const args = [
-    "-f", formatId,
-    "--no-warnings",
-    "--no-playlist",
-    "-o", "-", // Output to stdout
-  ];
-
-  // For audio, extract and convert to mp3
-  if (type === "audio") {
-    args.push("-x", "--audio-format", "mp3");
-  } else {
-    // For video, merge to mp4
-    args.push("--merge-output-format", "mp4");
-  }
-
-  args.push(url);
+  const contentType = type === "audio" ? "audio/mpeg" : "video/mp4";
 
   try {
-    const chunks: Buffer[] = [];
+    const info = await ytdl.getInfo(videoId);
+    const format = info.formats.find((f) => f.itag === parseInt(itag, 10));
 
-    await new Promise<void>((resolve, reject) => {
-      const proc = spawn("yt-dlp", args, {
-        timeout: 120000,
-        stdio: ["ignore", "pipe", "pipe"],
-      });
-
-      proc.stdout.on("data", (chunk: Buffer) => {
-        chunks.push(chunk);
-      });
-
-      let stderr = "";
-      proc.stderr.on("data", (chunk: Buffer) => {
-        stderr += chunk.toString();
-      });
-
-      proc.on("close", (code) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(stderr || `yt-dlp exited with code ${code}`));
-        }
-      });
-
-      proc.on("error", reject);
-    });
-
-    const data = Buffer.concat(chunks);
-
-    if (data.length === 0) {
+    if (!format) {
       return NextResponse.json(
-        { error: "Download resultou em arquivo vazio" },
-        { status: 502 }
+        { error: "Formato não encontrado" },
+        { status: 404 }
       );
     }
 
-    const contentType = type === "audio" ? "audio/mpeg" : "video/mp4";
+    // Stream the video/audio
+    const stream = ytdl.downloadFromInfo(info, { format });
+
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) {
+      chunks.push(Buffer.from(chunk));
+    }
+    const data = Buffer.concat(chunks);
 
     return new NextResponse(data, {
       status: 200,

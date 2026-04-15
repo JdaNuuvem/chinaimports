@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { execFile } from "child_process";
-import { promisify } from "util";
-
-const execFileAsync = promisify(execFile);
+import ytdl from "@distube/ytdl-core";
 
 interface DownloadOption {
   label: string;
-  formatId: string;
+  itag: number;
   quality: string;
   type: "video" | "audio";
   ext: string;
   filesize: number;
+  hasAudio: boolean;
+  hasVideo: boolean;
 }
 
 interface YouTubeVideoData {
@@ -20,19 +19,15 @@ interface YouTubeVideoData {
   thumbnail: string;
   duration: number;
   views: number;
-  likes: number;
   downloads: DownloadOption[];
 }
 
-function formatFileSize(bytes: number): string {
-  if (!bytes) return "";
-  if (bytes >= 1_000_000) return `${(bytes / 1_000_000).toFixed(1)} MB`;
-  if (bytes >= 1_000) return `${(bytes / 1_000).toFixed(0)} KB`;
-  return `${bytes} B`;
-}
-
-function isYouTubeUrl(url: string): boolean {
-  return /(?:youtube\.com|youtu\.be|youtube-nocookie\.com)/i.test(url);
+function extractVideoId(url: string): string | null {
+  try {
+    return ytdl.getVideoID(url);
+  } catch {
+    return null;
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -47,84 +42,101 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!isYouTubeUrl(rawUrl)) {
+    const videoId = extractVideoId(rawUrl);
+    if (!videoId) {
       return NextResponse.json(
         { error: "URL inválida. Cole um link do YouTube." },
         { status: 400 }
       );
     }
 
-    // Use yt-dlp to get video info
-    const { stdout } = await execFileAsync("yt-dlp", [
-      "--dump-json",
-      "--no-download",
-      "--no-warnings",
-      rawUrl,
-    ], { timeout: 30000, maxBuffer: 10 * 1024 * 1024 });
-
-    const info = JSON.parse(stdout);
+    const info = await ytdl.getInfo(videoId);
+    const details = info.videoDetails;
 
     // Build download options
     const downloads: DownloadOption[] = [];
-    const formats = (info.formats || []) as Record<string, unknown>[];
+    const seenQualities = new Set<string>();
 
-    // Collect available video heights
-    const videoFormats = formats.filter(
-      (f) => f.vcodec !== "none" && typeof f.height === "number" && (f.height as number) >= 240
-    );
-    const availableHeights = [...new Set(videoFormats.map((f) => f.height as number))].sort((a, b) => b - a);
+    // Combined formats (video + audio already merged)
+    const combined = info.formats
+      .filter((f) => f.hasVideo && f.hasAudio && f.container === "mp4")
+      .sort((a, b) => (b.height || 0) - (a.height || 0));
 
-    // Offer up to 4 video quality tiers using yt-dlp format selection (auto-merges video+audio)
-    const targetHeights = [1080, 720, 480, 360];
-    for (const target of targetHeights) {
-      const closest = availableHeights.find((h) => h <= target);
-      if (!closest) continue;
-      if (downloads.some((d) => d.quality === `${closest}p`)) continue;
-
-      // Estimate filesize from matching format
-      const match = videoFormats.find((f) => f.height === closest);
-      const vSize = (match?.filesize as number) || (match?.filesize_approx as number) || 0;
+    for (const f of combined) {
+      const h = f.height || 0;
+      if (h < 240) continue;
+      const key = `${h}p`;
+      if (seenQualities.has(key)) continue;
+      seenQualities.add(key);
 
       downloads.push({
-        label: `MP4 ${closest}p`,
-        formatId: `bestvideo[height<=${closest}][ext=mp4]+bestaudio[ext=m4a]/bestvideo[height<=${closest}]+bestaudio/best[height<=${closest}]`,
-        quality: `${closest}p`,
+        label: `MP4 ${h}p`,
+        itag: f.itag,
+        quality: key,
         type: "video",
         ext: "mp4",
-        filesize: vSize,
+        filesize: parseInt(f.contentLength || "0", 10),
+        hasAudio: true,
+        hasVideo: true,
       });
     }
 
-    // Fallback: if no heights found, offer "best"
+    // If no combined found, add video-only with note
     if (downloads.length === 0) {
+      const videoOnly = info.formats
+        .filter((f) => f.hasVideo && !f.hasAudio && (f.container === "mp4" || f.container === "webm"))
+        .sort((a, b) => (b.height || 0) - (a.height || 0));
+
+      const addedHeights = new Set<number>();
+      for (const f of videoOnly) {
+        const h = f.height || 0;
+        if (h < 240 || addedHeights.has(h)) continue;
+        addedHeights.add(h);
+
+        downloads.push({
+          label: `MP4 ${h}p (sem áudio)`,
+          itag: f.itag,
+          quality: `${h}p`,
+          type: "video",
+          ext: "mp4",
+          filesize: parseInt(f.contentLength || "0", 10),
+          hasAudio: false,
+          hasVideo: true,
+        });
+        if (downloads.length >= 3) break;
+      }
+    }
+
+    // Audio-only
+    const audioFormats = info.formats
+      .filter((f) => f.hasAudio && !f.hasVideo)
+      .sort((a, b) => (b.audioBitrate || 0) - (a.audioBitrate || 0));
+
+    if (audioFormats.length > 0) {
+      const best = audioFormats[0];
       downloads.push({
-        label: "MP4 (melhor qualidade)",
-        formatId: "best",
-        quality: "auto",
-        type: "video",
-        ext: "mp4",
-        filesize: 0,
+        label: "MP3 (Áudio)",
+        itag: best.itag,
+        quality: `${best.audioBitrate || 128}kbps`,
+        type: "audio",
+        ext: "mp3",
+        filesize: parseInt(best.contentLength || "0", 10),
+        hasAudio: true,
+        hasVideo: false,
       });
     }
 
-    // Audio-only option
-    downloads.push({
-      label: "MP3 (Áudio)",
-      formatId: "bestaudio",
-      quality: "128kbps",
-      type: "audio",
-      ext: "mp3",
-      filesize: 0,
-    });
+    const thumbnail =
+      details.thumbnails?.[details.thumbnails.length - 1]?.url ||
+      `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 
     const videoData: YouTubeVideoData = {
-      id: info.id || "",
-      title: info.title || "",
-      author: info.uploader || info.channel || "",
-      thumbnail: info.thumbnail || "",
-      duration: info.duration || 0,
-      views: info.view_count || 0,
-      likes: info.like_count || 0,
+      id: videoId,
+      title: details.title || "",
+      author: details.author?.name || details.ownerChannelName || "",
+      thumbnail,
+      duration: parseInt(details.lengthSeconds || "0", 10),
+      views: parseInt(details.viewCount || "0", 10),
       downloads,
     };
 
@@ -132,7 +144,7 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
 
-    if (msg.includes("is not available")) {
+    if (msg.includes("private") || msg.includes("unavailable")) {
       return NextResponse.json(
         { error: "Este vídeo não está disponível ou é privado." },
         { status: 400 }
