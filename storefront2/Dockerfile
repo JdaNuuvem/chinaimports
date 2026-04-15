@@ -42,8 +42,10 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-# wget for healthcheck
-RUN apk add --no-cache wget
+# wget for healthcheck, python3 + ffmpeg for yt-dlp (YouTube downloads)
+RUN apk add --no-cache wget python3 ffmpeg \
+    && python3 -m ensurepip --upgrade \
+    && pip3 install --no-cache-dir yt-dlp
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
