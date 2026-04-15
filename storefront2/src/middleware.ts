@@ -52,7 +52,7 @@ function applyCsp(response: NextResponse, nonce: string) {
   // In dev mode, allow unsafe-eval (React dev tools require it)
   const cspDirectives = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval' 'unsafe-inline'" : ""} https://www.googletagmanager.com https://connect.facebook.net https://cdn.sentineltracking.io`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval'${isDev ? " 'unsafe-eval' 'unsafe-inline'" : ""} https://www.googletagmanager.com https://connect.facebook.net https://cdn.sentineltracking.io`,
     `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com`,
     "img-src 'self' data: blob: https: http:",
     "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com",
