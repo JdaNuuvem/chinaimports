@@ -64,10 +64,18 @@ export default function BackgroundRemovalTab() {
     try {
       const { removeBackground: removeBg } = await import("@imgly/background-removal");
 
+      // Use local proxy to avoid CDN fetch failures / CORS issues
+      const publicPath = `${window.location.origin}/api/bg-model/`;
+
       setState("processing");
       let lastProgress = 0;
       const blob = await removeBg(originalImage, {
-        progress: (key: string, current: number, total: number) => {
+        publicPath,
+        model: "isnet_quint8",
+        device: "cpu",
+        proxyToWorker: false,
+        fetchArgs: { cache: "force-cache" as RequestCache },
+        progress: (_key: string, current: number, total: number) => {
           const p = total > 0 ? Math.round((current / total) * 100) : lastProgress;
           if (p > lastProgress) lastProgress = p;
           setProgress(lastProgress);
@@ -80,41 +88,60 @@ export default function BackgroundRemovalTab() {
       setProgress(100);
     } catch (err) {
       setState("error");
+      const msg = err instanceof Error ? err.message : String(err);
       setErrorMsg(
-        err instanceof Error ? err.message : "Erro ao processar a imagem. Tente novamente."
+        `Erro ao processar: ${msg}. Verifique sua conexão e tente novamente.`
       );
     }
   };
 
-  const downloadResult = () => {
+  const triggerServerDownload = async (blob: Blob, dlName: string) => {
+    const apiUrl = `/api/download-blob?filename=${encodeURIComponent(dlName)}&type=${encodeURIComponent(blob.type)}`;
+    const res = await fetch(apiUrl, { method: "POST", body: blob });
+    const resultBlob = await res.blob();
+    const url = URL.createObjectURL(resultBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.setAttribute("download", dlName);
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+  };
+
+  const downloadResult = async () => {
     if (!resultImage) return;
+    const baseName = fileName.replace(/\.[^.]+$/, "") || "imagem";
 
-    if (!showBgColor) {
-      const a = document.createElement("a");
-      a.href = resultImage;
-      const baseName = fileName.replace(/\.[^.]+$/, "");
-      a.download = `${baseName || "imagem"}-sem-fundo.png`;
-      a.click();
-      return;
+    try {
+      if (!showBgColor) {
+        const res = await fetch(resultImage);
+        const rawBlob = await res.blob();
+        const dlName = `${baseName}-sem-fundo.png`;
+        const pngBlob = new Blob([rawBlob], { type: "image/png" });
+        await triggerServerDownload(pngBlob, dlName);
+        return;
+      }
+
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          const dlName = `${baseName}-fundo-${bgColor.replace("#", "")}.png`;
+          await triggerServerDownload(blob, dlName);
+        }, "image/png");
+      };
+      img.src = resultImage;
+    } catch {
+      setErrorMsg("Erro ao baixar a imagem. Tente novamente.");
     }
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d")!;
-      ctx.fillStyle = bgColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-      const a = document.createElement("a");
-      a.href = canvas.toDataURL("image/png");
-      const baseName = fileName.replace(/\.[^.]+$/, "");
-      a.download = `${baseName || "imagem"}-fundo-${bgColor.replace("#", "")}.png`;
-      a.click();
-    };
-    img.src = resultImage;
   };
 
   const reset = () => {
